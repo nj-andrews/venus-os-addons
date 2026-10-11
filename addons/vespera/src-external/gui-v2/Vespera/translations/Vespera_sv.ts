@@ -132,51 +132,46 @@ Tjänsten startar snart...</translation>
         <source>Clicking yes will permanently remove this devices settings</source>
         <translation>Om du klickar på Ja tas denna enhets inställningar bort permanent</translation>
     </message>
-    <message id="vespera_package_details">
-        <location filename="../PageSettingsPackageInstall.qml" line="8"/>
-        <source>Package Details</source>
-        <translation>Paketdetaljer</translation>
-    </message>
     <message id="vespera_package_upgrade">
-        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="18"/>
         <source>Upgrade</source>
         <translation>Uppgradera</translation>
     </message>
     <message id="vespera_package_intsall">
-        <location filename="../PageSettingsPackageInstall.qml" line="22"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
         <source>Install</source>
         <translation>Installera</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="74"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="72"/>
         <source>Installed</source>
         <translation>Installerad</translation>
     </message>
     <message id="vespera_none">
-        <location filename="../PageSettingsPackageInstall.qml" line="82"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="101"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="99"/>
         <source>none</source>
         <translation>ingen</translation>
     </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="93"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="91"/>
         <source>Available</source>
         <translation>Tillgänglig</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="117"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="115"/>
         <source>Feed</source>
         <translation>Flöde</translation>
     </message>
     <message id="vespera_remove">
-        <location filename="../PageSettingsPackageInstall.qml" line="165"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="163"/>
         <location filename="../PageSettingsFeedEdit.qml" line="25"/>
         <source>Remove</source>
         <translation type="unfinished">Ta bort</translation>
     </message>
     <message id="vespera_loading">
         <location filename="../PageSettingsFeeds.qml" line="27"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="134"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="132"/>
         <location filename="../PageSettingsPackages.qml" line="21"/>
         <source>Loading...</source>
         <translation>Laddar...</translation>
@@ -228,7 +223,7 @@ Tjänsten startar snart...</translation>
         <translation>Sparar...</translation>
     </message>
     <message id="vespera_refresh">
-        <location filename="../PageSettingsPackages.qml" line="98"/>
+        <location filename="../PageSettingsPackages.qml" line="108"/>
         <source>Refresh</source>
         <translation>Uppdatera</translation>
     </message>
@@ -239,8 +234,9 @@ Tjänsten startar snart...</translation>
     </message>
     <message id="vespera_finalize_install">
         <location filename="../components/VesperaManager.qml" line="78"/>
-        <source>Finiazing install. The UI will restart shortly</source>
-        <translation>Installationen slutförs. Gränssnittet startar om snart</translation>
+        <source>Finalizing. The UI will restart shortly</source>
+        <oldsource>Finiazing install. The UI will restart shortly</oldsource>
+        <translation type="unfinished">Installationen slutförs. Gränssnittet startar om snart</translation>
     </message>
     <message id="vespera_no_devices_saved">
         <location filename="../PageSettingsSavedDevices.qml" line="24"/>

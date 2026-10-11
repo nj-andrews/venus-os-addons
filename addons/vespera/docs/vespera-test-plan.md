@@ -40,7 +40,6 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 ### 1.5 Enable/disable and runtime state
 - [x] Verify `vespera enable` enables matching installed apps and leaves the system in a stable state.
 - [x] Verify `vespera disable` disables the selected apps without leaving stale service or overlay state.
-- [ ] Verify `vespera fs-ro` and `vespera overlays ...` paths fail gracefully when the environment is not suitable.
 
 ### 1.6 opkg passthrough behavior
 - [x] Verify unknown commands are passed through to `opkg` using the active combined config.
@@ -61,6 +60,10 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 - [x] Trigger package list refresh from GUI-v2 and verify data is returned and rendered.
 - [ ] Trigger feed operations from GUI-v2 and verify status, completion, and error messages are shown.
 - [x] Trigger device scan/bind/remove from GUI-v2 and verify UI state updates match backend results.
+- [x] Trigger Install/Upgrade/Remove works and signals the Gui will restart.
+- [x] Indidator is blue for installed apps, orange for installed apps when upgrade is available.
+- [x] Trigger Enable Disable of package. Packages indicator dims.
+
 
 ### 2.3 Runtime behavior and resilience
 - [x] Verify GUI-v2 reflects long-running CLI operations with clear progress or busy state.

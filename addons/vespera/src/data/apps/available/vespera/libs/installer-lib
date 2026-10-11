@@ -67,7 +67,6 @@ installer_lib_log_verbose2() { ((VESPERA_VERBOSITY>1)) }
 installer_lib_log_verbose3() { ((VESPERA_VERBOSITY>2)) }
 installer_lib_log_verbose4() { ((VESPERA_VERBOSITY>3)) }
 
-
 installer_lib_phase_sync_custom_nav_pages() {
 	local action="${1:-}"
 	[[ -n "${PACKAGE_CUSTOM_NAV_PAGES:-}" ]] || return 0

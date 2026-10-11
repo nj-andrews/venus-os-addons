@@ -14,8 +14,6 @@
 #define MAX_FIELDS 50
 #define MAX_FEEDS 256
 #define OPKG_JSON_INDEXER_VERSION "1.1.0"
-#define APPS_ENABLED_DIR "/data/apps/enabled"
-#define APPS_AVAILABLE_DIR "/data/apps/available"
 
 static const char *const builtin_feeds[] = {
 	"vespera",
@@ -50,6 +48,7 @@ typedef struct {
 
 typedef struct {
 	char lists_dir[PATH_MAX];
+	char info_dir[PATH_MAX];
 	char status_file[PATH_MAX];
 	FeedEntry feeds[MAX_FEEDS];
 	int feed_count;
@@ -454,6 +453,8 @@ static int parse_opkg_config(const char *config_path, OpkgConfig *cfg)
 		if (strcmp(token1, "option") == 0) {
 			if (strcmp(token2, "lists_dir") == 0) {
 				snprintf(cfg->lists_dir, sizeof(cfg->lists_dir), "%s", token3);
+			} else if (strcmp(token2, "info_dir") == 0) {
+				snprintf(cfg->info_dir, sizeof(cfg->info_dir), "%s", token3);
 			} else if (strcmp(token2, "status_file") == 0) {
 				snprintf(cfg->status_file, sizeof(cfg->status_file), "%s", token3);
 			}
@@ -473,6 +474,10 @@ static int parse_opkg_config(const char *config_path, OpkgConfig *cfg)
 		fprintf(stderr, "Error: missing option lists_dir in config\n");
 		return 0;
 	}
+	if (cfg->info_dir[0] == '\0') {
+		fprintf(stderr, "Error: missing option info_dir in config\n");
+		return 0;
+	}
 	if (cfg->status_file[0] == '\0') {
 		fprintf(stderr, "Error: missing option status_file in config\n");
 		return 0;
@@ -481,51 +486,42 @@ static int parse_opkg_config(const char *config_path, OpkgConfig *cfg)
 	return 1;
 }
 
-static int is_package_enabled(const char *package_name)
+static void read_dbus_key_name(const char *info_dir, const char *package_name, char *out)
 {
-	if (!package_name || package_name[0] == '\0') {
-		return 0;
+	char path[PATH_MAX];
+	FILE *fp;
+
+	if (!out) {
+		return;
 	}
 
-	char enabled_path[PATH_MAX];
-	char expected_target[PATH_MAX];
-	char link_target[PATH_MAX];
-
-	if (snprintf(enabled_path,
-				 sizeof(enabled_path),
-				 "%s/%s",
-				 APPS_ENABLED_DIR,
-				 package_name) >= (int)sizeof(enabled_path)) {
-		return 0;
+	out[0] = '\0';
+	if (!info_dir || !info_dir[0] || !package_name || !package_name[0]) {
+		return;
 	}
 
-	if (snprintf(expected_target,
-				 sizeof(expected_target),
-				 "%s/%s",
-				 APPS_AVAILABLE_DIR,
-				 package_name) >= (int)sizeof(expected_target)) {
-		return 0;
+	if (snprintf(path, sizeof(path), "%s/%s.dbus-name", info_dir, package_name) >= (int)sizeof(path)) {
+		return;
 	}
 
-	struct stat st;
-	if (lstat(enabled_path, &st) != 0 || !S_ISLNK(st.st_mode)) {
-		return 0;
+	fp = fopen(path, "r");
+	if (!fp) {
+		return;
 	}
 
-	ssize_t link_len = readlink(enabled_path, link_target, sizeof(link_target) - 1);
-	if (link_len < 0) {
-		return 0;
+	if (fgets(out, MAX_FIELD, fp)) {
+		out[strcspn(out, "\n")] = '\0';
+		trim(out);
 	}
-	link_target[link_len] = '\0';
-
-	return strcmp(link_target, expected_target) == 0;
+	fclose(fp);
 }
 
 static void flush_package_json(const Package *pkg,
-							   const char *feed_name,
-							   FILE *out_json,
-							   int *first_item,
-							   const InstalledMap *installed_map)
+					   const char *feed_name,
+					   FILE *out_json,
+					   int *first_item,
+					   const InstalledMap *installed_map,
+					   const char *info_dir)
 {
 	if (!pkg || pkg->field_count <= 0) {
 		return;
@@ -536,11 +532,11 @@ static void flush_package_json(const Package *pkg,
 	const char *installed_version = "";
 	const char *available_version = "";
 	const char *field_name = "";
+	char dbus_key_name[MAX_FIELD] = "";
 	char installed_version_base[MAX_FIELD] = "";
 	char installed_version_suffix[MAX_FIELD] = "";
 	char available_version_base[MAX_FIELD] = "";
 	char available_version_suffix[MAX_FIELD] = "";
-	int package_enabled = 0;
 	int first_field = 1;
 
 	if (!*first_item) {
@@ -575,16 +571,13 @@ static void flush_package_json(const Package *pkg,
 		first_field = 0;
 	}
 
-	package_enabled = is_package_enabled(package_name);
-	if (!first_field) {
-		fputs(",", out_json);
-	}
-	fputs("\"enabled\":", out_json);
-	fputs(package_enabled ? "true" : "false", out_json);
 	first_field = 0;
 
 	if (installed_map) {
 		installed_version = lookup_installed_version(installed_map, package_name);
+		if (installed_version[0] != '\0') {
+			read_dbus_key_name(info_dir, package_name, dbus_key_name);
+		}
 
 		split_version_info(installed_version,
 						   installed_version_base,
@@ -614,6 +607,15 @@ static void flush_package_json(const Package *pkg,
 		}
 	}
 
+	if (dbus_key_name[0] != '\0') {
+		if (!first_field) {
+			fputs(",", out_json);
+		}
+		fputs("\"dbusKeyName\":", out_json);
+		json_escape_print(out_json, dbus_key_name);
+		first_field = 0;
+	}
+
 	split_version_info(available_version,
 					   available_version_base,
 					   sizeof(available_version_base),
@@ -637,6 +639,7 @@ static int parse_stanza_file(const char *filepath,
 						 FILE *out_json,
 						 int *first_item,
 						 const InstalledMap *installed_map,
+						 const char *info_dir,
 						 const char *const *allowed_fields,
 						 int allowed_count)
 {
@@ -654,7 +657,7 @@ static int parse_stanza_file(const char *filepath,
 		line[strcspn(line, "\n")] = '\0';
 
 		if (strlen(line) == 0) {
-			flush_package_json(&pkg, feed_name, out_json, first_item, installed_map);
+			flush_package_json(&pkg, feed_name, out_json, first_item, installed_map, info_dir);
 			memset(&pkg, 0, sizeof(pkg));
 			last_kept_index = -1;
 			continue;
@@ -735,7 +738,7 @@ static int parse_stanza_file(const char *filepath,
 		}
 	}
 
-	flush_package_json(&pkg, feed_name, out_json, first_item, installed_map);
+	flush_package_json(&pkg, feed_name, out_json, first_item, installed_map, info_dir);
 	fclose(fp);
 	return 1;
 }
@@ -812,6 +815,7 @@ static int write_packages_json(const char *output_file, const OpkgConfig *cfg)
 					 out,
 					 &first_item,
 					 &installed,
+					 cfg->info_dir,
 					 allowed_fields,
 					 allowed_count);
 	}

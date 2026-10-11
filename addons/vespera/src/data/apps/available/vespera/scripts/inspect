@@ -89,7 +89,7 @@ __list_dbus_settings() {
 
 	info="$(dbus -y "com.victronenergy.settings" "/Settings/Vespera" GetValue | \
 		grep "$dbus_name" | sed 's/[{}]//g' | sed -E 's/,[[:space:]]*$//' | sort)"
-	__print_section "  - Dbus Settings: /Settings"
+	__print_section "  - Dbus Settings: /Settings/Vespera"
 	info=
 
 	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do

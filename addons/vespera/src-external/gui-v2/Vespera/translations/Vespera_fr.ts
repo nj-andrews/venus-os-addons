@@ -132,51 +132,46 @@ Le service démarrera sous peu...</translation>
         <source>Clicking yes will permanently remove this devices settings</source>
         <translation>Cliquer sur Oui supprimera définitivement les paramètres de cet appareil</translation>
     </message>
-    <message id="vespera_package_details">
-        <location filename="../PageSettingsPackageInstall.qml" line="8"/>
-        <source>Package Details</source>
-        <translation>Détails du paquet</translation>
-    </message>
     <message id="vespera_package_upgrade">
-        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="18"/>
         <source>Upgrade</source>
         <translation>Mettre à jour</translation>
     </message>
     <message id="vespera_package_intsall">
-        <location filename="../PageSettingsPackageInstall.qml" line="22"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
         <source>Install</source>
         <translation>Installer</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="74"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="72"/>
         <source>Installed</source>
         <translation>Installé</translation>
     </message>
     <message id="vespera_none">
-        <location filename="../PageSettingsPackageInstall.qml" line="82"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="101"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="99"/>
         <source>none</source>
         <translation>aucun</translation>
     </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="93"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="91"/>
         <source>Available</source>
         <translation>Disponible</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="117"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="115"/>
         <source>Feed</source>
         <translation>Source</translation>
     </message>
     <message id="vespera_remove">
-        <location filename="../PageSettingsPackageInstall.qml" line="165"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="163"/>
         <location filename="../PageSettingsFeedEdit.qml" line="25"/>
         <source>Remove</source>
         <translation type="unfinished">Supprimer</translation>
     </message>
     <message id="vespera_loading">
         <location filename="../PageSettingsFeeds.qml" line="27"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="134"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="132"/>
         <location filename="../PageSettingsPackages.qml" line="21"/>
         <source>Loading...</source>
         <translation>Chargement...</translation>
@@ -228,7 +223,7 @@ Le service démarrera sous peu...</translation>
         <translation>Enregistrement...</translation>
     </message>
     <message id="vespera_refresh">
-        <location filename="../PageSettingsPackages.qml" line="98"/>
+        <location filename="../PageSettingsPackages.qml" line="108"/>
         <source>Refresh</source>
         <translation>Actualiser</translation>
     </message>
@@ -239,8 +234,9 @@ Le service démarrera sous peu...</translation>
     </message>
     <message id="vespera_finalize_install">
         <location filename="../components/VesperaManager.qml" line="78"/>
-        <source>Finiazing install. The UI will restart shortly</source>
-        <translation>Finalisation de l’installation. L’interface redémarrera sous peu</translation>
+        <source>Finalizing. The UI will restart shortly</source>
+        <oldsource>Finiazing install. The UI will restart shortly</oldsource>
+        <translation type="unfinished">Finalisation de l’installation. L’interface redémarrera sous peu</translation>
     </message>
     <message id="vespera_no_devices_saved">
         <location filename="../PageSettingsSavedDevices.qml" line="24"/>

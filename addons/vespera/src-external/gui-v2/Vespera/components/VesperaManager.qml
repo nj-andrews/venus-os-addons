@@ -71,10 +71,10 @@ QtObject {
 	}
 
 	function _writeLog(line) {
-		if (line==":::VESPERA-DISABLE:::") {
+		if (line==":::VESPERA-GUI-INTERRUPT:::") {
 			_finalizing_install = true
 			const Notification_Info=2
-			//% "Finiazing install. The UI will restart shortly"
+			//% "Finalizing. The UI will restart shortly"
 			line = qsTrId("vespera_finalize_install")
 			showToastNotification(Notification_Info, line, 5000)
 		}

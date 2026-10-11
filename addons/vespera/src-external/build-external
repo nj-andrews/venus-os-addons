@@ -2,8 +2,8 @@
 
 declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
 
-repo_root="/data/dev/addons/vespera"
-echo "hello"
+repo_root="$(realpath "$__this_path/../")"
+
 needs_rebuild() {
 	local _src_dir=${1}
 	local _output_bin=${2}
@@ -12,7 +12,7 @@ needs_rebuild() {
 }
 
 src_dir="$__this_path/gui-v2/Vespera"
-output_bin="$repo_root/src/data/apps/available/vespera/gui-v2/vespera.json"
+output_bin="$repo_root/src/data/apps/available/vespera/gui-v2/vespera.json.install"
 
 if needs_rebuild "$src_dir" "$output_bin"; then
 

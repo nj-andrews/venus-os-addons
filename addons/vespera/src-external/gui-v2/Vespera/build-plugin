@@ -67,6 +67,8 @@ print_summary_line() {
 mkdir -p ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2
 cp ./output/${PLUGIN_NAME}.json ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json.install
 
+echo "cp ./output/${PLUGIN_NAME}.json ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json.install" >&3
+
 declare bytes;bytes="$(wc -c < "$OUTPUT_PATH/${PLUGIN_NAME}.json")"
 declare human;human="$(numfmt --to=iec "$bytes")"
 print_summary_line "  $PLUGIN_NAME: compiled "

@@ -7,7 +7,6 @@ Maintainer: thespinmaster@github.com
 License: MIT
 Architecture: all
 OE: einstine
-DbusKeyName:Vespera
 Source: https://thespinmaster.github.io/venus-os-addons
 # This package requires gui-v2-webassembly 1.2.40 or newer (v3.80~44)
 # Depends: gui-v2-webassembly (>= 1.2.40)

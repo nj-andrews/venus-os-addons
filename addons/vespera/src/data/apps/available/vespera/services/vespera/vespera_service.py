@@ -28,7 +28,7 @@ from vespera_config import VesperaConfig
 
 SERVICE_NAME = "com.victronenergy.vespera"
 #DUMMY_SERVICE_NAME = "com.victronenergy._vespera"
-VERSION = "2.1.1"
+VERSION = "2.1.2"
 
 log = logging.getLogger(__name__)
 

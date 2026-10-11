@@ -60,6 +60,7 @@ class ChunkProcessor:
 				return True
 
 		def serve_chunk_from_request(self, request_json):
+				log.info("serve_chunk_from_request")
 				try:
 						request = json.loads(request_json)
 						if not isinstance(request, dict):
@@ -100,7 +101,9 @@ class ChunkProcessor:
 						return False
 
 				file_path = CHUNK_SOURCE_REGISTRY.get(name)
+				log.info("file_path= %s", file_path)
 				if file_path is None:
+
 						self._dbusservice[result_root + "/Error"] = f"Unknown source: {name}"
 						self._dbusservice[result_root + "/Seq"] = dbus.UInt32(req_seq)
 						log.warning("Chunk request rejected: unknown source name=%s session=%s", name, session_id)

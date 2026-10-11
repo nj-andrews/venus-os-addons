@@ -5,10 +5,11 @@ echo "Building opkg-json-indexer..."
 declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
 
 src_dir="$__this_path"
-output_dir="$__this_path/../../src/data/apps/available/vespera/opkg"
+output_dir="$__this_path/../../src/data/apps/available/vespera/bin"
 output_bin="$output_dir/opkg-json-indexer"
 
 cd "$src_dir" || exit 1
+mkdir -p "$output_dir"
 
 arm-linux-gnueabihf-gcc \
 	-O2 -Wall -Wextra -o \

@@ -4,8 +4,6 @@ import "./components" as Vespera
 
 Page {
 	id: root
-	//% "Package Details"
-	title: qsTrId("vespera_package_details")
 	tryPop: vesperaManager?.tryPop
 
 	required property var model
@@ -23,11 +21,6 @@ Page {
 
 	readonly property int hMargin: Theme.geometry_page_content_horizontalMargin + Theme.geometry_listItem_content_horizontalMargin
 	readonly property int vMargin: Theme.geometry_listItem_content_verticalMargin
-
-	VeQuickItem {
-		id: packageEnabled
-		uid: root.serviceUid + "/UsbProps"
-	}
 
 	Column {
 		id: column
@@ -192,12 +185,14 @@ Page {
 		}
 		ListItemButton {
 			width: actionsRow.defaultButtonWidth
+			visible: root.model.enabled != undefined
 			anchors {left: parent.left}
 
-			text: model.enabled ? "Disable" : "Enable"
-			enabled: !root.vesperaManager.running && root.installed && root.model.packageName != "vespera"
+			text: root.model.enabled === true ? "Disable" : "Enable"
+			enabled: visible && !root.vesperaManager.running && root.installed && root.model.packageName != "vespera"
 			onClicked: function() {
-					root.vesperaManager.setPackageEnabledState(root.model.packageName, !model.enabled, completionCallback)
+					var enabled = root.model.enabled === true
+					root.vesperaManager.setPackageEnabledState(root.model.packageName, !enabled, completionCallback)
 			}
 
 		}

@@ -44,11 +44,21 @@ Page {
 		delegate: ListNavigation {
 			required property var modelData
 
-			indicatorColor: (modelData.installedVersion && modelData.availableVersion
+			readonly property color _baseIndicatorColor: (modelData.installedVersion && modelData.availableVersion
 											? Theme.color_orange
 											: (modelData.installedVersion
 													? Theme.color_blue
 													: Qt.rgba(0,0,0,0)))
+
+			VeQuickItem {
+				id: packageEnabled
+				uid: modelData.dbusKeyName ? Global.systemSettings.serviceUid + "/Settings/Vespera/Packages/" + modelData.dbusKeyName +"/Enabled": ""
+				onValueChanged: { modelData.enabled = (value == 1) }
+			}
+
+			indicatorColor: modelData.enabled === false
+							 ? Qt.rgba(_baseIndicatorColor.r, _baseIndicatorColor.g, _baseIndicatorColor.b, _baseIndicatorColor.a * 0.5)
+							 : _baseIndicatorColor
 			text: formatName(modelData)
 			caption: root.vesperaManager.showCompact ? "" : modelData.description
 			onClicked: Global.pageManager.pushPage(

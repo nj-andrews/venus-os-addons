@@ -30,10 +30,11 @@ __enable_app() {
 	[[ -n $dbus_name ]] &&
 		dbus -y com.victronenergy.settings "/Settings/Vespera/Packages/$dbus_name/Enabled" SetValue "1" 1>/dev/null 2>&1
 
+	[[ -f "${available_app_path}/gui-v2/${app}.json.install" ]] &&
+		mv -f "${available_app_path}/gui-v2/${app}.json.install" "${available_app_path}/gui-v2/${app}.json"
+
 	[[ -d "$available_app_path" && ! -e "$enabled_apps_dir/$app" ]] && {
 		mkdir -p "$enabled_apps_dir"
-		[[ -f "${available_app_path}/gui-v2/${app}.json.install" ]] &&
-			mv "${available_app_path}/gui-v2/${app}.json.install" "${available_app_path}/gui-v2/${app}.json"
 		ln -sf "$available_app_path" "$enabled_apps_dir/$app"
 	}
 

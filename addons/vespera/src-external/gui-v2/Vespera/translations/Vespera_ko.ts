@@ -132,51 +132,46 @@ The service will start shortly...</source>
         <source>Clicking yes will permanently remove this devices settings</source>
         <translation>예를 선택하면 이 장치의 설정이 영구적으로 삭제됩니다</translation>
     </message>
-    <message id="vespera_package_details">
-        <location filename="../PageSettingsPackageInstall.qml" line="8"/>
-        <source>Package Details</source>
-        <translation>패키지 세부 정보</translation>
-    </message>
     <message id="vespera_package_upgrade">
-        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="18"/>
         <source>Upgrade</source>
         <translation>업그레이드</translation>
     </message>
     <message id="vespera_package_intsall">
-        <location filename="../PageSettingsPackageInstall.qml" line="22"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
         <source>Install</source>
         <translation>설치</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="74"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="72"/>
         <source>Installed</source>
         <translation>설치됨</translation>
     </message>
     <message id="vespera_none">
-        <location filename="../PageSettingsPackageInstall.qml" line="82"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="101"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="99"/>
         <source>none</source>
         <translation>없음</translation>
     </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="93"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="91"/>
         <source>Available</source>
         <translation>사용 가능</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="117"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="115"/>
         <source>Feed</source>
         <translation>피드</translation>
     </message>
     <message id="vespera_remove">
-        <location filename="../PageSettingsPackageInstall.qml" line="165"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="163"/>
         <location filename="../PageSettingsFeedEdit.qml" line="25"/>
         <source>Remove</source>
         <translation type="unfinished">제거</translation>
     </message>
     <message id="vespera_loading">
         <location filename="../PageSettingsFeeds.qml" line="27"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="134"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="132"/>
         <location filename="../PageSettingsPackages.qml" line="21"/>
         <source>Loading...</source>
         <translation>불러오는 중...</translation>
@@ -228,7 +223,7 @@ The service will start shortly...</source>
         <translation>저장 중...</translation>
     </message>
     <message id="vespera_refresh">
-        <location filename="../PageSettingsPackages.qml" line="98"/>
+        <location filename="../PageSettingsPackages.qml" line="108"/>
         <source>Refresh</source>
         <translation>새로 고침</translation>
     </message>
@@ -239,8 +234,9 @@ The service will start shortly...</source>
     </message>
     <message id="vespera_finalize_install">
         <location filename="../components/VesperaManager.qml" line="78"/>
-        <source>Finiazing install. The UI will restart shortly</source>
-        <translation>설치 완료 중입니다. 인터페이스가 곧 다시 시작됩니다</translation>
+        <source>Finalizing. The UI will restart shortly</source>
+        <oldsource>Finiazing install. The UI will restart shortly</oldsource>
+        <translation type="unfinished">설치 완료 중입니다. 인터페이스가 곧 다시 시작됩니다</translation>
     </message>
     <message id="vespera_no_devices_saved">
         <location filename="../PageSettingsSavedDevices.qml" line="24"/>
