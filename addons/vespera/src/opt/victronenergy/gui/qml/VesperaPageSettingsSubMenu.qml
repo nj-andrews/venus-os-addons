@@ -2,6 +2,6 @@ import QtQuick 2
 
 MbSubMenu {
   description: qsTr("Vespera")
-  subpage: Component { VesperaPageSettings {} }
+  subpage: Component { VesperaHomePage {} }
 	x: -2000
 }

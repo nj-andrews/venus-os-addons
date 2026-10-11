@@ -26,6 +26,27 @@ clear_output() {
   #cp -r "${ASSETS_DIR}/"* "$OUTPUT_DIR/"
 }
 
+__stage_mock_tty_devices() {
+  local dev_dir="${1:-$SERIAL_STARTER_DEV_DIR}"
+  mkdir -p "$dev_dir"
+  for tty in tty ttyUSB0 ttyACM0; do
+    : > "$dev_dir/${tty}" || true
+  done
+}
+
+__stage_file_from_assets_or_empty() {
+  local rel_path="$1"
+  local target_path="${output_dir}/${rel_path}"
+
+  mkdir -p "$(dirname "$target_path")"
+  if [[ -f "${assets_dir}/${rel_path}" ]]; then
+    cp "${assets_dir}/${rel_path}" "$target_path"
+  else
+    : > "$target_path"
+  fi
+  chmod +w "$target_path"
+}
+
 # stages the directories inside the output directory for starting services
 stage_service_paths() {
   output_path_len="${#output_dir}"
@@ -96,8 +117,7 @@ stage_default_vars() {
   DEVICE_UDEV_PROPS="ID_BUS,ID_VENDOR,ID_MODEL,ID_SERIAL"
   USE_UDEVADM_MONITOR="1"
 
-  mkdir -p "$SERIAL_STARTER_DEV_DIR"
-  for tty in tty ttyUSB0 ttyACM0; do : > "$SERIAL_STARTER_DEV_DIR/${tty}" || true; done
+  __stage_mock_tty_devices "$SERIAL_STARTER_DEV_DIR"
 }
 
 # shellcheck disable=SC2120
@@ -109,28 +129,14 @@ stage_files() {
   }
 
   clear_output
-  mkdir -p "$SERIAL_STARTER_DEV_DIR"
-  for tty in tty ttyUSB0 ttyACM0; do : > "$SERIAL_STARTER_DEV_DIR/${tty}" || true; done
+  __stage_mock_tty_devices "$SERIAL_STARTER_DEV_DIR"
 
   for file in "${args[@]}"; do
-    mkdir -p "$(dirname "${output_dir}/${file}")"
-    if [ -f "${assets_dir}/${file}" ]; then
-      cp "${assets_dir}/${file}" "${output_dir}/${file}"
-    else
-      : > "${output_dir}/${file}"
-    fi
-    chmod +w "${output_dir}/${file}"
+    __stage_file_from_assets_or_empty "$file"
   done
 
   return 0
 }
-
-
-#logging##############################
-LOGLEVEL=$LOGLEVEL_TRACE
-#LOGLEVEL=$LOGLEVEL_NONE
-LOGLEVEL=$LOGLEVEL_ERROR
-LOG_DATE_TIME=
 
 #testing#############################
 EXIT_ON_FAILED_TEST=
@@ -292,26 +298,6 @@ test_install_fails_when_SERVICE_NAME_is_empty() {
   assert_eq "ERROR: DEVICE_SERVICE_NAME not set" "$stderr"
 
 }
-
-oldtest_install_SERVICE_MAPPING_NAME_set_if_empty() {
-
-  # Arrange
-  stage_default_vars
-  stage_files "${SERIAL_STARTER_CONFIG_FILE##*/}" "${SERIAL_STARTER_RULES_FILE##*/}"
-  DEVICE_SERVICE_MAPPING_NAME=
-  DEVICE_TTY=ttyUSB0
-  DEVICE_UDEV_PROPS="BAD_PROP=||BAD_PROP2=||" # use BAD_PROP to exit early
-  local stderr=
-
-  # Act
-  sdi_install 2>/dev/null # ignore error
-
-  #Assert
-  assert_exitcode 1
-  assert_empty "${DEVICE_SERVICE_MAPPING_NAME}"
-}
-
-
 
 test_install_succeeds_serial_starter_rule_added() {
 
@@ -540,63 +526,6 @@ EOF
 }
 
 
-oldtest_remove_succeeds_when_serial_starter_rule_not_set() {
-
-  # Arrange
-  stage_default_vars
-  SERIAL_STARTER_RULES_FILE="${SERIAL_STARTER_RULES_FILE}.filled"
-  stage_files "${SERIAL_STARTER_RULES_FILE##*/}"
-
-  local stderr=
-
-  # Act
-  stderr="$(sdi_remove 2>&1)"
-
-  #Assert
-  assert_exitcode 0
-
-  # SERIAL_STARTER_RULE is empty rule not removed
-  local rule_added="# \"dummy_service\""
-  local count_of=;count_of=$(grep -o "$rule_added" "${SERIAL_STARTER_RULES_FILE}" | wc -l)
-  assert_eq "SERIAL_STARTER_RULE not set, nothing to do" "$stderr"
-
-}
-
-oldtest_remove_succeeds_when_serial_starter_rule_set() {
-
-   # Arrange
-  stage_default_vars
-  SERIAL_STARTER_RULES_FILE="${SERIAL_STARTER_RULES_FILE}.filled"
-  stage_files "${SERIAL_STARTER_RULES_FILE##*/}"
-  local serial_starter_rule_header serial_starter_rule_code
-  stage_get_expected_serial_starter_header_and_rule serial_starter_rule_header serial_starter_rule_code
-
-  local stderr=
-  local count_of=
-
-  count_of=$(grep -o "$serial_starter_rule_header" "${SERIAL_STARTER_RULES_FILE}" | wc -l)
-  assert_eq 1 "$count_of" "--"
-
-  count_of=$(grep -o "$serial_starter_rule_code" "${SERIAL_STARTER_RULES_FILE}" | wc -l)
-  assert_eq 1 "$count_of" "--"
-
-  # Act
-  stderr=$(sdi_remove) #2>/dev/null
-
-  #Assert
-  assert_exitcode 0
-
-  local count_of=
-  count_of=$(grep -o "$serial_starter_rule_header" "${SERIAL_STARTER_RULES_FILE}" | wc -l)
-  assert_eq 0 "$count_of"
-
-  count_of=$(grep -o "$serial_starter_rule_code" "${SERIAL_STARTER_RULES_FILE}" | wc -l)
-  assert_eq 0 "$count_of"
-
-  assert_empty $stderr
-}
-
-
 test_remove_succeeds_SERIAL_STARTER_CONF_entry_is_removed() {
 
    # Arrange
@@ -664,117 +593,6 @@ test_remove_succeeds_config_file_remains_unchanged_when_ve_service_mapping_not_f
   assert_empty $stderr
 }
 
-oldtest_start_service_fails_when_tty_not_found() {
-
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-  stage_get_filled_UDEVADM_PROPS_no_match DEVICE_UDEV_PROPS
-
-  local stderr=
-
-  # Act
-
-  stderr="$(sdi_start_service 2>&1)"
-
-  # Assert
-  assert_exitcode 1
-  assert_eq "ERROR: DEVICE_TTY device does not exist" "${stderr}"
-}
-
-
-oldtest_start_service_fails_when_SERIAL_STARTER_START_SERVICE_PATH_not_set() {
-
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-  stage_get_filled_UDEVADM_PROPS DEVICE_UDEV_PROPS
-
-  SERIAL_STARTER_START_SERVICE_PATH=
-
-  local stderr=
-
-  # Act
-  stderr="$(sdi_start_service 2>&1)"
-
-  # Assert
-  assert_exitcode 1
-  #echo "stderr:$stderr"
-  assert_eq "ERROR: SERIAL_STARTER_START_SERVICE_PATH not set or does not exist" "${stderr}"
-}
-
-oldtest_start_service_fails_when_SERVICE_NAME_not_set() {
-
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-  stage_get_filled_UDEVADM_PROPS DEVICE_UDEV_PROPS
-
-  DEVICE_SERVICE_NAME=
-
-  local stderr=
-
-  # Act
-  stderr="$(sdi_start_service 2>&1)"
-
-  # Assert
-  assert_exitcode 1
-  #echo "stderr:$stderr"
-  assert_eq "ERROR 2: DEVICE_SERVICE_NAME not set" "${stderr}"
-}
-
-TTY_EXISTS=
-__tty_device_exists() {
-  [[ -n $TTY_EXISTS ]] && return $TTY_EXISTS
-  [[ -e "/dev/${1}" ]]
-}
-
-oldtest_start_service_succeeds_when_all_conditions_are_met() {
-
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-  stage_get_filled_UDEVADM_PROPS DEVICE_UDEV_PROPS
-  DEVICE_TTY=ttyUSB0
-  TTY_EXISTS=0 # use dummy __tty_device_exists function above
-
-  local stderr=
-
-  # Act
-  stderr="$(sdi_start_service 2>&1)"
-  TTY_EXISTS=
-
-  # Assert
-  assert_exitcode 0
-  [[ -n $stderr ]] && echo "stderr:$stderr"
-  assert_file_exists "${SERIAL_STARTER_START_SERVICE_PATH}/ttyUSB0"
-
-} #check auto tty file exists
-
-oldtest_uninstall_uses_service_path_variable() {
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-
-  local -a seen_services=()
-  __sdi_remove_service() {
-    seen_services+=("$1")
-  }
-
-  DEVICE_SERVICE_NAME="dummy_service"
-  mkdir -p "${SERVICE_PATH}/${DEVICE_SERVICE_NAME}.ttyUSB0"
-  mkdir -p "${SERVICE_PATH}/${DEVICE_SERVICE_NAME}.ttyACM0"
-
-  # Act
-  sdi_uninstall --no-remove-usb-rule --no-remove-service-mapping
-
-  # Assert
-  assert_exitcode 0
-  assert_eq 2 "${#seen_services[@]}"
-  assert_eq "dummy_service.ttyACM0" "${seen_services[0]}"
-  assert_eq "dummy_service.ttyUSB0" "${seen_services[1]}"
-}
-
 test_remove_rule_with_sid_removes_only_matching_rule() {
   # Arrange
   stage_default_vars
@@ -838,38 +656,6 @@ test_add_service_mapping_does_not_create_duplicate_entry() {
   assert_eq 1 "$count_of"
 }
 
-oldtest_uninstall_wrapper_calls_package_uninstall() {
-  # Arrange
-  local called=
-  sdi_uninstall_package() {
-    called=1
-    return 0
-  }
-
-  # Act
-  sdi_uninstall --no-remove-usb-rule
-
-  # Assert
-  assert_exitcode 0
-  assert_eq 1 "$called"
-}
-
-oldtest_uninstall_package_removes_rules_symlink() {
-  # Arrange
-  stage_default_vars
-  local rules_file="${SERIAL_STARTER_RULES_FILE}"
-  local rules_link="${SERIAL_STARTER_RULES_FILE_SYMLINK}"
-  : > "${rules_file}"
-  ln -sfn "${rules_file}" "${rules_link}"
-
-  # Act
-  sdi_uninstall_package --no-remove-usb-rule --no-remove-service-mapping
-
-  # Assert
-  assert_exitcode 0
-  assert_file_not_exist "${rules_link}"
-}
-
 test_remove_device_rule_calls_rule_and_refresh() {
   # Arrange
   stage_default_vars
@@ -885,7 +671,7 @@ test_remove_device_rule_calls_rule_and_refresh() {
   __ensure_TTY_from_TTY_or_SID() {
     return 0
   }
-  sdi_refresh_udevadm() {
+  __sdi_refresh_udevadm() {
     echo "refresh:${1}" >> "$calls_file"
     return 0
   }
@@ -933,260 +719,6 @@ test_binding_logic_keeps_install_and_remove_helpers() {
   count_of_remove=$(grep -c 'sdi_remove_service' "$device_file" || true)
   assert_eq 1 "$count_of_install"
   assert_eq 1 "$count_of_remove"
-}
-
-oldtest_restart_services_finds_matching_tty_by_ve_service() {
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-
-  local tty0="${output_dir}/sys/class/tty/ttyUSB0"
-  local tty1="${output_dir}/sys/class/tty/ttyACM0"
-  mkdir -p "${tty0%/*}" "${tty1%/*}"
-  : > "$tty0"
-  : > "$tty1"
-
-  __get_tty_paths() {
-    local -n _out=$1
-    _out=("$tty0" "$tty1")
-  }
-
-  sdi_get_usb_prop() {
-    local tty="$1"
-    local key="$2"
-    [[ "$key" == "VE_SERVICE" ]] || return 0
-    echo "ve_dummy_service"
-  }
-
-  mkdir -p "/var/lock/serial-starter"
-  : > "/var/lock/serial-starter/ttyUSB0"
-  rm -f "${SERIAL_STARTER_START_SERVICE_PATH}/ttyUSB0" "${SERIAL_STARTER_START_SERVICE_PATH}/ttyACM0"
-
-  # Act
-  sdi_restart_services
-
-  # Assert
-  assert_exitcode 0
-  assert_file_not_exist "${SERIAL_STARTER_START_SERVICE_PATH}/ttyUSB0"
-  assert_file_exists "${SERIAL_STARTER_START_SERVICE_PATH}/ttyACM0"
-}
-
-oldtest_restart_services_skips_non_matching_services() {
-  # Arrange
-  stage_default_vars
-  stage_service_paths
-
-  local tty0="${output_dir}/sys/class/tty/ttyUSB0"
-  local tty1="${output_dir}/sys/class/tty/ttyACM0"
-  mkdir -p "${tty0%/*}" "${tty1%/*}"
-  : > "$tty0"
-  : > "$tty1"
-
-  __get_tty_paths() {
-    local -n _out=$1
-    _out=("$tty0" "$tty1")
-  }
-
-  sdi_get_usb_prop() {
-    local tty="$1"
-    local key="$2"
-    [[ "$key" == "VE_SERVICE" ]] || return 0
-    [[ "$tty" == "ttyUSB0" ]] && echo "ve_dummy_service"
-    [[ "$tty" == "ttyACM0" ]] && echo "ve_other"
-  }
-
-  mkdir -p "/var/lock/serial-starter"
-  rm -f "/var/lock/serial-starter/ttyUSB0" "/var/lock/serial-starter/ttyACM0"
-  rm -f "${SERIAL_STARTER_START_SERVICE_PATH}/ttyUSB0" "${SERIAL_STARTER_START_SERVICE_PATH}/ttyACM0"
-
-  # Act
-  sdi_restart_services
-
-  # Assert
-  assert_exitcode 0
-  assert_file_exists "${SERIAL_STARTER_START_SERVICE_PATH}/ttyUSB0"
-  assert_file_not_exist "${SERIAL_STARTER_START_SERVICE_PATH}/ttyACM0"
-}
-
-oldtest_reload_serial_starter_service_calls_svc_t_when_up() {
-  # Arrange
-  local calls_file="${output_dir}/reload.calls"
-  : > "$calls_file"
-
-  svstat() {
-    echo "serial-starter: up (pid 1)"
-  }
-
-  svc() {
-    echo "$*" >> "$calls_file"
-  }
-
-  # Act
-  sdi_reload_serial_starter_service
-
-  # Assert
-  assert_exitcode 0
-  local count_of=
-  count_of=$(grep -c '^-t /service/serial-starter$' "$calls_file" || true)
-  assert_eq 1 "$count_of"
-}
-
-oldtest_reload_serial_starter_service_calls_svc_u_when_down() {
-  # Arrange
-  local calls_file="${output_dir}/reload.calls"
-  : > "$calls_file"
-
-  svstat() {
-    echo "serial-starter: down (pid 1)"
-  }
-
-  svc() {
-    echo "$*" >> "$calls_file"
-  }
-
-  # Act
-  sdi_reload_serial_starter_service
-
-  # Assert
-  assert_exitcode 0
-  local count_of=
-  count_of=$(grep -c '^-u /service/serial-starter$' "$calls_file" || true)
-  assert_eq 1 "$count_of"
-}
-
-oldtest_tty_from_sid_sets_tty_when_found() {
-  # Arrange
-  DEVICE_SID="ef2d"
-  DEVICE_TTY=
-
-  __get_tty_from_props_byref() {
-    local -n _props="${1}"
-    local -n out_tty="${2}"
-    [[ "${_props[SERIAL_DEVICE_ID]:-}" == "ef2d" ]] || return 1
-    out_tty="ttyUSB9"
-    return 0
-  }
-
-  # Act
-  sdi_TTY_from_SID
-
-  # Assert
-  assert_exitcode 0
-  assert_eq "ttyUSB9" "$DEVICE_TTY"
-}
-
-oldtest_tty_from_sid_returns_failure_when_not_found() {
-  # Arrange
-  DEVICE_SID="bad1"
-  DEVICE_TTY=
-
-  __get_tty_from_props_byref() {
-    return 1
-  }
-
-  # Act
-  sdi_TTY_from_SID
-
-  # Assert
-  assert_exitcode 1
-  assert_empty "${DEVICE_TTY:-}"
-}
-
-oldtest_stop_service_tree_noop_when_missing_dir() {
-  # Arrange
-  local missing_dir="${output_dir}/no-such-service"
-
-  # Act
-  __stop_service_tree "$missing_dir"
-
-  # Assert
-  assert_exitcode 0
-  assert_file_not_exist "${missing_dir}/down"
-}
-
-oldtest_stop_service_tree_creates_down_files_and_calls_svc() {
-  # Arrange
-  local service_dir="${output_dir}/service-tree/dummy.ttyUSB0"
-  local calls_file="${output_dir}/stop-tree.calls"
-  mkdir -p "${service_dir}/log"
-  : > "$calls_file"
-
-  svc() {
-    echo "$*" >> "$calls_file"
-  }
-
-  # Act
-  __stop_service_tree "$service_dir"
-
-  # Assert
-  assert_exitcode 0
-  assert_file_exists "${service_dir}/down"
-  assert_file_exists "${service_dir}/log/down"
-  local count_of=
-  count_of=$(grep -c "^-d ${service_dir}$" "$calls_file" || true)
-  assert_eq 1 "$count_of"
-  count_of=$(grep -c "^-x ${service_dir}$" "$calls_file" || true)
-  assert_eq 1 "$count_of"
-  count_of=$(grep -c "^-d ${service_dir}/log$" "$calls_file" || true)
-  assert_eq 1 "$count_of"
-  count_of=$(grep -c "^-x ${service_dir}/log$" "$calls_file" || true)
-  assert_eq 1 "$count_of"
-}
-
-oldtest_kill_leftover_processes_noop_when_no_pids() {
-  # Arrange
-  local calls_file="${output_dir}/kill.calls"
-  : > "$calls_file"
-
-  pgrep() {
-    return 1
-  }
-
-  kill() {
-    echo "$*" >> "$calls_file"
-    return 0
-  }
-
-  # Act
-  __kill_leftover_service_processes "dummy_service.ttyUSB0"
-
-  # Assert
-  assert_exitcode 0
-  local lines=
-  lines=$(wc -l < "$calls_file")
-  assert_eq 0 "$lines"
-}
-
-oldtest_kill_leftover_processes_calls_kill_and_kill9_when_pids_found() {
-  # Arrange
-  local calls_file="${output_dir}/kill.calls"
-  : > "$calls_file"
-
-  pgrep() {
-    echo "$$"
-    echo "123"
-    echo "456"
-  }
-
-  kill() {
-    echo "$*" >> "$calls_file"
-    return 0
-  }
-
-  sleep() {
-    return 0
-  }
-
-  # Act
-  __kill_leftover_service_processes "dummy_service.ttyUSB0"
-
-  # Assert
-  assert_exitcode 0
-  local count_of=
-  count_of=$(grep -c '^123 456$' "$calls_file" || true)
-  assert_eq 1 "$count_of"
-  count_of=$(grep -c '^-9 123 456$' "$calls_file" || true)
-  assert_eq 1 "$count_of"
 }
 
 test_get_usb_prop_returns_value_when_present() {
@@ -1306,47 +838,6 @@ EOF
   # Assert
   assert_exitcode 0
   assert_eq "$expected_tty" "$DEVICE_TTY"
-}
-
-oldtest_prepare_props_for_grep_escapes_plus_keys() {
-  # Arrange
-  local -A props
-  props["+ID_SERIAL"]="abc"
-  props["ID_VENDOR"]="FTDI"
-  local out=
-
-  # Act
-  __prepare_props_for_grep_byref props out
-
-  # Assert
-  assert_not_empty "$out"
-  local has_plus=false
-  local has_vendor=false
-  [[ "$out" == *"\\+ID_SERIAL="* ]] && has_plus=true
-  [[ "$out" == *"ID_VENDOR="* ]] && has_vendor=true
-  assert_eq true "$has_plus"
-  assert_eq true "$has_vendor"
-}
-
-oldtest_props_roundtrip_read_write_preserves_key_values() {
-  # Arrange
-  DEVICE_UDEV_PROPS='ID_MODEL=FT232R_USB_UART,ID_SERIAL=FTDI_ABC,+SERIAL_DEVICE_ID=ef2d,ID_VENDOR=FTDI'
-  local -A props1
-  local -A props2
-
-  # Act
-  __read_props_byref props1
-  assert_exitcode 0
-  __write_props props1
-  __read_props_byref props2
-
-  # Assert
-  assert_exitcode 0
-  assert_eq "${#props1[@]}" "${#props2[@]}"
-  local key=
-  for key in "${!props1[@]}"; do
-    assert_eq "${props1[$key]}" "${props2[$key]:-}"
-  done
 }
 
 pre_test_runner() {

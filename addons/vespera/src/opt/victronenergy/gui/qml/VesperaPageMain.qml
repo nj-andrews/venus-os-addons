@@ -8,7 +8,7 @@ QtObject {
 	id: vesperaRoot
 
   property VeQuickItem moveSettingsToTop: VeQuickItem {
-    uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenus/PageMain/PageSettings"
+    uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenus/PageMain/PageHome"
     onValueChanged: vesperaRoot.movePageSettingsToTop()
   }
 

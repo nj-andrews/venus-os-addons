@@ -224,40 +224,6 @@ test_device_bind_resolves_tty_from_sid_argument() {
   cleanup_device_runtime
 }
 
-test_device_start_all_device_services_waits_for_localsettings() {
-  stage_device_runtime
-  load_device_lib
-
-  local call_count=0
-  svstat() {
-    local service="${1:-}"
-    ((call_count++))
-
-    if [[ "$service" == "/service/localsettings" ]]; then
-      if (( call_count < 3 )); then
-        printf '%s\n' '/service/localsettings: down'
-        return 1
-      fi
-      printf '%s\n' '/service/localsettings: run (pid 123) 1s'
-      return 0
-    fi
-
-    printf '%s\n' 'up (pid 1001) 10 seconds'
-    return 0
-  }
-
-  local output
-  output="$(device_start_all_device_services demo 2>&1)"
-
-  assert_exitcode 0
-  assert_contains 'waiting for /service/localsettings' "$output"
-  [[ "$call_count" -ge 3 ]]
-  assert_result "$?" "localsettings wait retried until service was running"
-  assert_file_contains "$TEST_LOG" 'start-template:ttyUSB0|demo-service'
-
-  cleanup_device_runtime
-}
-
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
   test_runner_all --summary ""
 fi

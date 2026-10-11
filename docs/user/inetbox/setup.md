@@ -4,13 +4,13 @@ Before you begin, ensure the [hardware](hardware.md) requirements are met.
 
 It is recommended to install the add-on before plugging the Inetbox device into a USB port.
 
-A prerequisite for setting up this add-on is the [Opkg Manager](../vespera/setup.md).
+A prerequisite for setting up this add-on is [Vespera](../vespera/setup.md).
 
 ## Summary of Setup Steps
 
 1. Confirm hardware requirements are met.
-2. Install Opkg Manager.
-3. Install the Inetbox package from Opkg Manager.
+2. Install Vespera.
+3. Install the Inetbox package from Vespera.
 4. Use USB Serial Device Installer to detect the Inetbox USB device.
 5. Click Apply to start the Inetbox service.
 6. Complete registration on the Truma CP Plus panel.
@@ -18,7 +18,7 @@ A prerequisite for setting up this add-on is the [Opkg Manager](../vespera/setup
 
 ## Detailed Steps
 
-Once Opkg Manager is installed, in Venus OS go to Menu/Settings/Open Package Manager/Packages and select the Inetbox package. Open the install screen and click Install.
+Once Vespera is installed, in Venus OS go to Menu/Settings/Open Package Manager/Packages and select the Inetbox package. Open the install screen and click Install.
 
 Next, in Venus OS go to Menu/Settings/Open Package Manager/USB Serial Device Installer.
 Click Detect and follow the instructions. You will be prompted to insert the USB device (your Inetbox hardware).

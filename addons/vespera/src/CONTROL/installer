@@ -35,9 +35,9 @@ RC_LOCAL_SCRIPT="
 "
 
 PACKAGE_CUSTOM_MENUS="
-	PageSettings/OpkgPageSettingsSubMenu
+	PageHome/OpkgPageSettingsSubMenu
 	PageSettingsDisplay/OpkgPageSettingsDisplaySubMenu
-	PageMain/PageSettings
+	PageMain/PageHome
 "
 
 PACKAGE_DBUS_SETTINGS='

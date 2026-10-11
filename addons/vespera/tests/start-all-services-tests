@@ -47,12 +47,24 @@ EOF
   cat > "$TEST_ROOT/bin/svstat" <<'EOF'
 #!/usr/bin/env bash
 count_file="$VESPERA_ROOT/svstat-count"
+start_file="$VESPERA_ROOT/svstat-start"
 count=0
 [[ -f "$count_file" ]] && count="$(cat "$count_file")"
 count=$((count + 1))
 printf '%s\n' "$count" > "$count_file"
 
-if [[ "${1:-}" == "/service/localsettings" && $count -lt 3 ]]; then
+if [[ ! -f "$start_file" ]]; then
+  date +%s > "$start_file"
+fi
+
+if [[ "${SVSTAT_MODE:-delayed}" == "always-down" ]]; then
+  printf '%s\n' '/service/localsettings: down'
+  exit 1
+fi
+
+elapsed=$(( $(date +%s) - $(cat "$start_file") ))
+
+if [[ "${1:-}" == "/service/localsettings" && $elapsed -lt ${LOCALSETTINGS_UP_AFTER_SEC:-2} ]]; then
   printf '%s\n' '/service/localsettings: down'
   exit 1
 fi
@@ -60,6 +72,15 @@ fi
 printf '%s\n' '/service/localsettings: run (pid 123) 2s'
 EOF
   chmod +x "$TEST_ROOT/bin/svstat"
+
+  cat > "$TEST_ROOT/bin/dbus" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${DBUS_READY:-1}" == "1" ]]; then
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$TEST_ROOT/bin/dbus"
 
   cat > "$TEST_DATA_DIR/info/demo.dbus-name" <<'EOF'
 com.example.demo
@@ -75,18 +96,44 @@ cleanup_start_all_services_runtime() {
   [[ -n "${TEST_ROOT:-}" ]] && vt_safe_rm_rf "$TEST_ROOT"
 }
 
+set_start_all_services_try_count() {
+  local try_count="$1"
+  sed -i "s/^LOCAL_SETTINGS_TRY_COUNT=.*/LOCAL_SETTINGS_TRY_COUNT=${try_count}/" "$TEST_APP_ROOT/scripts/start-all-services"
+}
+
 test_start_all_services_waits_for_localsettings_and_starts_enabled_apps() {
   stage_start_all_services_runtime
 
   local output
-  output="$(TEST_LOG="$TEST_ROOT/start-all-services.log" VESPERA_ROOT="$TEST_ROOT" PATH="$TEST_ROOT/bin:$PATH" bash "$TEST_APP_ROOT/scripts/start-all-services" 2>&1)"
+  output="$(TEST_LOG="$TEST_ROOT/start-all-services.log" VESPERA_ROOT="$TEST_ROOT" DBUS_READY=1 LOCALSETTINGS_UP_AFTER_SEC=2 PATH="$TEST_ROOT/bin:$PATH" bash "$TEST_APP_ROOT/scripts/start-all-services" 2>&1)"
 
   assert_exitcode 0
-  assert_contains 'waiting for /service/localsettings to be up' "$output"
+  assert_contains 'start-all-services: waiting for com.victronenergy.settings' "$output"
   assert_file_contains "$TEST_ROOT/start-all-services.log" 'start-services:demo com.example.demo'
   assert_file_not_contain "$TEST_ROOT/start-all-services.log" 'start-services:missing-dbus'
   [[ "$(cat "$TEST_ROOT/svstat-count")" -ge 3 ]]
   assert_result "$?" "start-all-services retried until localsettings was up"
+
+  cleanup_start_all_services_runtime
+}
+
+test_start_all_services_fails_when_try_count_is_three_and_localsettings_stays_down() {
+  stage_start_all_services_runtime
+  set_start_all_services_try_count 3
+
+  cat > "$TEST_ROOT/bin/sleep" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+  chmod +x "$TEST_ROOT/bin/sleep"
+
+  local output
+  output="$(TEST_LOG="$TEST_ROOT/start-all-services.log" VESPERA_ROOT="$TEST_ROOT" SVSTAT_MODE=always-down DBUS_READY=0 PATH="$TEST_ROOT/bin:$PATH" bash "$TEST_APP_ROOT/scripts/start-all-services" 2>&1)"
+
+  assert_exitcode 1
+  assert_contains 'start-all-services: localsettings service not available' "$output"
+  assert_file_not_contain "$TEST_ROOT/start-all-services.log" 'start-services:demo com.example.demo'
+  assert_eq 4 "$(cat "$TEST_ROOT/svstat-count")"
 
   cleanup_start_all_services_runtime
 }

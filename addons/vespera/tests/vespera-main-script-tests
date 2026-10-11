@@ -37,6 +37,10 @@ opkg_lib_feed_crud() {
   printf 'feed:%s\n' "$*" >> "$VESPERA_TEST_LOG"
 }
 
+opkg_lib_remove_feed_source() {
+  printf 'feed_remove:%s\n' "$*" >> "$VESPERA_TEST_LOG"
+}
+
 vespera_lib_enable_disable() {
   printf 'enable_disable:%s\n' "$*" >> "$VESPERA_TEST_LOG"
 }
@@ -111,6 +115,19 @@ test_vespera_main_dispatches_feed_command() {
   assert_exitcode 0
   assert_file_contains "$TEST_LOG" 'ensure_conf'
   assert_file_contains "$TEST_LOG" 'feed:add demo http://example.com'
+
+  cleanup_main_runtime
+}
+
+test_vespera_main_dispatches_feed_remove_command() {
+  stage_main_runtime
+
+  PATH="$TEST_ROOT/bin:$PATH" VESPERA_TEST_LOG="$TEST_LOG" \
+    bash "$TEST_APP_ROOT/vespera" feed remove demo >/dev/null 2>&1
+
+  assert_exitcode 0
+  assert_file_contains "$TEST_LOG" 'ensure_conf'
+  assert_file_contains "$TEST_LOG" 'feed_remove:demo'
 
   cleanup_main_runtime
 }

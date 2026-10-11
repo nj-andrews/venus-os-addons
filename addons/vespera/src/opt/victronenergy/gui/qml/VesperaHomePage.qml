@@ -4,7 +4,7 @@ import "utils.js" as Utils
 
 MbPage {
 	id: root
-	title: qsTr("Open Package Manager")
+	title: qsTr("Vespera")
 
 	property var VesperaManager: VesperaManager {
 		id: vesperaManager
@@ -34,15 +34,10 @@ MbPage {
 			subpage: Component {VesperaPageSettingsDevices {title:cdi.description; vesperaManager:root.vesperaManager} }
 		}
 
-		MbSwitch {
-			name: qsTr("Show Compact")
-			bind: Utils.path("com.victronenergy.settings", "/Settings/Vespera/ShowCompact")
-		}
-		MbSwitch {
-			name: qsTr("No Action")
-			// description: "For testing installs, does not install"
-			bind: Utils.path("com.victronenergy.settings", "/Settings/Vespera/NoAction")
-		}
+		// MbSubMenu {
+		// 	description: qsTr("Settings")
+		// 	subpage: Component { VesperaSettingsPage {} }
+		// }
 
 	}
 }

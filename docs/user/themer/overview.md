@@ -4,7 +4,7 @@ The Themer add-on, adds colour theme support to the Venus OS UI.
 
 ## Prerequisite
 
-Install [Opkg Manager](../vespera/setup.md) first before using this add-on.
+Install [Vespera](../vespera/setup.md) first before using this add-on.
 
 ### Usage
 Once Installed. A theme can be changed in the UI by going to Menu>Settings>Display & Language>Current Theme

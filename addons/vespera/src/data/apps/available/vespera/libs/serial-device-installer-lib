@@ -6,7 +6,6 @@ declare VESPERA_DIR; VESPERA_DIR="$(cd "${__this_path}/.." && pwd)"
 
 # shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
 source "${VESPERA_ROOT:-}$VESPERA_DIR/libs/source-lib"
-addsource "libs/log-lib"
 
 SERIAL_STARTER_CONFIG_FILE="${SERIAL_STARTER_CONFIG_FILE:-"$VESPERA_DIR/conf/serial-starter.conf"}"
 
@@ -16,6 +15,29 @@ SERIAL_STARTER_DEV_DIR="${SERIAL_STARTER_DEV_DIR:-"/dev"}"
 SERIAL_STARTER_RULES_FILE="${SERIAL_STARTER_RULES_FILE:-"$VESPERA_DIR/conf/serial-starter.rules"}"
 #symlink file *must* be placed after the serial-starter.rules file
 SERIAL_STARTER_RULES_FILE_SYMLINK="${SERIAL_STARTER_RULES_FILE_SYMLINK:-"/etc/udev/rules.d/serial-starter.rules-50-vespera.rules"}"
+
+__log_error() { echo "ERROR: $1" >&2; }
+
+__sdi_require_non_empty() {
+	local value="${1:-}"
+	local name="${2:-value}"
+	[[ -n "$value" ]] && return 0
+	__log_error "$name not set"
+	return 1
+}
+
+__sdi_ensure_parent_dir() {
+	local path="${1:-}"
+	[[ -n "$path" ]] || return 1
+	mkdir -p "$(dirname "$path")"
+}
+
+__sdi_ensure_file() {
+	local path="${1:-}"
+	[[ -n "$path" ]] || return 1
+	__sdi_ensure_parent_dir "$path" || return 1
+	[[ -f "$path" ]] || : > "$path"
+}
 
 sdi_resolve_tty_path() {
 	local tty="${1:-}"
@@ -37,10 +59,7 @@ sdi_get_sid_from_tty() { sdi_get_usb_prop "${1}" "SERIAL_DEVICE_ID"; }
 sdi_set_device_sid() {
 	local usb_props="${1:-}"
 
-	[[ -n "${usb_props}" ]] || {
-		log_error "ERROR: usb_props not set"
-		return 1
-	}
+	__sdi_require_non_empty "${usb_props}" "usb_props" || return 1
 
 	DEVICE_SID="$(printf '%s' "${usb_props}" | md5sum | awk '{print $1}' | cut -c1-16)"
 	[[ -n "${DEVICE_SID}" ]] || return 1
@@ -55,24 +74,20 @@ sdi_set_device_sid() {
 __sdi_ensure_rules_file() {
 
 	if [[ -e "${SERIAL_STARTER_RULES_FILE_SYMLINK}" && ! -L "${SERIAL_STARTER_RULES_FILE_SYMLINK}" ]]; then
-		log_error "ERROR: SERIAL_STARTER_RULES_FILE_SYMLINK exists and is not a symlink:${SERIAL_STARTER_RULES_FILE_SYMLINK}"
+		__log_error "SERIAL_STARTER_RULES_FILE_SYMLINK exists and is not a symlink:${SERIAL_STARTER_RULES_FILE_SYMLINK}"
 		return 2
 	fi
 
 	local current_target=""
-	[[ ! -f "$SERIAL_STARTER_RULES_FILE" ]] && {
-		mkdir -p "$(dirname "${SERIAL_STARTER_RULES_FILE}")"
-		touch "$SERIAL_STARTER_RULES_FILE"
-	}
+	__sdi_ensure_file "$SERIAL_STARTER_RULES_FILE" || return 2
 
 	[[ -L "${SERIAL_STARTER_RULES_FILE_SYMLINK}" ]] && current_target="$(readlink "${SERIAL_STARTER_RULES_FILE_SYMLINK}")"
 	[[ "${current_target}" == "${SERIAL_STARTER_RULES_FILE}" ]] && return 0
 
 	ln -sfn "${SERIAL_STARTER_RULES_FILE}" "${SERIAL_STARTER_RULES_FILE_SYMLINK}" || {
-		log_error "ERROR: failed to update SERIAL_STARTER_RULES_FILE_SYMLINK:${SERIAL_STARTER_RULES_FILE_SYMLINK} -> ${SERIAL_STARTER_RULES_FILE}"
+		__log_error "failed to update SERIAL_STARTER_RULES_FILE_SYMLINK:${SERIAL_STARTER_RULES_FILE_SYMLINK} -> ${SERIAL_STARTER_RULES_FILE}"
 		return 2
 	}
-
 	return 0
 }
 
@@ -84,9 +99,24 @@ __sdi_ensure_include_config() {
 	[[ -f "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" ]] &&
 		grep -qxF "${include_line}" "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" && return 0
 
-	mkdir -p "$(dirname "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}")"
+	__sdi_ensure_parent_dir "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" || return 1
 	echo "${include_line}" >> "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}"
 	return 0
+}
+
+__sdi_get_lookup_tty_paths() {
+	local tty="${1:-}"
+	local -n tty_paths_ref="${2}"
+
+	if [[ -n "$tty" ]]; then
+		if [[ "$tty" == /* ]]; then
+			tty_paths_ref=("$tty")
+		else
+			tty_paths_ref=("$(sdi_resolve_tty_path "$tty")")
+		fi
+	else
+		__sdi_get_tty_paths tty_paths_ref
+	fi
 }
 
 # requires: DEVICE_SERVICE_NAME
@@ -159,15 +189,7 @@ sdi_get_available_devices() {
 		udevadm settle >/dev/null
 	fi
 
-	if [[ -n "${tty}" ]]; then
-		if [[ "$tty" == /* ]]; then
-			tty_paths=("$tty")
-		else
-			tty_paths=("$(sdi_resolve_tty_path "$tty")")
-		fi
-	else
-		__sdi_get_tty_paths tty_paths
-	fi
+	__sdi_get_lookup_tty_paths "$tty" tty_paths
 
 	for tty_path in "${tty_paths[@]}"; do
 		[[ -e "$tty_path" ]] || continue
@@ -202,8 +224,8 @@ __create_serial_starter_rule() {
 	local -a props
 	local rules=""
 
-	[[ -z "${DEVICE_SERVICE_NAME:-}" ]] && { log_error "ERROR: DEVICE_SERVICE_NAME not set"; return 1; }
-	[[ -z "${DEVICE_UDEV_PROPS:-}" ]] && { log_error "ERROR: DEVICE_UDEV_PROPS not set"; return 1; }
+	__sdi_require_non_empty "${DEVICE_SERVICE_NAME:-}" "DEVICE_SERVICE_NAME" || return 1
+	__sdi_require_non_empty "${DEVICE_UDEV_PROPS:-}" "DEVICE_UDEV_PROPS" || return 1
 
 	IFS=',' read -r -a props <<< "${DEVICE_UDEV_PROPS}"
 	for prop_entry in "${props[@]}"; do
@@ -239,8 +261,6 @@ __create_serial_starter_rule() {
 	local rule_with_comment="${serial_starter_rule_comment}"$'\n'"${serial_starter_rule}"$'\n'
 	echo "${rule_with_comment}" >> "${SERIAL_STARTER_RULES_FILE}"
 
-	log_trace "new serial starter rule=${serial_starter_rule}"
-
 	return 0
 }
 
@@ -249,14 +269,8 @@ __create_serial_starter_rule() {
 # optional vars: DEVICE_SERVICE_MAPPING_NAME
 sdi_install() {
 
-	[[ -z "${DEVICE_SERVICE_NAME:-}" ]] && {
-		log_error "ERROR: DEVICE_SERVICE_NAME not set"
-		return 1
-	}
-	[[ -z "${DEVICE_UDEV_PROPS:-}" ]] && {
-		log_error "ERROR: DEVICE_UDEV_PROPS not set"
-		return 1
-	}
+	__sdi_require_non_empty "${DEVICE_SERVICE_NAME:-}" "DEVICE_SERVICE_NAME" || return 1
+	__sdi_require_non_empty "${DEVICE_UDEV_PROPS:-}" "DEVICE_UDEV_PROPS" || return 1
 
 	__sdi_ensure_include_config || return 1
 	__sdi_ensure_rules_file || return 1
@@ -291,7 +305,7 @@ sdi_add_service_mapping() {
 sdi_remove_service_mapping() {
 
 	[[ ! -f "${SERIAL_STARTER_CONFIG_FILE}" ]] && return 0
-	[[ -z "${DEVICE_SERVICE_NAME}" ]] && { log_error "DEVICE_SERVICE_NAME not supplied"; return 1; }
+	__sdi_require_non_empty "${DEVICE_SERVICE_NAME:-}" "DEVICE_SERVICE_NAME" || return 1
 
 	local service_mapping_name; __sdi_get_service_mapping_name_byref service_mapping_name
 	local pattern="^[[:space:]]*service[[:space:]]\+${service_mapping_name}[[:space:]]\+${DEVICE_SERVICE_NAME}[[:space:]]*$"
@@ -300,11 +314,9 @@ sdi_remove_service_mapping() {
 	sed "/$pattern/d" "$SERIAL_STARTER_CONFIG_FILE" > "$tmp"
 
 	if cmp -s "$SERIAL_STARTER_CONFIG_FILE" "$tmp"; then
-		log_trace "Service mapping not found"
 		rm "$tmp"
 	else
 		mv "$tmp" "$SERIAL_STARTER_CONFIG_FILE"
-		log "Removed service mapping"
 	fi
 }
 
@@ -314,9 +326,9 @@ sdi_remove_service_mapping() {
 __sdi_refresh_udevadm() {
 	local action="${1}"
 
-	[[ -z "${action}" ]] && { log_error "ERROR: action arg not not supplied"; return 1; }
+	[[ -z "${action}" ]] && { __log_error "action arg not not supplied"; return 1; }
 	[[ "${action}" != "add" && "${action}" != "remove" ]] && {
-		 log_error "ERROR: invalid action. should be 'add' or 'remove'"; return 1; }
+		 __log_error "invalid action. should be 'add' or 'remove'"; return 1; }
 
 	udevadm control --reload
 
@@ -336,7 +348,7 @@ __sdi_refresh_udevadm() {
 sdi_remove_device_rule() {
 	__ensure_TTY_from_TTY_or_SID 2>/dev/null || true
 	sdi_remove_rule || return 1
-	sdi_refresh_udevadm "remove" || true
+	__sdi_refresh_udevadm "remove" || true
 	return 0
 }
 
@@ -347,11 +359,11 @@ sdi_remove_rule() {
 	[[ ! -f "${SERIAL_STARTER_RULES_FILE:-}" ]] && return 0
 
 	if [[ -z "${DEVICE_SID:-}" ]]; then
-		[[ -z "${DEVICE_TTY:-}" ]] && { log_error "ERROR: DEVICE_TTY variable not set"; return 1; }
+		__sdi_require_non_empty "${DEVICE_TTY:-}" "DEVICE_TTY variable" || return 1
 
 		DEVICE_SID=$(sdi_get_usb_prop "$DEVICE_TTY" "SERIAL_DEVICE_ID")
 
-		[[ -z "${DEVICE_SID:-}" ]] && { log_trace "Cannot find SERIAL_DEVICE_ID, nothing to do"; return 0; }
+		[[ -z "${DEVICE_SID:-}" ]] && { return 0; }
 	fi
 
 	local tmp
@@ -369,8 +381,6 @@ sdi_remove_rule() {
 	if ! cmp -s "${SERIAL_STARTER_RULES_FILE}" "$tmp"; then
 		mkdir -p "$(dirname "${SERIAL_STARTER_RULES_FILE}")"
 		mv "$tmp" "${SERIAL_STARTER_RULES_FILE}"
-		local file_name;file_name="$(basename "${SERIAL_STARTER_RULES_FILE}")"
-		log "Removed rule from ${file_name}"
 	else
 		rm -f "$tmp"
 	fi
@@ -420,11 +430,11 @@ __ensure_TTY_from_TTY_or_SID() {
 		sdi_TTY_from_SID && return 0
 
 	tty_path="$(sdi_resolve_tty_path "${DEVICE_TTY:-}")" || {
-		log_error "ERROR: DEVICE_TTY device does not exist"; return 1;
+		__log_error "DEVICE_TTY device does not exist"; return 1;
 	}
 
 	[[ -z "${DEVICE_TTY:-}" || ! -e "$tty_path" ]] && {
-		log_error "ERROR: DEVICE_TTY device does not exist"; return 1; }
+		__log_error "DEVICE_TTY device does not exist"; return 1; }
 
 	return 0
 }
@@ -442,7 +452,7 @@ sdi_TTY_from_SID() {
 	local value=
 	local -a tty_paths
 
-	[[ -z "${DEVICE_SID}" ]] && { log_error "DEVICE_SID not set"; return 1; }
+	[[ -z "${DEVICE_SID}" ]] && { __log_error "DEVICE_SID not set"; return 1; }
 
 	DEVICE_TTY=
 
@@ -483,9 +493,9 @@ sdi_service_name_from_tty() {
 
 	__service_name=""
 	ve_service=$(sdi_get_usb_prop "$tty" "VE_SERVICE")
-	[[ -z "${ve_service}" ]] && { log_error "ERROR: VE_SERVICE not found"; return 1; }
+	[[ -z "${ve_service}" ]] && { __log_error "VE_SERVICE not found"; return 1; }
 	[[ ! -f "${SERIAL_STARTER_CONFIG_FILE}" ]] && {
-		log_error "ERROR: SERIAL_STARTER_CONFIG_FILE not found"; return 1; }
+		__log_error "SERIAL_STARTER_CONFIG_FILE not found"; return 1; }
 
 	local fields=
 	read -ra fields <<< "$(grep -F "service ${ve_service}" "${SERIAL_STARTER_CONFIG_FILE}")"

@@ -14,16 +14,4 @@ __pycache__/
 .build/
 tmp/
 vespera-latest.ipk
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_de.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_en.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_es.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_fi.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_fr.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_it.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_ja.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_ko.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_nl.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_pl.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_pt.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_sv.ts
-addons/dbus-inetbox/src-external/gui-v2/v2/Inetbox/translations/Inetbox_zh.ts
+

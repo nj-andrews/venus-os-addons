@@ -125,18 +125,16 @@ QtObject {
 		executeCommand(null,"feed", "edit", [feedName, url, origFeedName], completionCallback)
 	}
 
-	function loadPackages(force, completionCallback) {
-		var args = force ? ["force"] : undefined
-		if (force)
-			executeCommand("package load","packages", "update", args, completionCallback)
+	function loadPackages(update, completionCallback) {
+		if (update)
+			executeCommand("package load","packages", "update", [], completionCallback)
 		else if (initCommand("load packages", completionCallback)) {
 			dataReader.readAll("packages")
 		}
 	}
-	function loadFeeds(force, completionCallback) {
-		var args = force ? ["force"] : undefined
-		if (force)
-			executeCommand("feed load","packages", "update", args, completionCallback)
+	function loadFeeds(update, completionCallback) {
+		if (update)
+			executeCommand("feed load","packages", "update", [], completionCallback)
 		else if (initCommand("load feeds", completionCallback)) {
 			dataReader.readAll("feeds")
 		}
@@ -163,7 +161,7 @@ QtObject {
 
 	function setPackageEnabledState(packageName, state, completionCallback) {
 		const args = _makePackageArgs(packageName)
-		const command = state ? "enabled" : "disabled"
+		const command = state ? "enable" : "disable"
 		executeCommand(null,"package", command, args, completionCallback)
 	}
 
@@ -173,19 +171,6 @@ QtObject {
 	function bindDeviceToService(port, serviceName, completionCallback) {
 		//var reconnectArg = reconnect ? "true" : ""
 		executeCommand(null,"device", "bind", [port, serviceName], completionCallback)
-	}
-
-	function detectDevice(serviceType, reconnect, completionCallback) {
-		var reconnectArg = reconnect ? "true" : ""
-		executeCommand(null,"device", "detect", [serviceType, reconnectArg], completionCallback)
-	}
-
-	function applyDevice(serviceType, port, usbProps, completionCallback) {
-		executeCommand(null,"device", "apply", [serviceType, port, usbProps], completionCallback)
-	}
-
-	function removeDeviceEx(sid, devicePath, completionCallback) {
-		executeCommand(null, "device", "remove", [sid, devicePath], completionCallback)
 	}
 
 	function removeDevice(sid, completionCallback) {

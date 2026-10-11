@@ -5,7 +5,7 @@ It allows you to mount SMB/CIFS and NFS network shares using a helper script.
 
 ## Prerequisite
 
-Install [Opkg Manager](../vespera/setup.md) first before using this add-on.
+Install [Vespera](../vespera/setup.md) first before using this add-on.
 
 ## Main Script
 

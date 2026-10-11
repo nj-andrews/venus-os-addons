@@ -101,9 +101,9 @@ Example
 # These names are the qml file page names with the .qml extension removed.
 : <<'Example'
 	PACKAGE_CUSTOM_MENUS="
-		PageSettings/OpkgPageSettingsSubMenu
+		PageHome/OpkgPageSettingsSubMenu
 		PageSettingsDisplay/OpkgPageSettingsDisplaySubMenu
-		PageMain/PageSettings
+		PageMain/PageHome
 	"
 Example
 

@@ -148,7 +148,8 @@ __run_remove() {
 	__try_call "pre_remove" || true
 
 	(
-		echo "Stopping and Removing Services"
+		
+		echo_lang "$LANG_UPDATING_DATABASE"
 		"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" _
 		! installer_lib_is_upgrade &&
 			"${PACKAGE_INSTALL_DIR}/vespera/libs/device-lib" remove-all "${PACKAGE_DBUS_NAME}"

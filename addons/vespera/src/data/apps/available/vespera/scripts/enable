@@ -23,7 +23,7 @@ __enable_app() {
 
 	[[ -f "$overlay_targets_conf" ]] &&
 		"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-register "${app}" <"$overlay_targets_conf"
-	
+
 	retVal=$("$__vespera_path/scripts/start-app-services" "${app}" "${dbus_name}")
 	[[ $retVal == 2 ]] && __refresh_devices=true
 

@@ -7,4 +7,4 @@ this_path="$(dirname "${BASH_SOURCE[0]}")"
 echo building /feeds/venus-data-vespera-blind-install.tgz
 tar czf $this_path/../../../feeds/release/vespera/venus-data-vespera-blind-install.tgz -C $this_path/src/ rc
 
-echo done
+echo "done"

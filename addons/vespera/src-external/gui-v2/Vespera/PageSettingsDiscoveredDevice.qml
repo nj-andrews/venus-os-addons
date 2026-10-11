@@ -13,7 +13,7 @@ Page {
 	required property string port
 	required property string serviceUid
 
-	property string selectedDeviceServiceName: "" //"Inetbox"
+	property string selectedDeviceServiceName: ""
 	property var addingDeviceText: progressText.running ? progressText.text : ""
 	property var jsonUsbProps: usbPropsItem.valid ? usbPropsToFormatedJson(usbPropsItem.value) : {}
 	property var availableServices: []
@@ -161,11 +161,11 @@ Page {
 		var addingDevice = qsTrId("vespera_adding_device")
 		progressText.start(addingDevice)
 
-		var sid = root.serviceUid.split('/').pop()
-		sid = sid.replace(/^sid_/, "");
-
+		// var sid = root.serviceUid.split('/').pop()
+		// sid = sid.replace(/^sid_/, "");
+		// console.log("BBB:",root.selectedDeviceServiceName)
 		root.vesperaManager.bindDeviceToService(
-			sid, root.port, root.selectedDeviceServiceName, root.jsonUsbProps,
+			root.port, root.selectedDeviceServiceName,
 			function(result) {
 				if (progressText)
 					progressText.stop()

@@ -1,12 +1,23 @@
 #!/bin/sh
 
-VERSION=1.7
+VERSION=1.8
 VESPERA_VERBOSITY=1
+PROMPT=1
+FEED=https://thespinmaster.github.io/venus-os-addons/feeds/release/vespera
 
-case "$1" in -V[0-4]) VESPERA_VERBOSITY="${1#-V}" ;; esac
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		-V[0-4]) VESPERA_VERBOSITY="${1#-V}" ;;
+		--no-prompt) PROMPT=0;;
+	  --feed) FEED=$2;;
+	esac
+	shift
+done
 
-printf "Install Vespera? [n/Y] "
-read -r answer; [ "$answer" = n ] || [ "$answer" = N ] && { echo "Cancelled."; exit 0; }
+if [ "$PROMPT" -eq 1 ]; then
+	printf "Install Vespera? [n/Y] "
+	read -r answer; [ "$answer" = n ] || [ "$answer" = N ] && { echo "Cancelled."; exit 1; }
+fi
 
 VESPERA_DATA_DIR="/data/var/vespera"
 OPKG_CONF="${VESPERA_DATA_DIR}/bootstrap-opkg.conf"
@@ -40,8 +51,7 @@ fsresize="/opt/victronenergy/swupdate-scripts/resize2fs.sh"
     ("$fsresize" && mount -o remount,ro /) >"$output" 2>&1
 }
 
-
-opkg -f "${OPKG_CONF}" "$@" install "http://192.168.10.32:8808/develop/vespera-latest.ipk" || exit
+opkg -f "${OPKG_CONF}" "$@" install "$FEED/vespera-latest.ipk" || exit
 retval=$?
 
 # shellcheck disable=SC1091

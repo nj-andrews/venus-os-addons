@@ -8,6 +8,7 @@ source "$__vespera_path/conf/vespera.conf"
 VESPERA_DATA_DIR="${VESPERA_ROOT:-}${VESPERA_DATA_DIR}"
 # shellcheck source="../libs/opkg-lib"
 source "$__vespera_path/libs/opkg-lib"
+LOCAL_SETTINGS_TRY_COUNT=100
 
 declare -i settings_up=0 counter=0
 echo "start-all-services: waiting for com.victronenergy.settings"
@@ -21,9 +22,10 @@ while true; do
 	fi
 
 	counter=$((counter+1))
-	((counter>200)) && break
+	((counter>$LOCAL_SETTINGS_TRY_COUNT)) && break
 	sleep 1
 done
+
 ((settings_up!=2)) && { echo "start-all-services: localsettings service not available"; exit 1; }
 
 for app in $(opkg_lib_list_packages "all"); do

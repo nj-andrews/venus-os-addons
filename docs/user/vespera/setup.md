@@ -1,4 +1,4 @@
-# Opkg Manager Setup
+# Vespera Setup
 
 ### SSH
 To install via SSH execute the following command
@@ -43,9 +43,9 @@ An example config file can be downloaded from here: [venus-data-vespera-blind-in
 The log file for a bind-install is located in /var/log/vespera/blind-install.log. The log file is re-created on every blind-install
 
 ### Installed
-After installing there should be a menu item Open Package Manager under Menu/Settings
+After installing there should be a Vespera entry under Menu/Settings
 
-![Opkg Manager settings menu screenshot](images/settings-menu.webp "Opkg Manager Settings Menu")
+![Vespera menu screenshot](vespera-intergration "Vespera Menu")
 
 
 ---

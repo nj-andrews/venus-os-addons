@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+this_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+output_dir="$this_path/output"
+venus_root_dir="$output_dir/__create-opkg-source"
+VENUS_ROOT_DIR="$venus_root_dir"
+
+. "$this_path/../../../scripts/libs/test-lib"
+
+clear_output() {
+  mkdir -p "$output_dir"
+  rm -rf -- "$venus_root_dir"
+}
+
+stage_create_opkg_source_runtime() {
+  local app_root="$VENUS_ROOT_DIR/data/apps/available/vespera"
+  local data_root="$VENUS_ROOT_DIR/data/var/vespera"
+  local source_root
+  source_root="$(cd "$this_path/../src/data/apps/available/vespera" && pwd)"
+
+  clear_output
+  mkdir -p "$app_root/libs" "$app_root/conf" "$app_root/scripts" "$data_root" "$VENUS_ROOT_DIR/etc/opkg"
+
+  ln -sf "$source_root/libs/source-lib" "$app_root/libs/source-lib"
+  ln -sf "$source_root/libs/opkg-lib" "$app_root/libs/opkg-lib"
+  ln -sf "$source_root/scripts/create-opkg-feed" "$app_root/scripts/create-opkg-feed"
+
+  cat > "$app_root/conf/vespera.conf" <<EOF
+VESPERA_APP_DIR="$app_root"
+VESPERA_DATA_DIR="$data_root"
+VESPERA_FEEDS_FILE="$data_root/feeds-release.conf"
+VESPERA_FEEDS_CONF_FILE="$app_root/conf/opkg.conf"
+VESPERA_COMBINED_CONF_FILE="$data_root/opkg.conf"
+VESPERA_INDEXER_STATE_FILE="$data_root/indexer.md5"
+VESPERA_JSON_FEEDS_FILE="$data_root/feeds.json"
+VESPERA_JSON_PACKAGES_FILE="$data_root/packages.json"
+VESPERA_VENUS_VERSION_FILE="$data_root/venus-version"
+VESPERA_PATCH_LIST_FILE="$data_root/patch.list"
+VESPERA_INDEXER="$app_root/scripts/indexer"
+VESPERA_LOCK_FILE="/var/lock/vespera"
+VESPERA_VENUS_FIRMWARE_CHANGED_FILE="firmware-changed"
+VESPERA_INSTALL_STATE_FILE="install-state"
+VESPERA_APP_SERVICES_FILE="app-services"
+VESPERA_APP_TEMPLATE_SERVICES_FILE="app-template-services"
+VESPERA_APP_TEMPLATE_DEVICES="app-template-devices"
+VESPERA_VERBOSITY_FILE="verbosity"
+VESPERA_WHITEOUTS_FILE="installer-whiteouts"
+VESPERA_OVERLAYS_FILE="installer-overlays"
+VESPERA_GUI_LOCK_FILE="/var/lock/vespera-gui"
+VESPERA_DBUS_NAME="dbus-name"
+VESPERA_ALWAYS_START_SERVICES=false
+EOF
+  cp "$source_root/conf-default/opkg.conf" "$app_root/conf/opkg.conf"
+
+  printf '%s\n' 'src/gz vespera http://example.com' > "$data_root/feeds-release.conf"
+
+  export VESPERA_ROOT="$VENUS_ROOT_DIR"
+
+  # shellcheck disable=SC1090
+  . "$app_root/libs/opkg-lib"
+
+  export VESPERA_APP_DIR="$app_root"
+  export VESPERA_DATA_DIR="$data_root"
+  export VESPERA_FEEDS_FILE="$data_root/feeds-release.conf"
+  export VESPERA_FEEDS_CONF_FILE="$app_root/conf/opkg.conf"
+  export VESPERA_COMBINED_CONF_FILE="$data_root/opkg.conf"
+  export VESPERA_FEEDS_SYMLINK="$data_root/feeds.conf"
+  export VESPERA_VERBOSITY=0
+}
+
+test_opkg_lib_set_feed_source_creates_missing_feed_after_prompt() {
+  local output=
+  local feed_name="new_feed"
+  local feed_file="$VESPERA_APP_DIR/conf/feeds-${feed_name}.conf"
+  local bin_dir="$VESPERA_DATA_DIR/test-bin"
+
+  mkdir -p "$bin_dir"
+  cat > "$bin_dir/nano" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' '# example' > "\$1"
+printf '%s\n' "src/gz ${feed_name} http://new.example.com" >> "\$1"
+EOF
+  chmod +x "$bin_dir/nano"
+
+  rm -f "$feed_file" "$VESPERA_FEEDS_SYMLINK"
+  PATH="$bin_dir:$PATH"
+  output="$(printf 'y\n' | opkg_lib_set_feed_source "$feed_name" 2>&1)"
+
+  assert_exitcode 0
+  assert_contains 'Add new feed' "$output"
+  assert_file_exists "$feed_file"
+  assert_file_contains "$feed_file" "src/gz ${feed_name} http://new.example.com"
+  assert_eq "$feed_file" "$(readlink "$VESPERA_FEEDS_SYMLINK")"
+}
+
+test_create_opkg_feed_script_wrapper_creates_missing_feed_after_prompt() {
+  local output=
+  local feed_name="script_feed"
+  local feed_file="$VESPERA_APP_DIR/conf/feeds-${feed_name}.conf"
+  local bin_dir="$VESPERA_DATA_DIR/test-bin"
+
+  mkdir -p "$bin_dir"
+  cat > "$bin_dir/nano" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' '# example' > "\$1"
+printf '%s\n' "src/gz ${feed_name} http://script.example.com" >> "\$1"
+EOF
+  chmod +x "$bin_dir/nano"
+
+  rm -f "$feed_file" "$VESPERA_FEEDS_SYMLINK"
+  PATH="$bin_dir:$PATH"
+  output="$(printf 'y\n' | "$VESPERA_APP_DIR/scripts/create-opkg-feed" "$feed_name" 2>&1)"
+
+  assert_exitcode 0
+  assert_contains 'Add new feed' "$output"
+  assert_file_exists "$feed_file"
+  assert_file_contains "$feed_file" "src/gz ${feed_name} http://script.example.com"
+}
+
+if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
+  stage_create_opkg_source_runtime
+  test_runner_all --summary ""
+fi

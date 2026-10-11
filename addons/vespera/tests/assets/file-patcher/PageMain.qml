@@ -37,7 +37,7 @@ MbPage {
 
 			MbSubMenu {
 				description: qsTr("Settings")
-				subpage: Component { PageSettings {} }
+				subpage: Component { PageHome {} }
 			}
 
 			MbOK {

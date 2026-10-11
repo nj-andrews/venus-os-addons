@@ -3,100 +3,63 @@
 declare log_path=/var/log/vespera/
 declare log=$log_path/blind-install.log
 
-if [[ ! -d "$log_path" ]]; then
-	mkdir -p "$log_path"
-fi
+declare URI=http://192.168.10.32:8808
+declare RELEASE="develop"
+# declare URI=https://thespinmaster.github.io/venus-os-addons/feeds
 
+mkdir -p "$log_path"
 exec > "$log" 2>&1
-echo "blind-install vespera"
-
-#if opkg list-installed vespera; then
-#  echo "Already installed, nothing to do"
-#  exit 0
-#fi
 
 echo "Running vespera bind install"
+echo "Installing - vespera from:$URI/$RELEASE"
 
-mount -o remount,rw /
-/opt/victronenergy/swupdate-scripts/resize2fs.sh
+wget -qO /tmp/vespera-bootstrap "$URI/vespera-bootstrap" \
+	&& sh /tmp/vespera-bootstrap "$URI/$RELEASE/vespera" \
+		|| { echo "bootstrap failed, exiting"; exit 1; };
 
-declare opkg_url="https://thespinmaster.github.io/venus-os-addons/feeds/release/vespera/vespera-latest.ipk"
+declare install_conf
+install_conf=$(find /run/media -mindepth 2 -maxdepth 2 -type f \
+	-name 'venus-data-vespera-blind-install.conf' -print -quit)
 
-echo "installing- vespera"
+if [[ -f "$install_conf" ]]; then
+	declare -a package_commands=()
 
-opkg install "$opkg_url" && {
-  if [[ -f /data/apps/vespera/libs/source-lib ]]; then
-		# shellcheck source="/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib"
-    source /data/apps/vespera/libs/source-lib
-    addsource libs/opkg-lib
-  else
-    echo "vespera shared helpers not found"
-    exit 1
-  fi
+	while IFS= read -r line || [[ -n "$line" ]]; do
+		if [[ "$line" =~ ^[[:space:]]*$ || "$line" =~ ^[[:space:]]*# ]]; then
+			continue
+		fi
 
-  declare install_conf
-  install_conf=$(find /run/media -mindepth 2 -maxdepth 2 -type f \
-    -name 'venus-data-vespera-blind-install.conf' -print -quit)
+		read -r -a tokens <<< "$line"
 
-  if [[ -f "$install_conf" ]]; then
-    declare -a feed_commands=()
-    declare -a package_commands=()
+		case "${tokens[0]}" in
+			package)
+				if [[ ${#tokens[@]} -lt 3 ]]; then
+					echo "Invalid package command: $line"
+					exit 1
+				fi
+				package_commands+=("$line")
+				;;
+			*)
+				echo "Unsupported command: $line"
+				exit 1
+				;;
+		esac
+	done < "$install_conf"
 
-    while IFS= read -r line || [[ -n "$line" ]]; do
-      if [[ "$line" =~ ^[[:space:]]*$ || "$line" =~ ^[[:space:]]*# ]]; then
-        continue
-      fi
+	for command in "${package_commands[@]}"; do
+		read -r -a package_tokens <<< "$command"
 
-      read -r -a tokens <<< "$line"
+		declare package_action="${package_tokens[1]}"
+		declare package_name="${package_tokens[$((${#package_tokens[@]} - 1))]}"
+		declare -a package_args=()
 
-      case "${tokens[0]}" in
-        feed)
-          if [[ ${#tokens[@]} -ne 3 ]]; then
-            echo "Invalid feed command: $line"
-            exit 1
-          fi
+		if [[ ${#package_tokens[@]} -gt 3 ]]; then
+			package_args=("${package_tokens[@]:2:$((${#package_tokens[@]} - 3))}")
+		fi
 
-          feed_commands+=("${tokens[1]}|${tokens[2]}")
-          ;;
-        package)
-          if [[ ${#tokens[@]} -lt 3 ]]; then
-            echo "Invalid package command: $line"
-            exit 1
-          fi
-
-          package_commands+=("$line")
-          ;;
-        *)
-          echo "Unsupported command: $line"
-          exit 1
-          ;;
-      esac
-    done < "$install_conf"
-
-    for command in "${feed_commands[@]}"; do
-      IFS='|' read -r command_name command_url <<< "$command"
-
-      feed_editor "add" "$command_name" "$command_url"
-    done
-
-    opkg update
-
-    for command in "${package_commands[@]}"; do
-      read -r -a package_tokens <<< "$command"
-
-      declare package_action="${package_tokens[1]}"
-      declare package_name="${package_tokens[$((${#package_tokens[@]} - 1))]}"
-      declare -a package_args=()
-
-      if [[ ${#package_tokens[@]} -gt 3 ]]; then
-        package_args=("${package_tokens[@]:2:$((${#package_tokens[@]} - 3))}")
-      fi
-
-      opkg "$package_action" "${package_args[@]}" "$package_name"
-    done
-  fi
-}
-
+		vespera "$package_action" "${package_args[@]}" "$package_name"
+	done
+fi
 
 rm -f "${BASH_SOURCE[0]}"
 echo "Done"

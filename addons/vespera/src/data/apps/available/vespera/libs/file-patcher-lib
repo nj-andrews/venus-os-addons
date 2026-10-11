@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
 set -o nounset
-declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
-__this_path="$(cd "${__this_path}/.." && pwd)"
-
+declare __this_path; __this_path="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
-source "${VESPERA_ROOT:-}$__this_path/libs/source-lib"
+source "${VESPERA_ROOT:-}$__this_path/source-lib"
 addsource libs/version-lib
 
 declare -i PATCH_LENGTH=0
@@ -128,8 +126,7 @@ _find() {
 	local  -i patch_end=${3}
 	local -n __file_start=${4}
 	local -n __file_end=${5}
-	local -i comment_count=0 f=0 p=0
-	local -i step=1
+	local -i comment_count=0 f=0 p=0 step=1
 	local -i file_exit_index=${#FILE_LINES[@]}
 	local -i patch_exit_index=$((patch_end+1))
 	local -i patch_start_index=$patch_start
@@ -422,11 +419,10 @@ file_patcher_apply_patch() {
 	local -i block_start=-1
 	local -i file_job_start=-1
 	local -i file_job_end=-1
-	local current_file=""
 
 	_read_patch_lines "$patchfile" || return 1
 
-	local venus_version="" patch_line="" command="" version_condition=""
+	local current_file="" venus_version="" patch_line="" command="" version_condition=""
 
 	version_lib_get_venus_verion_byref venus_version
 

@@ -75,6 +75,7 @@ __register_services() {
 		[[ ! -f "$service_path/run" ]] && continue
 		local service="${service_path##*/}"
 		echo "$service" >> "$template_services_file"
+		#shellcheck disable=SC2034
 		DEVICE_SERVICE_NAME="$service"
 		addsource "libs/serial-device-installer-lib"
 		sdi_add_service_mapping
@@ -108,7 +109,7 @@ __install() {
 
 	# Phase 2: patch + settings apply
 	__add_patch_files
-	echo "Processing Dbus settings"
+	echo_lang "$LANG_PROCESSING_DBUS_SETTINGS"
 	__add_dbus_settings_from_dbus_list_file
 
 	# Phase 3: runtime enablement
@@ -117,7 +118,7 @@ __install() {
 	installer_lib_update_install_list
 	__register_services
 
-	echo "Updating database"
+	echo_lang "$LANG_UPDATING_DATABASE"
 	return 0
 }
 

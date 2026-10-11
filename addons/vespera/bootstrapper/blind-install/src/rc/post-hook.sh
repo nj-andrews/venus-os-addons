@@ -10,12 +10,9 @@ fi
 exec > "$log" 2>&1
 
 echo "starting blind install"
-echo "$(date)" 
+"$(date)"
 
 this_path="$(dirname "${BASH_SOURCE[0]}")"
-echo "this_path=$this_path"
-
-ls $this_path
 
 install_script="$this_path/blind-install.sh"
 if [[ -f "$install_script" ]]; then

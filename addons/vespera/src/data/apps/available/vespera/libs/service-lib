@@ -3,7 +3,8 @@
 service_lib_service_up() { svstat "/service/${1}" | grep -q "^/service/${1}: up "; }
 
 service_lib_remove_service() {
-	local service="${1:-}" || return
+local service="${1:-}" || return
+service="${service#/service/}"
 
 	[[ ! -e "/service/${service}" ]] &&
 		return
@@ -11,7 +12,7 @@ service_lib_remove_service() {
 	svc -dx "/service/$service"
 
 	[[ -d "/service/${service}/log" ]] &&
-		svc -dx "/service/${service}/log"
+		svc -dx "/service/${service}/log" 2>/dev/null
 
 	rm -rf "/service/${service}"
 
@@ -23,12 +24,13 @@ __create_templated_service() {
 
 	local tty_service="$service.$2"
 	# check if service already exists
-	test -d "/service/$tty_service" && return 0
+	test -e "/service/$tty_service" && return 0
 
 	local tmpl=/opt/victronenergy/service-templates/$service
 
 	# check existence of service template
-	[[ ! -d "$tmpl" ]] && { echo "ERROR: no service template for $service" >&2; return 1; }
+	[[ ! -d "$tmpl" ]] && { echo "ERROR: no service template for /opt/victronenergy/service-templates/$service" \
+		>&2; return 1; }
 
 	# copy service
 	local service_dir="/var/volatile/services"
@@ -39,8 +41,8 @@ __create_templated_service() {
 	sed -i "s:TTY:$tty:" "$service_dir/$tty_service/log/run"
 
 	# Create symlink to /service
+	rm -f "/service/$tty_service"
 	ln -sf "$service_dir/$tty_service" "/service/$tty_service"
-
 	# wait for svscan to find service
 	sleep 6
 }
@@ -69,4 +71,3 @@ service_lib_start_templated_service() {
 	svc -u "/service/$tty_service"
 
 }
-

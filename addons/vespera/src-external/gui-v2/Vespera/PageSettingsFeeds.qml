@@ -81,20 +81,18 @@ Page {
 			_loading = false
 		})
 	}
-
 	Vespera.ActionsRow {
 		id: actionsRow
-
-		buttonModel: [
-			 {
-				//% "Add New Feed"
-				text: qsTrId("vespera_add_new_feed"),
-				onClicked: function() {Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeedEdit.qml", {
-							title: qsTrId("vespera_add_new_feed"),
-							vesperaManager: root.vesperaManager,
-							model: {name:"", url:"", builtin: false, isNew: true},
-							loadFeedsModelCallback: root.loadFeeds})}
+		ListItemButton {
+			//% "Add New Feed"
+			text: qsTrId("vespera_add_new_feed")
+			anchors {right: parent.right}
+			onClicked: function() {Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeedEdit.qml", {
+						title: qsTrId("vespera_add_new_feed"),
+						vesperaManager: root.vesperaManager,
+						model: {name:"", url:"", builtin: false, isNew: true},
+						loadFeedsModelCallback: root.loadFeeds})}
 			}
-		]
 	}
+
 }

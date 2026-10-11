@@ -32,7 +32,7 @@ rm -f $OUTPUT_PATH/${PLUGIN_NAME}.json
 python3 "$compiler_script" \
     --name ${PLUGIN_NAME} \
     --min-required-version v1.2.13 \
-    --settings PageSettings.qml \
+    --settings PageHome.qml \
 		--version ${PLUGIN_VERSION} \
 		${MINIFY:-} \
 		${PRE_COMPILE:-}
@@ -65,7 +65,7 @@ print_summary_line() {
 
 # copy orgional output name (PLUGIN_NAME) to final name (PLUGIN_FOLDER_NAME)
 mkdir -p ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2
-cp ./output/${PLUGIN_NAME}.json ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json
+cp ./output/${PLUGIN_NAME}.json ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json.install
 
 declare bytes;bytes="$(wc -c < "$OUTPUT_PATH/${PLUGIN_NAME}.json")"
 declare human;human="$(numfmt --to=iec "$bytes")"

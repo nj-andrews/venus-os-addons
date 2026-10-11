@@ -3,11 +3,11 @@
 <file>../PageSettingsFeeds.qml</file>
 <file>../PageSettingsDevicesList.qml</file>
 <file>../PageSettingsSavedDevices.qml</file>
-<file>../PageSettings.qml</file>
 <file>../PageSettingsDiscoveredDevice.qml</file>
 <file>../PageSettingsPackageInstall.qml</file>
 <file>../PageSettingsDiscoveredDevices.qml</file>
 <file>../PageSettingsSavedDevice.qml</file>
+<file>../PageHome.qml</file>
 <file>../PageSettingsPackages.qml</file>
 <file>../PageSettingsFeedEdit.qml</file>
 <file>../components/VeperaBridge.qml</file>

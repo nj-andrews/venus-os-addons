@@ -44,12 +44,12 @@ QtObject {
 		uid: systemSettingsServiceUid + "/Settings/Vespera/NoAction"
 	}
 
-	property VesperaBridge bridge: VesperaBridge {
+	property VeperaBridge bridge: VeperaBridge {
 		id: bridge
 		traceEnabled: true
 	}
 
-	property VesperaJsonReader dataReader: VesperaJsonReader {
+	property JsonReader dataReader: JsonReader {
 		id: dataReader
 	}
 
@@ -66,31 +66,24 @@ QtObject {
 			bridge.stop()
 	}
 
-	function setOutputLog(logViewer) {
-		outputLog = logViewer
-		logViewer?.clear()
-	}
-
 	function snapshotObject(source) {
 		return source ? JSON.parse(JSON.stringify(source)) : null
 	}
 
 	function _writeLog(line) {
-
-		if (traceEnabled)
-			console.log(line)
-
-		if (line=="::FINALIZING-INSTALL::") {
+		if (line==":::VESPERA-DISABLE:::") {
 			_finalizing_install = true
 			const Notification_Info=2
 			//% "Finiazing install. The UI will restart shortly"
 			line = qsTrId("vespera_finalize_install")
 			showToastNotification(Notification_Info, line, 5000)
-			return
 		}
 
 		if (outputLog)
 			outputLog.log(line)
+
+		if (traceEnabled)
+			console.log(line)
 
 		log(line) // signal
 	}
@@ -132,13 +125,19 @@ QtObject {
 		executeCommand(null,"feed", "edit", [feedName, url, origFeedName], completionCallback)
 	}
 
-	function loadPackages(force, completionCallback) {
-		var args = force ? ["force"] : undefined
-		executeCommand("package load","packages", "update", args, completionCallback)
+	function loadPackages(update, completionCallback) {
+		if (update)
+			executeCommand("package load","packages", "update", [], completionCallback)
+		else if (initCommand("load packages", completionCallback)) {
+			dataReader.readAll("packages")
+		}
 	}
-	function loadFeeds(force, completionCallback) {
-		var args = force ? ["force"] : undefined
-		executeCommand("feed load","packages", "update", args, completionCallback)
+	function loadFeeds(update, completionCallback) {
+		if (update)
+			executeCommand("feed load","packages", "update", [], completionCallback)
+		else if (initCommand("load feeds", completionCallback)) {
+			dataReader.readAll("feeds")
+		}
 	}
 
 	function installPackage(packageName, completionCallback) {
@@ -156,62 +155,49 @@ QtObject {
 		executeCommand(null,"package", "remove", args, completionCallback)
 	}
 
+	function _makePackageArgs(packageName) {
+		return root.noAction ? [packageName, "--noaction"] : [packageName]
+	}
+
 	function setPackageEnabledState(packageName, state, completionCallback) {
 		const args = _makePackageArgs(packageName)
 		const command = state ? "enabled" : "disabled"
 		executeCommand(null,"package", command, args, completionCallback)
 	}
 
-	function _makePackageArgs(packageName) {
-		return root.noAction ? [packageName, "--noaction"] : [packageName]
-	}
-
-
 	function usbScan(completionCallback) {
 		executeCommand(null, "device", "scan", [], completionCallback)
 	}
-	function bindDeviceToService(usbHash, port, devicePath, jsonUsbPropsObject, completionCallback) {
+	function bindDeviceToService(port, serviceName, completionCallback) {
 		//var reconnectArg = reconnect ? "true" : ""
-		var strJsonUsbProps = JSON.stringify(jsonUsbPropsObject)
-		executeCommand(null,"device", "bind", [usbHash, port, devicePath, strJsonUsbProps], completionCallback)
-	}
-	function checkDeviceServiceState(port, completionCallback) {
-		//var reconnectArg = reconnect ? "true" : ""
-		executeCommand(null,"device", "check-service-state", [port], completionCallback)
-	}
-
-	function detectDevice(serviceType, reconnect, completionCallback) {
-		var reconnectArg = reconnect ? "true" : ""
-		executeCommand(null,"device", "detect", [serviceType, reconnectArg], completionCallback)
-	}
-
-	function applyDevice(serviceType, port, usbProps, completionCallback) {
-		executeCommand(null,"device", "apply", [serviceType, port, usbProps], completionCallback)
-	}
-
-	function removeDeviceEx(sid, devicePath, completionCallback) {
-		executeCommand(null, "device", "remove", [sid, devicePath], completionCallback)
+		executeCommand(null,"device", "bind", [port, serviceName], completionCallback)
 	}
 
 	function removeDevice(sid, completionCallback) {
 		executeCommand(null,"device", "remove", [sid], completionCallback)
 	}
 
-	function executeCommand(operationName, familyName, commandName, args, completionCallback) {
-		var opName = operationName || familyName + " " + commandName
+	function initCommand(operationName, completionCallback) {
 
 		var error
-		if (!_connected) error = "Opkg Manager Service not running"
-		if (!error && bridge.running) error = "Bridge already running"
+		if (!_connected) error = "Vepera Service not running"
+		if (!error && bridge.running) error = "Command processor already running"
 		if (error) {
 			var result = {success: false, error: error}
 			root.showToastNotification(0,result.error, 3000)
 			completionCallback?.(result)
-			return
+			return false
 		}
-
-		root._operationName = opName
+		root._operationName = operationName
  		root._completionCallback = (completionCallback && completionCallback.call) ? completionCallback : undefined
+
+		return true
+	}
+
+	function executeCommand(operationName, familyName, commandName, args, completionCallback) {
+		var opName = operationName || familyName + " " + commandName
+		if (!initCommand(opName, completionCallback))
+			return
 
 		bridge.start(familyName, commandName, ...(args || []))
 	}

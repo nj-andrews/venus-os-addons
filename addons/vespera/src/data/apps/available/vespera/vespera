@@ -21,18 +21,38 @@ Commands:
 	status                        Show Vespera status via opkg
 	inspect, i [app ...]          Show app, service, addon, and dbus details
 	list-enabled, le [app ...]    List enabled apps/packages
-	list-services, ls [app ...]   List service status
-	list-feeds                    Show the active feed file and its contents
-	list-feed-sources             List feed source files
-	feed [set|add|edit|remove] ...
-	                              Manage the active feed configuration
-	device [scan|bind|remove] ...
-	                              Device-related actions
+	feed-conf <subcommand> ...    Manage active feed configurations
+	feed-sources <subcommand> ... Manage active feed sources for the active configuration
+	device <subcommand> ...       Device discovery and binding actions
 	fs-ro                         Remount the fs as read-only
 	overlays [mount|unmount]
 	enable [app ...]              Enable matching installed apps (or all when no args)
 	disable [app ...]             Disable matching enabled apps (or all when no args)
 	update                        Update package metadata and regenerate indexes
+
+Feed family:
+	feed-conf                     Print active feed config name
+	feed-conf list                Prints a list of available feed configs
+	feed-conf set                 Sets the active feed, if feed does not exist then prompts to add a new config
+	feed-conf remove              Removes a feed config
+
+	feed-source add <name> <url>         Add a feed entry to the active feed file
+	feed-source edit <name> <url> [old]  Edit feed URL, optionally rename from [old]
+	feed-source remove <name>            Remove a feed entry from the active feed file
+
+Device family:
+	device scan                   Discover available serial devices
+	device bind <sid|tty> <svc>   Bind a serial device to service template <svc>
+	device remove <sid>           Remove one binding by device sid
+	device unbind <sid>           Alias of device remove
+	device remove-all <dbus-name> Remove all bindings for a dbus service
+	device unbind-all <dbus-name> Alias of device remove-all
+
+Examples:
+	vespera feed set develop
+	vespera feed add myfeed https://example.invalid/feed
+	vespera device bind ttyUSB0 dbus-serialbattery
+	vespera device remove 8f9a3c12
 
 Notes:
 	Any arguments not handled above are passed directly to opkg.
@@ -55,7 +75,6 @@ function processArgs() {
 			-V[0-4])
 				VESPERA_VERBOSITY="${1#-V}"
 				args+=("$1");;
-
 			--help)
 				vespera_show_help;;
 			*)
@@ -76,7 +95,7 @@ set -- "${args[@]}"
 
 [[ $VESPERA_IN_GUI == true ]] && {
 	for ((i=1; i<=10; i++)); do
-		echo "$1, $2: step $i"
+		echo "$command, $1: step $i"
 		sleep 1
 	done
 	exit 0
@@ -89,22 +108,25 @@ case "$command" in
 		vespera_show_help; exit;;
 	fs-ro)
 		mount -o remount,ro /; exit;;
-	feed)
-		if [[ "$#" -eq 0 ]]; then
-			opkg_lib_show_feed_name; exit
-	  elif [[ $1 == "set" ]]; then
-			opkg_lib_set_feed_source "${2}" || exit
-			opkg_lib_show_feed_contents
-			exit;
-		fi
-		opkg_lib_feed_crud "$@"; exit
+	feed-conf)
+		case "${1:-}" in
+			"") opkg_lib_show_feed_name;;
+			set)	opkg_lib_feed_conf_set "${2}";;
+			list) opkg_lib_feed_conf_available;;
+			remove) opkg_lib_feed_conf_remove "${2}";;
+			*) opkg_lib_show_feed_sources "${1}";;
+		esac
+		exit
 		;;
+	feed-source)
+		opkg_lib_feed_crud "$@"; exit ;;
 	overlays)
 		if [[ "$#" -eq 0 ]]; then
 			cat "$VESPERA_DATA_DIR/overlays/overlays.conf"
 			echo
 		elif [[ $1 == "mount" || $1 == "unmount" ]]; then
 			"$__vespera_path/libs/overlay-lib" overlay-mount-unmount "$@"
+
 		else
 			echo "Invalid sub command: [mount|unmount] expected"
 		fi
@@ -112,18 +134,13 @@ case "$command" in
 	device)
 		"$__vespera_path/libs/device-lib" "$@"; exit;;
 	status)
-		exec opkg -f "${VESPERA_COMBINED_CONF_FILE}" "$command" "$@" | opkg_lib_process_opkg_status "$@";;
+		exec opkg -f "${VESPERA_COMBINED_CONF_FILE}" "$command" "$@" | opkg_lib_process_opkg_status "$@"; exit;;
 	inspect|i)
 		( . "$__vespera_path/scripts/inspect" "$@" ); exit;;
 	list-enabled|le)
 		opkg_lib_list_enabled_packages "all" "$@"; exit;;
-	list-services|ls)
-		declare -a ___template_services=()
-		vespera_lib_list_service_status ___template_services "$@"; exit;;
 	list-feeds)
-		opkg_lib_show_feed_contents; exit;;
-	list-feed-sources)
-		opkg_lib_list_feed_sources; exit;;
+		opkg_lib_list_available_feed_configs; exit;;
 	enable|disable)
 		vespera_lib_enable_disable "$command" "$@"; exit;;
 	update)

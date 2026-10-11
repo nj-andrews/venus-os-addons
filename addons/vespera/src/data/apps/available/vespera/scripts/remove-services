@@ -5,23 +5,19 @@ __vespera_path="$(cd "${__vespera_path}/.." && pwd)"
 
 # shellcheck source="../conf-default/vespera.conf"
 source "$__vespera_path/conf/vespera.conf"
+# shellcheck source="../libs/service-lib"
+source "$__vespera_path/libs/service-lib"
 
 declare app="${1}"
 declare -n ____refresh_devices="${2}"
 
 for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_SERVICES_FILE}" 2>/dev/null; ); do
-	[[ -d "/service/$service" ]] || continue
-	svc -dx "/service/$service"
-	svc -dx "/service/$service/log" 2>/dev/null
-	rm -rf "/service/$service"
+	service_lib_remove_service "$service"
 done
 
 for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_TEMPLATE_SERVICES_FILE}"); do
 	for tty_service in "/service/$service.tty"*; do
-		[[ -d "$tty_service" ]] || continue;
-		svc -dx "$tty_service"
-		svc -dx "$tty_service/log" 2>/dev/null
-		rm -rf "$tty_service"
+		service_lib_remove_service "$tty_service"
 		____refresh_devices=true
 	done
 	# remove the symlink so serial-starter will not find the service

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec /data/apps/available/vespera/vespera "$@"

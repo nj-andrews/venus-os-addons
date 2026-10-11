@@ -17,16 +17,35 @@ stage_start_services_runtime() {
   TEST_APP_ROOT="$TEST_ROOT/data/apps/available/vespera"
   TEST_DATA_DIR="$TEST_ROOT/data/var/vespera"
 
-  mkdir -p "$TEST_APP_ROOT/conf" "$TEST_APP_ROOT/libs" "$TEST_APP_ROOT/scripts" "$TEST_ROOT/data/apps/available/demo/service" "$TEST_ROOT/data/apps/available/demo/service-templates" "$TEST_DATA_DIR/info" "$TEST_ROOT/bin" "$TEST_ROOT/service" "$TEST_ROOT/opt/victronenergy/service-templates"
+  mkdir -p "$TEST_APP_ROOT/conf" "$TEST_APP_ROOT/scripts/libs" "$TEST_ROOT/data/apps/available/demo/service" "$TEST_ROOT/data/apps/available/demo/service-templates" "$TEST_DATA_DIR/info" "$TEST_ROOT/bin" "$TEST_ROOT/service" "$TEST_ROOT/opt/victronenergy/service-templates"
 
 	cp "$source_root/conf-default/vespera.conf" "$TEST_APP_ROOT/conf"
 	cp "$source_root/scripts/start-app-services" "$TEST_APP_ROOT/scripts"
+	ln -s ../conf "$TEST_APP_ROOT/scripts/conf"
 
-  cat > "$TEST_APP_ROOT/libs/device-lib" <<'EOF'
+  cat > "$TEST_APP_ROOT/scripts/libs/service-lib" <<'EOF'
 #!/usr/bin/env bash
-printf 'device-lib:%s\n' "$*" >> "$TEST_LOG"
+sdi_TTY_from_SID() {
+  printf 'sid-to-tty:%s\n' "${DEVICE_SID:-}" >> "$TEST_LOG"
+  DEVICE_TTY='ttyUSB0'
+}
+sdi_service_name_from_tty() {
+  local tty="$1"
+  local -n out="$2"
+  out='demo-service'
+  printf 'service-name-from-tty:%s\n' "$tty" >> "$TEST_LOG"
+}
+service_lib_start_templated_service() {
+  printf 'start-template:%s|%s\n' "$1" "$2" >> "$TEST_LOG"
+}
 EOF
-  chmod +x "$TEST_APP_ROOT/libs/device-lib"
+  chmod +x "$TEST_APP_ROOT/scripts/libs/service-lib"
+
+  cat > "$TEST_APP_ROOT/scripts/list-device-bindings" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' sid-usb0
+EOF
+  chmod +x "$TEST_APP_ROOT/scripts/list-device-bindings"
 
   cat > "$TEST_ROOT/bin/svc" <<'EOF'
 #!/usr/bin/env bash
@@ -34,15 +53,13 @@ printf 'svc:%s\n' "$*" >> "$TEST_LOG"
 EOF
   chmod +x "$TEST_ROOT/bin/svc"
 
-  cat > "$TEST_ROOT/bin/svstat" <<'EOF'
+  cat > "$TEST_ROOT/bin/dbus" <<'EOF'
 #!/usr/bin/env bash
-if [[ "${SERIAL_STARTER_UP:-1}" == "1" ]]; then
-  printf '%s: up (pid 10) 3 seconds\n' "$1"
-else
-  printf '%s: down 3 seconds\n' "$1"
+if [[ -n "${DBUS_DEMO_MODE:-}" ]]; then
+  printf '%s\n' "$DBUS_DEMO_MODE"
 fi
 EOF
-  chmod +x "$TEST_ROOT/bin/svstat"
+  chmod +x "$TEST_ROOT/bin/dbus"
 }
 
 cleanup_start_services_runtime() {
@@ -75,7 +92,7 @@ test_start_app_services_starts_existing_service_and_copies_missing_service() {
   cleanup_start_services_runtime
 }
 
-test_start_app_services_uses_device_lib_when_templates_exist_and_serial_starter_down() {
+test_start_app_services_starts_template_services_when_templates_exist_and_serial_starter_down() {
   stage_start_services_runtime
   vt_set_conf_value VESPERA_ALWAYS_START_SERVICES true
 
@@ -84,14 +101,16 @@ test_start_app_services_uses_device_lib_when_templates_exist_and_serial_starter_
   mkdir -p "$TEST_ROOT/data/apps/available/demo/service-templates/tpl-a"
   echo tpl-a > "$TEST_DATA_DIR/info/demo.app-template-services"
 
-  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" SERIAL_STARTER_UP=0 \
+  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" DBUS_DEMO_MODE=1 \
 		PATH="$TEST_ROOT/bin:$PATH" \
 		bash "$TEST_ROOT/data/apps/available/vespera/scripts/start-app-services" demo com.example.demo
 
   assert_exitcode 1
 	assert_file_exists "$log_file"
 
-  assert_file_contains "$log_file" 'device-lib:start-all-device-services com.example.demo'
+  assert_file_contains "$log_file" 'sid-to-tty:sid-usb0'
+  assert_file_contains "$log_file" 'service-name-from-tty:ttyUSB0'
+  assert_file_contains "$log_file" 'start-template:ttyUSB0|demo-service'
   [[ -L "$TEST_ROOT/opt/victronenergy/service-templates/tpl-a" ]]
   assert_result "$?" 'Template service symlink created'
 
@@ -107,7 +126,7 @@ test_start_app_services_sets_refresh_devices_when_templates_exist_and_serial_sta
   mkdir -p "$TEST_ROOT/data/apps/available/demo/service-templates/tpl-a"
   echo tpl-a > "$TEST_DATA_DIR/info/demo.app-template-services"
 
-  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" SERIAL_STARTER_UP=1 \
+  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" DBUS_DEMO_MODE= \
 		PATH="$TEST_ROOT/bin:$PATH" \
 		bash "$TEST_ROOT/data/apps/available/vespera/scripts/start-app-services" demo com.example.demo
 
@@ -119,8 +138,8 @@ test_start_app_services_sets_refresh_devices_when_templates_exist_and_serial_sta
   cleanup_start_services_runtime
 }
 #test_start_app_services_starts_existing_service_and_copies_missing_service
-#test_start_app_services_uses_device_lib_when_templates_exist_and_serial_starter_down
- 
+#test_start_app_services_starts_template_services_when_templates_exist_and_serial_starter_down
+
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
   test_runner_all --summary ""
 fi

@@ -21,11 +21,11 @@ stage_opkg_lib_runtime() {
   source_root="$(cd "$this_path/../src/data/apps/available/vespera" && pwd)"
 
   clear_output
-  mkdir -p "$app_root/libs" "$app_root/conf" "$data_root" "$VENUS_ROOT_DIR/etc/opkg"
+  mkdir -p "$app_root/libs" "$app_root/conf" "$app_root/scripts" "$data_root" "$VENUS_ROOT_DIR/etc/opkg"
 
   ln -sf "$source_root/libs/source-lib" "$app_root/libs/source-lib"
-  ln -sf "$source_root/libs/log-lib" "$app_root/libs/log-lib"
   ln -sf "$source_root/libs/opkg-lib" "$app_root/libs/opkg-lib"
+  ln -sf "$source_root/scripts/create-opkg-feed" "$app_root/scripts/create-opkg-feed"
 
   cp "$source_root/conf-default/vespera.conf" "$app_root/conf/vespera.conf"
   cp "$source_root/conf-default/opkg.conf" "$app_root/conf/opkg.conf"
@@ -141,6 +141,34 @@ test_opkg_lib_feed_crud_rejects_remove_with_old_feed_name() {
 
   assert_exitcode 1
   assert_contains 'remove: old feed name not supported' "$stderr"
+}
+
+test_opkg_lib_remove_feed_source_removes_inactive_feed_file() {
+  local stderr
+  local removable_feed="$VESPERA_APP_DIR/conf/feeds-removable.conf"
+
+  opkg_ensure_feed_symlink
+  printf '%s\n' 'src/gz removable http://remove.example.com' > "$removable_feed"
+
+  stderr="$(opkg_lib_remove_feed_source removable 2>&1)"
+
+  assert_exitcode 0
+  assert_empty "$stderr"
+  assert_file_not_exist "$removable_feed"
+}
+
+test_opkg_lib_remove_feed_source_rejects_active_feed() {
+  local stderr
+  local active_feed="$VESPERA_APP_DIR/conf/feeds-active.conf"
+
+  printf '%s\n' 'src/gz active http://active.example.com' > "$active_feed"
+  ln -sf "$active_feed" "$VESPERA_FEEDS_SYMLINK"
+
+  stderr="$(opkg_lib_remove_feed_source active 2>&1)"
+
+  assert_exitcode 1
+  assert_contains 'cannot remove active feed: active' "$stderr"
+  assert_file_exists "$active_feed"
 }
 
 test_opkg_lib_feed_crud_rejects_invalid_mode() {

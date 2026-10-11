@@ -18,25 +18,71 @@ opkg_lib_expand_root_fs() {
 	[[ $is_ro == 0 ]] && mount -o remount,ro /
 }
 
-opkg_lib_show_feed_contents() {
-	opkg_lib_show_feed_name
-	echo "file: $(readlink "${VESPERA_FEEDS_SYMLINK}")"
-	sed -e '/./,$!d' -e 's/[[:space:]]*$//' "$VESPERA_FEEDS_SYMLINK"
+opkg_lib_show_feed_sources() {
+	local conf_name=${1}
+	local conf_file
+	if [[ -z $conf_name ]]; then
+		conf_file="$VESPERA_FEEDS_SYMLINK"
+	else
+		conf_name="${conf_name#feed-}"
+		conf_file="$VESPERA_APP_DIR/conf/feeds-$conf_name.conf"
+	fi
+	sed -e '/./,$!d' -e 's/[[:space:]]*$//' "$conf_file"
 	echo
 }
-opkg_lib_list_feed_sources() {
-	#shellcheck disable=SC2011
-	ls "$VESPERA_APP_DIR/conf/feeds-"*.conf | xargs -n1 basename
+opkg_lib_feed_conf_available() {
+	for file in "$VESPERA_APP_DIR/conf/feeds-"*.conf; do
+		file="${file##*/feeds-}"
+		echo "${file%.conf}"
+	done
 }
 
-opkg_lib_set_feed_source() {
-	local feed_name="${1#feed-}"
-	local feed_file="$VESPERA_APP_DIR/conf/feeds-$feed_name.conf"
+opkg_lib_feed_conf_set() {
+	local conf_name="${1:-}"
+	local conf_file=""
 
-	[[ -f "$feed_file" ]] || { echo "feed name not found:$feed_file" >&2; return 1; }
+	conf_name="${conf_name#feed-}"
+	conf_file="$VESPERA_APP_DIR/conf/feeds-$conf_name.conf"
 
-	ln -sf "$feed_file" "$VESPERA_FEEDS_SYMLINK"
+	[[ -n "$conf_name" ]] || { echo "feed name required" >&2; return 1; }
+	[[ "$conf_name" =~ [^a-zA-Z0-9_-] ]] && { echo "Invalid feed name: $conf_file" >&2; return 1; }
+
+	if [[ -f "$conf_file" ]]; then
+		ln -sf "$conf_file" "$VESPERA_FEEDS_SYMLINK"
+		return 0
+	fi
+
+	"$VESPERA_APP_DIR/scripts/create-opkg-feed" "$conf_name" "$conf_file" || return 1
+	ln -sf "$conf_file" "$VESPERA_FEEDS_SYMLINK"
+
+	return 0
 }
+
+opkg_lib_feed_conf_remove() {
+	local feed_name="${1:-}"
+	local cur_feed_name=""
+	local cur_feed_file=""
+	local feed_file=""
+
+	feed_name="${feed_name#feed-}"
+
+	[[ -n "$feed_name" ]] || { echo "Invalid name" >&2; return 1; }
+	[[ "$feed_name" =~ [^a-zA-Z0-9_-] ]] && { echo "Invalid name" >&2; return 1; }
+
+	opkg_ensure_feed_symlink || return 1
+	cur_feed_file="$(readlink "${VESPERA_FEEDS_SYMLINK}")"
+	cur_feed_name="${cur_feed_file##*/feeds-}"
+	cur_feed_name="${cur_feed_name%.*}"
+
+	[[ "$feed_name" == "$cur_feed_name" ]] && { echo "cannot remove active feed: $feed_name" >&2; return 1; }
+
+	feed_file="$VESPERA_APP_DIR/conf/feeds-$feed_name.conf"
+	[[ -f "$feed_file" ]] || { echo "Feed not found: $feed_name" >&2; return 1; }
+
+	rm -f "$feed_file" || { echo "Failed to remove feed: $feed_name" >&2; return 1; }
+	return 0
+}
+
 opkg_lib_show_feed_name() {
 	opkg_ensure_feed_symlink
 	local feed_name; feed_name="$(readlink "${VESPERA_FEEDS_SYMLINK}")"
@@ -154,7 +200,7 @@ opkg_lib_process_opkg_status() {
 	done
 
 	# Handle a final package with no trailing blank line.
-	[[ -n "$package" ]] && ___extra_status_content "$package"
+	#[[ -n "$package" ]] && ___extra_status_content "$package"
 }
 
 opkg_lib_list_packages() {

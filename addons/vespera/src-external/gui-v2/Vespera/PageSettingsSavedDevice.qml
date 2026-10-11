@@ -10,17 +10,13 @@ Page {
 	required property Vespera.VesperaManager vesperaManager
 	required property string name
 	required property string serviceUid
-	//required property var deviceRemovedCallback
-
 	property var removingDeviceText: progressText.running ? progressText.text : ""
-
 	property var jsonUsbProps: usbPropsItem.valid ? usbPropsToFormatedJson(usbPropsItem.value) : {}
 
 	function usbPropsToFormatedJson(str) {
-		var info = str.split(",").map(function(p) {
-    	var a = p.split("=")
-    	return { name: a[0].replace(/^ID_/, "").replace(/_ID$/, "").replace(/[-_]+/g, " ").replace(/\b\w/g,
-				function(c) { return c.toUpperCase() }), value: a.slice(1).join("=") }
+		return str.split(",").map(function(p) {
+			var a = p.split("="), n = a[0].replace(/^ID_|_ID$/g, "").replace(/[-_]+/g, " ")
+			return {name: n.charAt(0).toUpperCase() + n.slice(1).toLowerCase(), value: a.slice(1).join("=")}
 		})
 	}
 

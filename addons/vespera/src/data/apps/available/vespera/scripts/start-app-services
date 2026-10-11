@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-__vespera_path="$(dirname "${BASH_SOURCE[0]}")"
-__vespera_path="$(cd "${__vespera_path}/.." && pwd)"
+__vespera_path="$(dirname "$(realpath "${BASH_SOURCE[0]}")")/.."
 
 # shellcheck source="../conf-default/vespera.conf"
 source "${__vespera_path}/conf/vespera.conf"
@@ -18,6 +17,24 @@ declare has_templated_devices=false
 declare refresh_devices=false
 declare demo_mode serial_starter_up
 
+__start_template_services() {
+
+	# shellcheck source="../libs/service-lib"
+	source "$__vespera_path/libs/service-lib"
+
+	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do
+		DEVICE_SID="${sid}"
+		echo "Starting device: $DEVICE_SID ($dbus_name)"
+		local service_name=
+
+		sdi_TTY_from_SID &&
+			sdi_service_name_from_tty "${DEVICE_TTY}" service_name &&
+				service_lib_start_templated_service "${DEVICE_TTY}" "${service_name}" &&
+					rm -f "/dev/serial-starter/${DEVICE_TTY}"
+	done
+
+}
+
 for service in $(cat "${services_file}" 2>/dev/null); do
 	echo "start=app-services: starting service: $service"
 	if [[ -e "${service_root}/$service" ]]; then
@@ -30,14 +47,14 @@ for service in $(cat "${services_file}" 2>/dev/null); do
 done
 
 for service in $(cat "${service_templates_file}" 2>/dev/null); do
-	echo "creating templat service symlink for: $service"
+	echo "creating template service symlink for: $service"
 	ln -fs "$available_app_path/service-templates/$service" \
 				"${service_templates_root}/$service"
 	has_templated_devices=true
 done
 
-echo "has_templated_devices: $has_templated_devices"
-echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
+#echo "has_templated_devices: $has_templated_devices"
+#echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
 
 if [[ $has_templated_devices == true ]]; then
 	demo_mode="$(dbus -y com.victronenergy.settings "/Settings/Gui/DemoMode" GetValue 2>/dev/null)"
@@ -46,7 +63,7 @@ if [[ $has_templated_devices == true ]]; then
 	if [[ $serial_starter_up == false ]]; then
 		if [[ $VESPERA_ALWAYS_START_SERVICES == true ]]; then
 			echo "Starting template device services (serial-starter service down)"
-			"$__vespera_path/libs/device-lib" start-all-device-services "$dbus_name" &
+			__start_template_services
 		else
 			echo "Warning serial-starter down; Template services will not be started"
 		fi

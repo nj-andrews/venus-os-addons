@@ -1,8 +1,8 @@
 # Installer Integration Patterns (Developer Note)
 
-This note explains why vespera avoids using `patch` against shared system/UI files during package install and remove.
+This note explains why Vespera avoids editing shared system or GUI files directly during package install and remove.
 
-For the small number of UI touchpoints that still need file-level integration, vespera uses a custom script: `src/data/apps/vespera/file-patcher`.
+For the small number of file-level seams that still need integration, Vespera uses the package-owned patch utilities in `src/data/apps/available/vespera/libs/file-patcher-lib`. The install and remove lifecycle code in `scripts/install` and `scripts/remove` invokes those helpers instead of relying on fragile one-off edits to upstream files.
 
 ## Why this matters
 
@@ -12,21 +12,21 @@ Installers run on many firmware versions and combinations of add-ons. Shared-fil
 
 | Topic | Patch-based workflow | Structured integration pattern |
 | --- | --- | --- |
-| Firmware drift | Patch can fail when target file changes upstream. | Integration reads/writes owned config/data surfaces that remain stable across versions. |
-| Multi-package behavior | Two packages patching the same file can conflict by order of install/remove. | Each package owns its own entries/files, reducing cross-package coupling. |
-| Uninstall and rollback | Hard to restore exact prior state after multiple overlapping patches. | Package can remove only artifacts it owns, making rollback predictable. |
-| Observability | Failures often appear as partial hunks or silent offsets. | Behavior is explicit in package-managed files and helper logic. |
-| Upgrade safety | Reapplying old patches after firmware upgrade is risky. | Reconciliation logic can rebuild state from package metadata/settings. |
+| Firmware drift | A patch can fail when upstream files change. | Integration reads or writes package-owned state that remains stable across versions. |
+| Multi-package behavior | Multiple packages editing the same file can conflict by install order. | Each package owns its own entries or generated fragments, reducing coupling. |
+| Uninstall and rollback | Exact restoration is hard when multiple patches overlap. | The package removes only the artifacts it owns. |
+| Observability | Failures often appear as partial hunks or silent offsets. | Behavior is explicit in helper scripts, config files, and package metadata. |
+| Upgrade safety | Reapplying old patch hunks after firmware updates is risky. | The install logic can reconcile state from current metadata rather than mutating stale base files. |
 
-## Preferred patterns in vespera
+## Preferred patterns in Vespera
 
-- Use package-owned files, generated fragments, or registries instead of editing shared base files directly.
-- When a shared QML file must be touched, limit changes to very small hook blocks near the end of the file.
-- Apply/remove those hook blocks with `file-patcher apply` and `file-patcher revert` so the operation is symmetric.
-- Model integration through settings/metadata and helper scripts that can be re-applied safely.
-- Keep ownership clear: install creates package-owned artifacts, uninstall removes only those artifacts.
-- Design for idempotency: running install/remove multiple times, in different orders, should converge to the same result.
+- Prefer package-owned files, generated fragments, and registries over editing shared base files directly.
+- When a QML or system file must be touched, keep the change small and isolated to a clearly owned integration seam.
+- Use the file patch helpers so the apply and revert steps remain symmetric and repeatable.
+- Model integration through settings, manifests, and helper scripts that can be re-applied safely.
+- Keep ownership clear: install creates package-owned artifacts, uninstall removes only the artifacts it created.
+- Design for idempotency: repeated install/remove actions should converge to the same stable state.
 
 ## Practical rule of thumb
 
-If a change requires editing a shared file that other packages or firmware also modify, treat that as a design smell. Prefer an integration seam where package ownership and cleanup are explicit.
+If a change requires editing a shared file that other packages or firmware also modify, treat that as a design smell. Prefer a clear integration seam where ownership and cleanup are explicit and discoverable.

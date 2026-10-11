@@ -24,12 +24,10 @@ Page {
 	readonly property int hMargin: Theme.geometry_page_content_horizontalMargin + Theme.geometry_listItem_content_horizontalMargin
 	readonly property int vMargin: Theme.geometry_listItem_content_verticalMargin
 
-
-
-	Component.onDestruction: {
-		if (vesperaManager)
-			vesperaManager.setOutputLog(null)
- 	}
+	VeQuickItem {
+		id: packageEnabled
+		uid: root.serviceUid + "/UsbProps"
+	}
 
 	Column {
 		id: column
@@ -199,7 +197,7 @@ Page {
 			text: model.enabled ? "Disable" : "Enable"
 			enabled: !root.vesperaManager.running && root.installed && root.model.packageName != "vespera"
 			onClicked: function() {
-					root.vesperaManager.setPackageEnabledState(root.model.packageName, !model.enabled,completionCallback)
+					root.vesperaManager.setPackageEnabledState(root.model.packageName, !model.enabled, completionCallback)
 			}
 
 		}

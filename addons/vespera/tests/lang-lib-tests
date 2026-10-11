@@ -3,6 +3,7 @@
 set -o nounset
 
 this_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source_root="$this_path/../src/data/apps/available/vespera"
 source_lib="$this_path/../src/data/apps/available/vespera/libs/lang-lib"
 
 . "$this_path/../../../scripts/libs/test-lib"
@@ -59,6 +60,20 @@ test_echo_lang_supports_multiple_format_args() {
   assert_eq 'Hello There' "$output"
 
   cleanup_lang_runtime
+}
+
+test_installer_lang_files_match_english_master_keys() {
+  local master_keys
+  local lang_file
+
+  master_keys="$(grep '^LANG_' "$source_root/lang/strings-en" | cut -d= -f1)"
+
+  for lang_file in "$source_root"/lang/strings-*; do
+    local current_keys
+
+    current_keys="$(grep '^LANG_' "$lang_file" | cut -d= -f1)"
+    assert_eq "$master_keys" "$current_keys" "lang keys match master: ${lang_file##*/}"
+  done
 }
 
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then

@@ -68,9 +68,9 @@ Page {
         .replace(/\b\w/g, function(c) { return c.toUpperCase() })
 				+ "  " + modelData.installedVersion
 	}
-	function refreshPackages(force) {
+	function refreshPackages(update) {
 		_loading = true
-		vesperaManager.loadPackages(force, function(result) {
+		vesperaManager.loadPackages(update, function(result) {
 				if (result.success)
 					onLoadPackagesModel(result.data)
 				_loading = false

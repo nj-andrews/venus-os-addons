@@ -25,17 +25,13 @@ Page {
 				//% "Packages"
 				text: qsTrId("vespera_packages")
 				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsPackages.qml", {
-						title: text,
-						vesperaManager: vesperaManager
-					})
+						title: text, vesperaManager: vesperaManager })
 			}
 			ListNavigation {
 				//% "Feeds"
 				text: qsTrId("vespera_feeds")
 				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeeds.qml", {
-						title: text,
-						vesperaManager: vesperaManager
-					})
+						title: text, vesperaManager: vesperaManager })
 			}
 
 			ListNavigation {
@@ -44,32 +40,22 @@ Page {
 				//% "Custom Devices"
 				text: qsTrId("vespera_custom_devices")
 				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsDevicesList.qml", {
-						title: text,
-						vesperaManager: vesperaManager
-					})
+						title: text, vesperaManager: vesperaManager })
 			}
-
-			ListSwitch {
-				dataItem.uid: vesperaManager.showCompactSetting.uid
-				//% "Show Compact"
-				text: qsTrId("vespera_show_compact")
-			}
-			ListSwitch {
-				dataItem.uid: vesperaManager.noActionSetting.uid
-				//% "No Action"
-				text: qsTrId("vespera_no_action")
+			// ListNavigation {
+			// 	//% "Settings"
+			// 	text: qsTrId("vespera_settings")
+			// 	onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {title: text,vesperaManager: vesperaManager})
+			// }
+			ListLink {
+				//% "Documentation"
+				text: qsTrId("pagecontrollableloads_documentation")
+				url: "https://thespinmaster.github.io/venus-os-addons/"
 			}
 			ListText {
 				//% "Version"
 				text: qsTrId("vespera_version")
 				secondaryText: GuiPluginLoader.plugin("Vespera").version
-			}
-			ListLink {
-				id: documentation
-
-				//% "Documentation"
-				text: qsTrId("pagecontrollableloads_documentation")
-				url: "https://thespinmaster.github.io/venus-os-addons/"
 			}
 		}
 	}

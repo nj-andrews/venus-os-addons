@@ -12,7 +12,6 @@ LIBS_TARGET_PATH="$this_path/../src/data/apps/vespera/libs"
 LIB_FILES=(
   conf-lib
   core-lib
-  log-lib
   string-lib
   usb-lib
 )

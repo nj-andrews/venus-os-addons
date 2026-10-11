@@ -1,162 +1,234 @@
-# vespera Test Plan
+# Vespera Test Plan
 
 ## Overview
-Comprehensive testing for vespera installation/removal and core features.
+This plan focuses on the currently shipped Vespera addon structure and the code paths that are exercised by the active shell tests under `tests/`.
+
+The current implementation is organized around:
+- `src/data/apps/available/vespera/libs/` for install/remove logic
+- `src/data/apps/available/vespera/scripts/` for entrypoints
+- `src/data/apps/available/vespera/services/` for service runtime behavior
+- `src/opt/victronenergy/gui/qml/` for the Venus GUI layer
 
 ---
 
-## Phase 1: Installation & Service Startup
+## Phase 1: Vespera CLI full functionality
 
-### 1.1 Fresh Install
-- [ ] Install vespera package via opkg
-- [ ] Verify `/data/apps/vespera/` directory structure exists
-- [ ] Verify `/opt/victronenergy/gui/` QML pages present
+The Vespera CLI is the primary automation and troubleshooting entrypoint, so it is tested first.
 
-### 1.2 UI Integration
-- [ ] Venus GUI loads without errors
-- [ ] vespera pages appear in main menu
-- [ ] UI connects to service (VBusItem paths functional)
+### 1.1 Help and argument parsing
+- [x] Verify `vespera --help` prints the current command summary and usage text.
+- [x] Verify `vespera help` combines vespera help and opkg help.
+- [x] Verify `-V0` through `-V4` arguments are accepted without breaking opkg invocation.
+- [x] Verify `--in-gui` is handled without side effects in the normal shell path.
 
----
+### 1.2 Status and package listing
+- [x] Verify `vespera status` prints package state using the active combined opkg config.
+- [x] Verify `vespera list-enabled` returns the expected enabled apps or packages.
+- [x] Verify `vespera inspect` reports app, service, addon, and DBus details without errors.
 
-## Phase 2: Core Features - Package Feed Management
+### 1.3 Feed and update operations
+- [x] Verify `vespera feeds-conf, '', `list`, `set`, `remove` confirm api works.
+- [x] Verify `vespera feeds-source` `add`, `edit`, `remove` confirm api works.
+- [x] Verify `vespera update` refreshes package metadata and regenerates indexes cleanly.
 
-### 2.1 Feed Configuration
-- [ ] View current feeds via opkg (UI or CLI)
-- [ ] Verify default feeds (vespera, addons) present
-- [ ] Check feed cache in `/tmp/vespera/feeds.json`
-- [ ] Manually add custom feed via UI (add URL, save, verify)
-- [ ] Remove custom feed via UI (verify conf updated)
-- [ ] Switch between release and development feeds
+### 1.4 Device operations
+- [x] Verify `vespera device scan` resolves USB serial devices and returns the expected state.
+- [x] Verify `vespera device bind <tty>` updates the service mapping without creating duplicates.
+- [x] Verify `vespera device remove <tty>` removes stale device bindings and config entries cleanly.
+- [x] Verify invalid or missing tty/device arguments fail with a clear error rather than corrupting system state.
 
-### 2.2 Feed Update
-- [ ] Trigger `opkg update` via UI
-- [ ] Verify package cache refreshes
-- [ ] Check for package list errors
-- [ ] Verify cache timestamp updates
+### 1.5 Enable/disable and runtime state
+- [x] Verify `vespera enable` enables matching installed apps and leaves the system in a stable state.
+- [x] Verify `vespera disable` disables the selected apps without leaving stale service or overlay state.
+- [ ] Verify `vespera fs-ro` and `vespera overlays ...` paths fail gracefully when the environment is not suitable.
 
----
-
-## Phase 3: Core Features - Package Operations
-
-### 3.1 Package Installation
-- [ ] Search for available package in UI
-- [ ] Install package via UI (non-critical test addon recommended)
-- [ ] Verify package appears in installed list
-- [ ] Check `/opt/victronenergy/<package>/` directory created
-- [ ] If package has service, verify it starts and runs
-
-### 3.2 Package Removal
-- [ ] Remove installed package via UI
-- [ ] Verify package removed from installed list
-- [ ] Verify directories cleaned up
-- [ ] Verify installed-packages.conf updated
-- [ ] If package had service, verify it stops
-
-### 3.3 Dry-Run Mode (NoAction)
-- [ ] Enable dry-run via settings
-- [ ] Attempt package install
-- [ ] Verify no actual changes made
-- [ ] Verify operation reports would-be results
+### 1.6 opkg passthrough behavior
+- [x] Verify unknown commands are passed through to `opkg` using the active combined config.
+- [x] Verify `vespera install <pkg>`, `vespera remove <pkg>`, and `vespera upgrade <pkg>` execute as expected via opkg passthrough.
+- [x] Verify opkg passthrough preserves exit codes for success and failure cases.
+- [ ] Verify opkg passthrough output remains visible for troubleshooting (stdout/stderr not swallowed).
 
 ---
 
-## Phase 4: Serial Device Installer
+## Phase 2: GUI-v2 Vespera integration in Venus GUI
 
-### 4.1 Device Detection
-- [ ] Connect USB serial device (FTDI or compatible)
-- [ ] Check udev detection: `udevadm info /dev/ttyUSB*`
-- [ ] Verify udev rules exist: `cat /etc/udev/rules.d/serial-starter.rules`
-- [ ] Verify serial-starter.conf mapping: `cat /etc/venus/serial-starter.conf`
+### 2.1 Navigation and page loading
+- [x] Open the Vespera entrypoint in Venus GUI and verify all GUI-v2 Vespera pages load.
+- [x] Verify navigation to package, feed, and device pages works without rendering errors.
+- [x] Verify return/back navigation preserves expected state and does not crash the page stack.
 
-### 4.2 Automatic Service Spawning
-- [ ] Verify `/service/serial-starter` service runs
-- [ ] Check `/service/<service>.<ttyUSB0>` instance created
-- [ ] Verify logs show device matched to service
-- [ ] Disconnect and reconnect device; verify re-detection
+### 2.2 Bridge and operation wiring
+- [x] Trigger package list refresh from GUI-v2 and verify data is returned and rendered.
+- [ ] Trigger feed operations from GUI-v2 and verify status, completion, and error messages are shown.
+- [x] Trigger device scan/bind/remove from GUI-v2 and verify UI state updates match backend results.
 
----
-
-## Phase 5: DBus Interface Testing
-
-### 5.1 Direct DBus Calls
-- [ ] Query package lists via DBus
-- [ ] Trigger install operation via DBus (Request/Start)
-- [ ] Monitor operation progress (Result/Json)
-- [ ] Cancel operation mid-flight
-
-### 5.2 Settings Persistence
-- [ ] Write to `/Settings/Vespera/*` paths
-- [ ] Reboot and verify settings persist
-- [ ] Check `settings.xml` integration
+### 2.3 Runtime behavior and resilience
+- [x] Verify GUI-v2 reflects long-running CLI operations with clear progress or busy state.
+- [ ] Verify GUI-v2 recovers cleanly after an operation failure or canceled action.
+- [x] Verify no stale data remains after returning to the page after a completed operation.
 
 ---
 
-## Phase 6: Uninstall & Cleanup
+## Phase 3: GUI-v1 Vespera integration in Venus GUI
 
-### 6.1 Package Removal
-- [ ] Remove vespera package via opkg
-- [ ] Verify prerm hook executes cleanly
-- [ ] Check for leftover processes: `ps aux | grep opkg`
+### 3.1 Legacy page behavior
+- [ ] Verify GUI-v1 Vespera menu entry is visible where expected on the target firmware.
+- [ ] Verify GUI-v1 pages open and render package/feed/device information correctly.
+- [ ] Verify legacy navigation and back stack behavior is stable.
 
-### 6.2 Filesystem Cleanup
-- [ ] Verify service removed: `/service/vespera` gone
-- [ ] Verify DBus interface unregistered
-- [ ] Check config files cleaned: `/etc/opkg/vespera.conf` symlink removed
-- [ ] Verify QML pages removed (or gracefully hidden)
-- [ ] Check `/var/log/vespera/` logs for clean shutdown
+### 3.2 Feature parity checks against CLI
+- [ ] Compare GUI-v1 package operations against equivalent CLI commands for expected outcomes.
+- [ ] Compare GUI-v1 feed operations against equivalent CLI commands for expected outcomes.
+- [ ] Compare GUI-v1 device actions against equivalent CLI commands for expected outcomes.
 
-### 6.3 Fresh Install After Removal
-- [ ] Reinstall vespera package
-- [ ] Verify clean install (no conflicts, settings reset)
-- [ ] Run Phase 1 checks again
+### 3.3 Error handling
+- [ ] Verify GUI-v1 reports operation failures in a user-visible and actionable way.
+- [ ] Verify GUI-v1 does not enter broken state after failed operations.
 
 ---
 
-## Phase 7: Edge Cases & Stress Tests
+## Phase 4: Blind-install testing
 
-### 7.1 Network Issues
-- [ ] Block feed URL, attempt update (verify error handling)
-- [ ] Disconnect network, attempt install (graceful fail)
-- [ ] Restore network, verify recovery
+### 4.1 Package creation and media staging
+- [ ] Build the blind-install artifact using the bootstrapper workflow.
+- [ ] Verify the generated archive and expected payload files are present.
+- [ ] Verify copy-to-drive workflow places files in the expected destination layout.
 
-### 7.2 Filesystem Issues
-- [ ] Fill disk to 90%, attempt large package install (fail gracefully)
-- [ ] Restore disk space, retry install (succeeds)
+### 4.2 First-boot execution path
+- [ ] Verify blind-install startup hook runs on target boot.
+- [ ] Verify install logs indicate package extraction and install steps completed.
+- [ ] Verify failure paths write actionable logs when media or payload is invalid.
 
-### 7.3 Concurrent Operations
-- [ ] Start install, trigger second operation immediately (queue/block)
-- [ ] Start install, restart service mid-operation (cleanup)
-
-### 7.4 Multiple Reboots
-- [ ] Install packages, reboot 3 times
-- [ ] Verify packages persist, service restarts cleanly each time
+### 4.3 Post-install validation
+- [ ] Verify Vespera package is installed and services are enabled after blind-install.
+- [ ] Verify GUI integration entrypoint is available after boot.
+- [ ] Verify rerunning the blind-install path is idempotent and does not duplicate state.
 
 ---
 
-## Phase 8: Test Evidence
+## Phase 5: Core package lifecycle checks
 
-### Required Logs to Collect
-- [ ] `/var/log/vespera/startup.log` (install/startup)
-- [ ] `/var/log/vespera/system.log` (operations)
-- [ ] `/var/log/gui/current` (UI errors)
-- [ ] `journalctl -u vespera` (runit logs)
+### 5.1 Fresh install
+- [x] Install or refresh the Vespera package with the project package workflow.
+- [x] Verify the package files land under `/data/apps/available/vespera/` in the target machine.
+- [x] Verify all Vespera GUI pages are present in the Venus GUI asset tree.
+- [x] Verify basic functionality works, refresh packages.
 
-### Performance Benchmarks (Optional)
-- [ ] Time to install small package (< 100KB)
-- [ ] Time to install large package (> 5MB)
-- [ ] Feed update time (with/without cache)
-- [ ] UI responsiveness during install
+### 5.2 Runtime enablement
+- [x] Confirm Vespera services start cleanly after install.
+- [x] Verify the main Vespera pages are visible and selectable.
 
 ---
 
-## Test Execution Notes
+## Phase 6: Feed and package metadata checks
 
-1. **Test Device**: Use Raspberry Pi 4 or similar (Venus OS device)
-2. **Test Packages**: Use non-critical addons (test-install, test-service) for safety
-3. **Network**: Ensure stable internet; test offline scenarios separately
-4. **Backup**: Create backup before Phase 1 to restore if needed
-5. **Logging**: Capture all phase transitions for troubleshooting
+### 6.1 Feed config
+- [ ] Verify the combined opkg configuration is valid.
+- [ ] Confirm feed entries are available in the generated package index metadata.
+- [ ] Check that feed metadata still loads when the cache is empty or stale.
+
+### 6.2 Feed refresh
+- [x] Trigger a feed refresh through the Vespera CLI or package logic.
+- [x] Verify the update path completes without an invalid index state.
+- [x] Confirm the cached package list is refreshed and parseable.
+
+---
+
+## Phase 7: Package operations
+
+### 7.1 Install
+- [ ] Run the install flow through the package lifecycle entrypoint.
+- [ ] Verify the application is added to the enabled/installed state list.
+- [ ] Confirm the app-level runtime logic is invoked and completes without partial state.
+
+### 7.2 Remove
+- [ ] Run the remove flow through the package lifecycle entrypoint.
+- [ ] Verify installed state is cleaned up.
+- [ ] Confirm remove logic does not leave stale symlinks or generated metadata behind.
+
+### 7.3 Upgrade/reinstall safety
+- [x] Run an upgrade-install path and verify state transitions are preserved.
+- [ ] Verify remove/upgrade flows do not duplicate entries in package or device state files.
+
+---
+
+## Phase 8: Serial device installer coverage
+
+### 8.1 Device detection
+- [ ] Verify `sdi_get_available_devices` handles normal USB tty devices and ignores stale or invalid entries.
+- [ ] Verify udev property parsing returns the expected USB fields for a discovered device.
+- [ ] Confirm device SID generation is deterministic for equivalent USB metadata.
+
+### 8.2 Device binding
+- [ ] Verify a tty resolves to the correct service name and service mapping.
+- [ ] Verify duplicate device rules are not written twice.
+- [ ] Verify a damaged or missing symlink is repaired by the installer logic.
+
+### 8.3 Remove and cleanup
+- [ ] Remove a bound device rule and verify the serial-starter rule is cleaned up.
+- [ ] Verify the service mapping is removed from the config when the device is unbound.
+- [ ] Confirm stale locks or leftover tty state are not kept around after cleanup.
+
+---
+
+## Phase 9: DBus and settings integration
+
+### 9.1 DBus state
+- [ ] Confirm settings values are written under the expected DBus subtree.
+- [ ] Verify remove flows do not leave stale DBus entries behind.
+- [ ] Check that device settings can be created and reconciled across repeated scan/bind cycles.
+
+### 9.2 Settings persistence
+- [ ] Verify values survive a typical package lifecycle transition.
+- [ ] Confirm the package does not create duplicate config entries after re-install.
+
+---
+
+## Phase 10: Operational checks
+
+### 10.1 Startup and service restart
+- [ ] Verify Vespera startup scripts remain idempotent.
+- [ ] Ensure service restarts do not leave stale services behind.
+- [ ] Check that all expected services respond to enabled/disabled transitions.
+
+### 10.2 Failure handling
+- [ ] Validate error behavior when device properties are missing or malformed.
+- [ ] Validate invalid install state or conflicting service names fail cleanly.
+- [ ] Confirm stale file or symlink conditions are handled without corrupting config state.
+
+---
+
+## Phase 11: Regression focus
+
+The regression suite should stay centered on the most failure-prone paths:
+
+- repeated install/remove cycles
+- duplicate service mapping entries
+- stale tty and lock cleanup
+- udev property parsing edge cases
+- config file repair and symlink correction
+- Vespera CLI argument parsing and exit code behavior
+
+---
+
+## Phase 12: Evidence collection
+
+### Required logs and files
+- [ ] test output from the active shell tests under `tests/`
+- [ ] package lifecycle logs generated during a real install/remove cycle
+- [ ] CLI output from key `vespera` commands (`status`, `list-enabled`, `device`, `update`, `feed`) and passthrough commands (`install`, `remove`, `upgrade`)
+- [ ] GUI-v2 test evidence (screenshots/logs) for package/feed/device operations
+- [ ] GUI-v1 test evidence (screenshots/logs) for package/feed/device operations
+- [ ] blind-install logs and produced artifact checksums or file lists
+- [ ] any relevant serial-starter or device binding logs from the target system
+- [ ] known-good device metadata samples used in the test fixtures
+
+### Validation gate
+- [ ] The active Vespera test suite runs cleanly before release.
+- [ ] A targeted serial-device regression run passes after any lifecycle change.
+- [ ] The main `vespera` CLI commands and opkg passthrough paths succeed with stable exit codes and expected output.
+- [ ] GUI-v2 and GUI-v1 integration checks pass for the targeted firmware variants.
+- [ ] Blind-install path completes and remains repeatable.
 
 ---
 
@@ -164,11 +236,15 @@ Comprehensive testing for vespera installation/removal and core features.
 
 | Phase | Status | Date | Notes |
 |-------|--------|------|-------|
-| 1. Installation & Startup | ☐ | | |
-| 2. Feed Management | ☐ | | |
-| 3. Package Operations | ☐ | | |
-| 4. Serial Devices | ☐ | | |
-| 5. DBus Interface | ☐ | | |
-| 6. Uninstall & Cleanup | ☐ | | |
-| 7. Edge Cases | ☐ | | |
+| 1. Vespera CLI | ☐ | | |
+| 2. GUI-v2 integration | ☐ | | |
+| 3. GUI-v1 integration | ☐ | | |
+| 4. Blind-install | ☐ | | |
+| 5. Core lifecycle | ☐ | | |
+| 6. Feed metadata | ☐ | | |
+| 7. Package operations | ☐ | | |
+| 8. Serial devices | ☐ | | |
+| 9. DBus/settings | ☐ | | |
+| 10. Operational checks | ☐ | | |
+| 11. Regression focus | ☐ | | |
 | **Overall Status** | ☐ | | |

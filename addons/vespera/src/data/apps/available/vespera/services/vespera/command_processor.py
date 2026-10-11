@@ -33,9 +33,9 @@ COMMAND_REGISTRY = {
 			"helper_path": f"{VESPERA_PATH}",
 		},
 		"actions": {
-			"add": {"prefix_args": ["feed"]},
-			"edit": {"prefix_args": ["feed"]},
-			"remove": {"prefix_args": ["feed"]},
+			"add": {"prefix_args": ["feed-source"]},
+			"edit": {"prefix_args": ["feed-source"]},
+			"remove": {"prefix_args": ["feed-source"]},
 		},
 	},
 	"package": {

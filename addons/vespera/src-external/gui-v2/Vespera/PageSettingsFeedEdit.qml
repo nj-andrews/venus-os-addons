@@ -105,7 +105,7 @@ Page {
 		ListItemButton {
 			text: root._removeButtonText
 			width: actionsRow.defaultButtonWidth
-			anchors {right: btn_remove.left; rightMargin: actionsRow.spacing}
+			anchors {right: btn_save.left; rightMargin: actionsRow.spacing}
 			enabled: !root._builtin && !root._isNew && !root.vesperaManager.running
 			onClicked: root.remove
 		}

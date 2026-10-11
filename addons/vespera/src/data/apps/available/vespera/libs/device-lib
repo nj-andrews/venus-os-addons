@@ -26,34 +26,41 @@ device_remove_all() {
 }
 
 device_remove() {
+	local sid_or_tty="${1:-}"
+	local tty= sid=
 
-	DEVICE_SID="${1}"
-	[[ -z "$DEVICE_SID" ]] && { echo "Invalid argument: sid empty" >&2; return 1; }
+	[[ -n "${sid_or_tty}" ]] \
+		|| { echo "Invalid arguments: bind expects <sid|tty>" >&2; return 1; }
+
+	local tty_or_sid="${sid_or_tty#/dev/}"
+
+	if [[ -e "/dev/${tty_or_sid}" ]]; then
+		tty="${tty_or_sid}"
+		DEVICE_TTY=$tty
+	else
+		sid="${tty_or_sid}"
+		DEVICE_SID="${sid}"
+		#sdi_TTY_from_SID || { echo "Error: sid (${sid}) does not map to an available tty" >&2; return 1; }
+		tty="${DEVICE_TTY:-}"
+	fi
+
+	if sdi_service_name_from_tty "${tty:-}" service_name; then
+		local tty_service=/service/$service_name.$tty
+		if [[ -d "$tty_service" ]]; then
+			svc -dx "$tty_service"
+			svc -dx "$tty_service/log" 2>/dev/null
+		fi
+		rm -f "$tty_service"
+	fi
 
 	sdi_remove_service
 
-	# [[ -n "${DEVICE_TTY:-}" && -n "${service_name}" ]] &&
-	# 	service_lib_remove_service "${service_name}.${DEVICE_TTY}"
+	echo "${DEVICE_SID}"
 
-	dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null
+	[[ -n ${DEVICE_SID} ]] &&
+		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null
 
 	return 0
-}
-
-device_start_all_device_services() {
-	local dbus_name="${1}"
-	local this_path; this_path="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-
-	for sid in $("$this_path/../scripts/list-device-bindings" "$dbus_name"); do
-		DEVICE_SID="${sid}"
-		echo "Starting device: $DEVICE_SID ($dbus_name)"
-		local service_name=
-
-		sdi_TTY_from_SID &&
-			sdi_service_name_from_tty "${DEVICE_TTY}" service_name &&
-				service_lib_start_templated_service "${DEVICE_TTY}" "${service_name}" &&
-					rm -f "/dev/serial-starter/${DEVICE_TTY}"
-	done
 }
 
 device_scan_usb() {
@@ -114,10 +121,11 @@ device_bind() {
 	dbus_lib_set_string_value "/Settings/Devices/sid_${sid}/UsbProps" "${usbProps}" 1>/dev/null
 
 	find /var/volatile/services -type d -name "*.${DEVICE_TTY}" \
-			! -name "${service_name}.${DEVICE_TTY}" -exec rm -rf {} +
+			! -name "${service_name}.${DEVICE_TTY}" -exec rm -rf {} + 2>/dev/null
 
 	# Remove stale service symlinks
-	find -L /service -maxdepth 1 -type l -delete
+	#rm -f /service/*.${DEVICE_TTY} 2>/dev/null
+	find -L /service/ -maxdepth 1 -type l -delete
 
 	# The vespera service is responsible for adding the dbus settings
 	# so just pass that we have claimed the device.
@@ -128,12 +136,11 @@ device_bind() {
 	local demo_mode=
 	dbus_lib_get_value "/Settings/Gui/DemoMode" demo_mode
 
-	[[ -n $demo_mode ]] && {
+	if [[ -n $demo_mode ]]; then
 		#echo "vespera: Venus OS in demo mode, manualy starting service"
 		service_lib_start_templated_service "${tty}" "${service_name}"
 		rm -f "/dev/serial-starter/${tty}"
-
-	}
+	fi
 
 }
 

@@ -4,7 +4,7 @@ The Network GPS add-on enables forwarding NMEA GPS messages from a compatible ne
 
 ## Prerequisite
 
-Install [Opkg Manager](../vespera/setup.md) first before using this add-on.
+Install [Vespera](../vespera/setup.md) first before using this add-on.
 
 Venus OS automatically recognizes standard NMEA0183 messages after startup and initial data flow.
 

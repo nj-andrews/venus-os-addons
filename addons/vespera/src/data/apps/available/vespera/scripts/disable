@@ -13,6 +13,7 @@ declare _venus_services_to_restart=()
 declare _refresh_devices=
 
 for app in $(opkg_lib_list_enabled_packages "all"); do
+
 	[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 	app="${app##*/}"
 

@@ -176,6 +176,7 @@ __vespera_lib_post_install() {
 
 	# 7. cleanup
 	__vespera_lib_cleanup
+
 }
 
 __show_file_contents() {
@@ -236,4 +237,6 @@ vespera_lib_enable_disable() {
 
   __vespera_lib_restart_venus_services _venus_services_to_restart
 	[[ $_refresh_devices == true ]] && vespera_lib_refresh_devices
+
+	
 }

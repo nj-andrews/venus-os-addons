@@ -8,7 +8,7 @@ Many thanks guys!
 
 ## Prerequisites
 
-Install [Opkg Manager](../vespera/setup.md) first before using this addon.
+Install [Vespera](../vespera/setup.md) first before using this addon.
 
 The Inetbox addon requires some hardwere inbetween the CerboBX/Raspberry PI.
 See [Here](hardware.md) for details

@@ -1,6 +1,6 @@
-# vespera Mermaid diagrams
+# Vespera Mermaid diagrams
 
-This document captures code-level flows for the vespera addon.
+This document captures the current code-level flows for the Vespera addon.
 
 Related: [Installer Integration Patterns (Developer Note)](installer-integration-patterns.md)
 
@@ -8,49 +8,40 @@ Related: [Installer Integration Patterns (Developer Note)](installer-integration
 
 ```mermaid
 flowchart LR
-    UI[QML Pages\nOpkgPageSettings*.qml] --> VMJS[QML JS Helpers\nopkgPageSettingsPackages.js\nopkg-utils.js\nopkg-custom-device.js]
-    UI --> BRIDGE[OpkgBridge\nQt C++ plugin]
-    VMJS --> BRIDGE
+    UI[QML pages\nVesperaHomePage / VesperaPageSettings*.qml] --> MANAGER[VesperaManager]
+    MANAGER --> BRIDGE[VesperaBridge]
 
-    BRIDGE --> PROC[QProcess]
-    PROC --> DEV[/device helper script/]
-    PROC --> FEED[/feed helper script/]
-    PROC --> PKG[/package helper script/]
-    PROC --> PY[python3 json-helper.py\nfeed list and package list]
+    BRIDGE --> CLI[vespera CLI / helper scripts]
+    CLI --> LIBS[libs/installer-lib\nlibs/opkg-lib\nlibs/device-lib\nlibs/serial-device-installer-lib]
+    CLI --> DATA[/data/apps/available/vespera/]
 
-    PY --> CACHE[/tmp/vespera/\nfeeds.json, packages.json/]
-    UI --> FILE[FileHelper.readFile]
-    FILE --> CACHE
+    LIBS --> CONF[conf/vespera.conf\nconf-default/vespera.conf]
+    LIBS --> STATE[/tmp/vespera/\nstatus and indexes]
+    UI --> JSON[VesperaJsonReader / JSON cache]
+    JSON --> STATE
 ```
 
-## 2) Package list/install/upgrade/remove flow
+## 2) Package install / upgrade / remove flow
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant PackagesPage as OpkgPageSettingsPackages.qml
-    participant Vm as opkgPageSettingsPackages.js
-    participant Bridge as OpkgBridge
-    participant Runner as package helper / python helper
-    participant Cache as /tmp/vespera/packages.json
+    participant UI as VesperaPageSettingsPackages.qml
+    participant Manager as VesperaManager
+    participant Bridge as VesperaBridge
+    participant CLI as vespera CLI / scripts
+    participant Lib as installer-lib / vespera-lib
+    participant FS as package files + overlays
 
-    User->>PackagesPage: Open page
-    PackagesPage->>Vm: loadPackages(opkgBridge, model, "package list", "")
-    Vm->>Bridge: start(["package", "list"])
-    Bridge->>Runner: resolveCommand + QProcess.start
-    Runner-->>Cache: Write package list JSON
-    Runner-->>Bridge: exit 0
-    Bridge-->>PackagesPage: finished(0,0)
-    PackagesPage->>PackagesPage: loadPackagesFromFile(packagesPath)
-    PackagesPage->>Cache: FileHelper.readFile
-    PackagesPage->>PackagesPage: populate ListModel
-
-    User->>PackagesPage: Install/Upgrade/Remove action
-    PackagesPage->>Vm: doInstllerAction(action, packageName, noAction)
-    Vm->>Bridge: start(["package", action, packageName, ...])
-    Bridge-->>PackagesPage: outputLine/errorLine (streamed log)
-    Bridge-->>PackagesPage: finished(exitCode, status)
-    PackagesPage->>PackagesPage: clear busy state + finalize log callback
+    User->>UI: open packages page
+    UI->>Manager: load package list / install action
+    Manager->>Bridge: request operation
+    Bridge->>CLI: launch helper script
+    CLI->>Lib: initialize install/upgrade/remove flow
+    Lib->>FS: update package state, manifests, overlays
+    CLI-->>Bridge: exit code + streamed output
+    Bridge-->>Manager: finished(result)
+    Manager-->>UI: refresh package model
 ```
 
 ## 3) Feed management flow
@@ -58,174 +49,95 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant User
-    participant FeedsPage as OpkgPageSettingsFeeds.qml
-    participant Bridge as OpkgBridge
-    participant FeedRunner as feed helper / python helper
+    participant FeedPage as VesperaPageSettingsFeeds.qml
+    participant Manager as VesperaManager
+    participant Bridge as VesperaBridge
+    participant Lib as opkg-lib / feed logic
     participant Cache as /tmp/vespera/feeds.json
 
-    User->>FeedsPage: Open Feeds page
-    FeedsPage->>Bridge: start(["feed", "list"])
-    Bridge->>FeedRunner: run python helper for list
-    FeedRunner-->>Cache: Write feeds JSON
-    Bridge-->>FeedsPage: finished(0,0)
-    FeedsPage->>Cache: FileHelper.readFile(feedsPath)
-    FeedsPage->>FeedsPage: feedsModel = parsed feeds
-
-    alt Add feed
-        User->>FeedsPage: Add + confirm
-        FeedsPage->>Bridge: start(["feed", "add", name, url])
-    else Edit feed
-        User->>FeedsPage: Edit + confirm
-        FeedsPage->>Bridge: start(["feed", "edit", name, url, oldName])
-    else Remove feed
-        User->>FeedsPage: Remove
-        FeedsPage->>Bridge: start(["feed", "remove", name])
-    end
-
-    Bridge-->>FeedsPage: finished(exitCode, status)
-    FeedsPage->>FeedsPage: update/remove local model + toast
+    User->>FeedPage: open feed settings
+    FeedPage->>Manager: list feeds / add / remove / edit
+    Manager->>Bridge: request feed operation
+    Bridge->>Lib: run opkg feed update logic
+    Lib-->>Cache: write updated feed metadata
+    Bridge-->>Manager: finished(exitCode)
+    Manager-->>FeedPage: refresh model
 ```
 
-## 4) Install / upgrade / remove lifecycle
+## 4) Device binding lifecycle
 
 ```mermaid
 sequenceDiagram
-    autonumber
+    participant Device as USB serial device
+    participant Udev as udev + serial-device-installer-lib
+    participant DeviceLib as device-lib
+    participant Service as service-lib / runit service
+    participant DBus as dbus-lib
 
-    actor User
-    participant OPKG as opkg
-    participant PRE as preinst/prerm
-    participant Inst as installer-lib
-    participant Vlib as vespera-lib
-    participant Dbus as vespera-dbus-lib
-    participant FS as package files
-    participant SYS as system
-    participant Vcli as vespera CLI
-
-    User->>OPKG: install / upgrade / remove
-
-    alt Install
-        OPKG->>PRE: run preinst
-        PRE->>Inst: invoke installer
-        Inst->>Vlib: overlay-register app
-        Vlib->>SYS: overlay ready before filesystem mutation
-        Inst->>Dbus: build manifest and apply DBus settings
-        Dbus->>SYS: AddSettings / SetValue
-        Inst->>FS: copy files / apply patches
-        OPKG-->>Vcli: install complete
-        Vcli->>Vlib: enable app / start services
-        Vlib->>SYS: runtime activation
-    else Upgrade
-        OPKG->>PRE: run preinst / upgrade hooks
-        PRE->>Inst: invoke installer
-        Inst->>Vlib: overlay-register app
-        Vlib->>SYS: overlay ready before filesystem mutation
-        Inst->>Dbus: read previous manifest and compute delta
-        Dbus->>SYS: add/remove changed settings only
-        Inst->>FS: update files / patches
-        OPKG-->>Vcli: upgrade complete
-        Vcli->>Vlib: enable app / restart services
-        Vlib->>SYS: runtime activation
-    else Remove
-        OPKG->>PRE: run prerm
-        PRE->>Inst: invoke installer
-        Inst->>Vlib: overlay-unregister app
-        Vlib->>SYS: remove overlay before teardown
-        Inst->>Dbus: remove package manifest
-        Dbus->>SYS: RemoveSettings
-        Inst->>FS: remove files / revert patches
-        OPKG-->>Vcli: remove complete
-        Vcli->>Vlib: disable app / finalize cleanup
-        Vlib->>SYS: runtime deactivation
-    end
+    Device->>Udev: trigger add event
+    Udev->>DeviceLib: resolve tty / usb props / SID
+    DeviceLib->>DBus: bind device metadata
+    DeviceLib->>Service: ensure service mapping and start service
+    Service-->>Device: service active for tty
 ```
-
-This sequence intentionally separates concerns:
-- `installer-lib` handles package lifecycle orchestration
-- `vespera-lib` owns overlay and runtime activation/deactivation
-- `vespera-dbus-lib` owns package DBus state and upgrade deltas
-- the `vespera` CLI performs post-opkg runtime finalization only
 
 ## 5) Responsibility map
 
 ```mermaid
 flowchart TB
-    subgraph Pkg[Package lifecycle]
-        Inst[installer-lib]
-        Pre[package preinst / prerm]
+    subgraph Package[package lifecycle]
+        Install[scripts/install + scripts/remove]
+        Installer[installer-lib]
+        VesperaLib[vespera-lib]
     end
 
-    subgraph App[App runtime / system state]
-        Vlib[vespera-lib]
-        Ovr[overlay registration]
-        Svc[service enable / disable]
-        Jso[delayed GUI json finalization]
+    subgraph Device[serial device handling]
+        DeviceLib[device-lib]
+        SDI[serial-device-installer-lib]
+        ServiceLib[service-lib]
     end
 
-    subgraph Dbus[DBus state]
-        D1[vespera-dbus-lib]
-        M[package manifest + delta]
-        Nav[CustomNavPages / CustomMenus]
-        Set[SetValue queue]
+    subgraph GUI[Venus GUI layer]
+        Manager[VesperaManager]
+        Bridge[VesperaBridge]
+        Pages[VesperaPageSettings*.qml]
     end
 
-    subgraph Post[Post-opkg runtime finalization]
-        Vcli[vespera CLI]
-    end
-
-    Pre --> Inst
-    Inst --> Vlib
-    Inst --> D1
-
-    Vlib --> Ovr
-    Vlib --> Svc
-    Vlib --> Jso
-
-    D1 --> M
-    D1 --> Nav
-    D1 --> Set
-
-    Vcli --> Vlib
-    Vcli --> Svc
-    Vcli --> Jso
+    GUI --> Bridge
+    Bridge --> Install
+    Install --> Installer
+    Installer --> VesperaLib
+    DeviceLib --> SDI
+    SDI --> ServiceLib
+    VesperaLib --> DeviceLib
 ```
 
-This map makes the intended boundary explicit:
-- package lifecycle actions are triggered by the installer path
-- overlay and runtime activation belong to `vespera-lib`
-- DBus package state belongs to `vespera-dbus-lib`
-- final app enablement post-opkg belongs to the CLI path only
+The current design separates:
+- GUI concerns in the QML layer
+- package lifecycle in the installer and helper scripts
+- serial device binding in `device-lib` and `serial-device-installer-lib`
+- runtime restarts and state cleanup in `vespera-lib` and `service-lib`
 
-## 6) Device setup step state machine
+## 6) Device setup state flow
 
 ```mermaid
 stateDiagram-v2
     [*] --> idle
-
-    idle --> detect_device: doStep("detect-device")
-    detect_device --> detect_device_done: finished 0 + optional JSON parsed
-    detect_device --> error: finished non-zero
-
-    detect_device_done --> apply_device: doStep("apply-device")
-    apply_device --> apply_device_done: finished 0
-    apply_device --> error: finished non-zero
-
-    idle --> canceling: doStep("") while process running
-    detect_device --> canceling: stop requested
-    apply_device --> canceling: stop requested
-    canceling --> canceling_done: process stops
-    canceling_done --> idle
-
-    error --> idle: doStep("error") cleanup/reset
-    apply_device_done --> service_running: doStep("service-running")
-    service_running --> idle
+    idle --> discover: scan for tty / USB props
+    discover --> bind: resolve SID and service mapping
+    bind --> ready: install rules + register device
+    ready --> service_running: start service for tty
+    service_running --> idle: device removed or rebound
+    bind --> error: invalid tty / missing props
+    error --> idle: cleanup and reset
 ```
 
 ## Source anchors
 
-- [src/opt/victronenergy/gui/qml/OpkgPageSettingsPackages.qml](../src/opt/victronenergy/gui/qml/OpkgPageSettingsPackages.qml)
-- [src/opt/victronenergy/gui/qml/opkgPageSettingsPackages.js](../src/opt/victronenergy/gui/qml/opkgPageSettingsPackages.js)
-- [src/opt/victronenergy/gui/qml/OpkgPageSettingsFeeds.qml](../src/opt/victronenergy/gui/qml/OpkgPageSettingsFeeds.qml)
-- [src/opt/victronenergy/gui/qml/OpkgPageSettingsDeviceSetup.qml](../src/opt/victronenergy/gui/qml/OpkgPageSettingsDeviceSetup.qml)
-- [src/qmlplugin/OpkgBridge.cpp](../src/qmlplugin/OpkgBridge.cpp)
-- [src/data/apps/vespera/service-commands/json-helper.py](../src/data/apps/vespera/service-commands/json-helper.py)
+- [src/opt/victronenergy/gui/qml/VesperaManager.qml](../src/opt/victronenergy/gui/qml/VesperaManager.qml)
+- [src/opt/victronenergy/gui/qml/VesperaBridge.qml](../src/opt/victronenergy/gui/qml/VesperaBridge.qml)
+- [src/opt/victronenergy/gui/qml/VesperaPageSettingsPackages.qml](../src/opt/victronenergy/gui/qml/VesperaPageSettingsPackages.qml)
+- [src/opt/victronenergy/gui/qml/VesperaPageSettingsFeeds.qml](../src/opt/victronenergy/gui/qml/VesperaPageSettingsFeeds.qml)
+- [src/data/apps/available/vespera/vespera](../src/data/apps/available/vespera/vespera)
+- [src/data/apps/available/vespera/libs/device-lib](../src/data/apps/available/vespera/libs/device-lib)
+- [src/data/apps/available/vespera/libs/serial-device-installer-lib](../src/data/apps/available/vespera/libs/serial-device-installer-lib)

@@ -1,3 +1,0 @@
-module com.victron.velib
-VeQuickItem 1.0 VeQuickItem.qml
-singleton DBusService 1.0 DBusService.qml
