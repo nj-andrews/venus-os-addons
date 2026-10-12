@@ -13,6 +13,7 @@ DeviceListDelegate {
 
 		// Using callLater fixes intermitten lock ups
 		Qt.callLater(function () {
+			parent.height=0
 			parent.active = false
 		})
 
@@ -33,7 +34,6 @@ DeviceListDelegate {
 			Global.pageManager.popAllPages(1)
 
 			Qt.callLater(function () {
-
 				Global.mainView.navBar.setCurrentIndex(0)
 				Global.mainView.swipeView.animationEnabled = true
 			})

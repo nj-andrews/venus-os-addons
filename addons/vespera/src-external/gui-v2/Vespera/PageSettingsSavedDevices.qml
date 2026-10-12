@@ -7,7 +7,7 @@ Page {
 
 	required property Vespera.VesperaManager vesperaManager
 	property string devicesUid: Global.systemSettings.serviceUid + "/Settings/Devices"
- 
+
 	Vespera.DbusChildModel {
 		id: devicesModel
 		uid: root.devicesUid
@@ -29,6 +29,8 @@ Page {
 		delegate: ListNavigation {
 			id: device
 			required property var model
+			showAccessLevel: VenusOS.User_AccessType_User
+			writeAccessLevel: VenusOS.User_AccessType_Installer
 
 			VeQuickItem {
 				id: customNameItem
@@ -48,12 +50,18 @@ Page {
 				return deviceAdded
 			}
 
-			onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsSavedDevice.qml",
-				{title: text,
-				vesperaManager: root.vesperaManager,
-				name: model.value,
-				serviceUid: model.buddy.uid
-				})
+			onClicked: {
+				if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+					Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+					return
+				}
+				Global.pageManager.pushPage("qrc:/Vespera/PageSettingsSavedDevice.qml",
+					{title: text,
+					vesperaManager: root.vesperaManager,
+					name: model.value,
+					serviceUid: model.buddy.uid
+					})
+			}
 		}
 	}
 

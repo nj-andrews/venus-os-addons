@@ -8,8 +8,6 @@ QtObject {
 	readonly property bool running: _operationName != "" || _finalizing_install
 	readonly property string operationName: _operationName
 	property string _operationName: ""
-	property bool noAction: noActionSetting.value == 1
-	property bool showCompact: showCompactSetting.value == 1
 	property var outputLog: null
 	property string _lastErrorLine: ""
 	property var _completionCallback: undefined

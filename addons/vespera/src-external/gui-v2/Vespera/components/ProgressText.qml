@@ -14,7 +14,6 @@ Timer {
 
 	onTriggered: {
 		_dotCount = _dotCount % 3 + 1
-		text = text.slice(0, -3) +
-						Array(_dotCount+1).join(".") + Array(3 - _dotCount+1).join(" ")
+		text = text.slice(0, -3) + Array(_dotCount+1).join(".") + Array(3 - _dotCount+1).join(" ")
 	}
 }

@@ -50,12 +50,16 @@ Page {
 				id: feedNameTextField
 				//% "Feed name"
 				text: qsTrId("vespera_feed_name")
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
 				validateInput: root.validateFeedName
 				interactive: !root._builtin
 			}
 			ListSetting {
 				id: listItem
 				height: feedUrlTextField.implicitHeight + listItem.topPadding + listItem.bottomPadding
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
 				interactive: !root._builtin
 
 				contentItem: RowLayout {
@@ -99,15 +103,27 @@ Page {
 			width: actionsRow.defaultButtonWidth
 			anchors {right: parent.right}
 			text: root._saveButtonText
-			enabled: !root._builtin && !root.vesperaManager.running
-			onClicked: root.save
+			enabled: !root._builtin && !root.vesperaManager.running && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			onClicked: function() {
+				if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+					Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+					return
+				}
+				root.save()
+			}
 			}
 		ListItemButton {
 			text: root._removeButtonText
 			width: actionsRow.defaultButtonWidth
 			anchors {right: btn_save.left; rightMargin: actionsRow.spacing}
-			enabled: !root._builtin && !root._isNew && !root.vesperaManager.running
-			onClicked: root.remove
+			enabled: !root._builtin && !root._isNew && !root.vesperaManager.running && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			onClicked: function() {
+				if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+					Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+					return
+				}
+				root.remove()
+			}
 		}
 
 	}
@@ -139,6 +155,10 @@ Page {
 	}
 
 	function remove() {
+		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+			return
+		}
 		if (root._builtin || vesperaManager.running)
 			return
 
@@ -158,6 +178,10 @@ Page {
 	}
 
 	function save() {
+		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+			return
+		}
 		if (root._builtin || vesperaManager.running)
 			return
 

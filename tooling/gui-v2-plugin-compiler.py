@@ -122,6 +122,23 @@ def _minify_qml_text(relative_path):
     # Pull opening braces up: Item\n{ -> Item {
     collapsed_content = re.sub(r'\n\s*\{', ' {', collapsed_content)
 
+    # Pull the next line up when the current line ends with an opening brace:
+    # Item {\n    width: 100 -> Item { width: 100
+    collapsed_content = re.sub(r'\{\s*\n\s*', '{ ', collapsed_content)
+
+    # Pull the next line up when it starts with a ternary continuation:
+    # cond\n    ? valueA\n    : valueB -> cond ? valueA : valueB
+    collapsed_content = re.sub(r'\n\s*([?:])\s*', r' \1 ', collapsed_content)
+
+    # Pull the next line up when it starts with +, preserving spaces around the operator.
+    collapsed_content = re.sub(r'\n\s*\+\s*', ' + ', collapsed_content)
+
+    # Pull chained member calls up without inserting spaces before the dot.
+    collapsed_content = re.sub(r'(?<=\S)\n\s*\.\s*', '.', collapsed_content)
+
+    # Pull closing group tokens up without introducing stray spaces before them.
+    collapsed_content = re.sub(r'\n\s*\)', ')', collapsed_content)
+
     # Pull lonely closing braces up: Statement\n} -> Statement}
     # This removes the newline character entirely before a closing brace
     collapsed_content = re.sub(r'\n\s*\}', '}', collapsed_content)
@@ -253,7 +270,7 @@ def run_rcc(name, pre_compile=False, minify=False):
 				targetQrcFile = tempQrcFile
 
 		# 3. Prepare and execute the rcc command
-		cmd = [rccPath, '-binary', '-compress-algo', 'zlib', '-compress', '9', '-threshold', '0']
+		cmd = [rccPath, '-binary', '-compress-algo', 'zlib', '-compress', '9', '-threshold', '20']
 		cmd.extend(['-o', rccFile, targetQrcFile])
 
 		try:

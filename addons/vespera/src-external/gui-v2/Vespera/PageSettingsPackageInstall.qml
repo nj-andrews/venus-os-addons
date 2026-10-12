@@ -22,22 +22,21 @@ Page {
 	readonly property int hMargin: Theme.geometry_page_content_horizontalMargin + Theme.geometry_listItem_content_horizontalMargin
 	readonly property int vMargin: Theme.geometry_listItem_content_verticalMargin
 
+	function installerAccess() {
+		//% "No access"
+		if (Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) return true
+		Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+	}
+
 	Column {
 		id: column
-		anchors {
-			top: parent.top
-			left: parent.left
-			right: parent.right
-			topMargin: root.vMargin
-		}
+		anchors {top: parent.top; left: parent.left; right: parent.right; topMargin: root.vMargin}
 		spacing: 0
 
 		// package name, full width
 		Label {
 			width: parent.width
-			leftPadding: root.hMargin
-			rightPadding: root.hMargin
-			topPadding: root.vMargin
+			leftPadding: root.hMargin; rightPadding: root.hMargin; topPadding: root.vMargin
 			//bottomPadding: vMargin
 			text: formatNameCallback(root.model)
 			font.pixelSize: Theme.font_size_body3
@@ -47,9 +46,7 @@ Page {
 		// description, full width
 		Label {
 			width: parent.width
-			leftPadding: root.hMargin
-			rightPadding: root.hMargin
-			topPadding: root.vMargin
+			leftPadding: root.hMargin; rightPadding: root.hMargin; topPadding: root.vMargin
 			text: root.model.description
 			font.pixelSize: Theme.font_size_body2
 			color: Theme.color_font_secondary
@@ -59,9 +56,7 @@ Page {
 		// secondary font/color
 		Flow {
 			width: parent.width
-			leftPadding: root.hMargin
-			rightPadding: root.hMargin
-			topPadding: root.vMargin
+			leftPadding: root.hMargin; rightPadding: root.hMargin; topPadding: root.vMargin
 			spacing: Theme.geometry_listItem_content_spacing
 
 			// Label 1: Installed
@@ -76,8 +71,7 @@ Page {
 				Label {
 					text: (root.installed)
 							? root.model.installedVersion + (root.model.installedVersionSuffix ? "." + root.model.installedVersionSuffix : "")
-							//% "none"
-							: qsTrId("vespera_none")
+							: CommonWords.none_option
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary
 				}
@@ -95,8 +89,7 @@ Page {
 				Label {
 					text: (root.available)
 							? root.model.availableVersion + (root.model.availableVersionSuffix ? "." + root.model.availableVersionSuffix : "")
-							//% "none"
-							: qsTrId("vespera_none")
+							: CommonWords.none_option
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary
 				}
@@ -106,8 +99,7 @@ Page {
 		// Tertiary: feed
 		Row {
 			id: row
-			leftPadding: root.hMargin
-			topPadding: root.vMargin
+			leftPadding: root.hMargin; topPadding: root.vMargin
 			spacing: Theme.geometry_listItem_content_spacing / 2
 
 			Label {
@@ -136,19 +128,14 @@ Page {
 		ProgressBar {
 			id: progressBar
 			visible: root.vesperaManager.running
-			anchors.top: column.bottom;
-			//anchors.topMargin: (actionsRow.y-(column.y+column.height))/2
-			anchors.topMargin: 75
-			anchors.horizontalCenter: parent.horizontalCenter
+			anchors {top: column.bottom;topMargin: 75; horizontalCenter: parent.horizontalCenter}
 			width: parent.width / 2
 			indeterminate: true
 		}
 
 		Label {
 			id: loadingLabel
-			anchors.top: progressBar.bottom
-			anchors.topMargin: root.vMargin
-			anchors.horizontalCenter: parent.horizontalCenter
+			anchors {top: progressBar.bottom; topMargin: root.vMargin; horizontalCenter: parent.horizontalCenter}
 			visible: progressBar.visible
 			font.pixelSize: Theme.font_size_body1
 		}
@@ -159,10 +146,10 @@ Page {
 		ListItemButton {
 			id: btn_remove
 			width: actionsRow.defaultButtonWidth
-			//% "Remove"
-			text: qsTrId("vespera_remove")
-			enabled: !root.vesperaManager.running && root.installed && root.model.packageName != "vespera"
+			text: CommonWords.remove
+			enabled: !root.vesperaManager.running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
+				if (!installerAccess) return
 				root.vesperaManager.removePackage(root.model.packageName, completionCallback)
 			}
 			anchors.right: parent.right
@@ -173,8 +160,9 @@ Page {
 			text: root.actionLabel
 			width: actionsRow.defaultButtonWidth
 			anchors {right: btn_remove.left; rightMargin: actionsRow.spacing}
-			enabled: !root.vesperaManager.running && root.available
+			enabled: !root.vesperaManager.running && root.available && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
+				if (!installerAccess) return
 				if (!root.installed) {
 					root.vesperaManager.installPackage(root.model.packageName, completionCallback)
 				} else {
@@ -188,27 +176,28 @@ Page {
 			visible: root.model.enabled != undefined
 			anchors {left: parent.left}
 
-			text: root.model.enabled === true ? "Disable" : "Enable"
-			enabled: visible && !root.vesperaManager.running && root.installed && root.model.packageName != "vespera"
+			text: root.model.enabled === true
+				//% "Disable"
+				? qsTrId("vespera_disable")
+				//% "Enable"
+				: qsTrId("vespera_enable")
+
+			enabled: visible && !root.vesperaManager.running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
-					var enabled = root.model.enabled === true
-					root.vesperaManager.setPackageEnabledState(root.model.packageName, !enabled, completionCallback)
+				if (!installerAccess) return
+				var enabled = root.model.enabled === true
+				root.vesperaManager.setPackageEnabledState(root.model.packageName, !enabled, completionCallback)
 			}
 
 		}
 	}
 
 	function completionCallback(result) {
+		if (!result.success || result.data === undefined) return
 
-		if (!result.success)
-			return
-
-			root.loadPackagesModelCallback?.(result.data, root.model.packageName, function(updatedModel) {
-				root.model = updatedModel
-			})
-		if (root.vesperaManager.ShowDetailedOutput) {
-			logViewer.log("--- Finished " + result.operationName + ". Exit code: " + 	result.exitCode + ", status: " + result.exitStatus + " ---")
-		}
+		root.loadPackagesModelCallback?.(result.data, root.model.packageName, function(updatedModel) {
+			root.model = updatedModel
+		})
 	}
 
 }

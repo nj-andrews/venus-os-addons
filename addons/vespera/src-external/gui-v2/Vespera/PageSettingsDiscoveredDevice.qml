@@ -105,6 +105,8 @@ Page {
 			ListRadioButtonGroup {
 				id: selectServiceType
 				optionModel: root.availableServices
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
 
 				//% "Serial Device Service"
 				text: qsTrId("vespera_serial_device_service")
@@ -144,14 +146,26 @@ Page {
 			topPadding: spacing
 			ListButton {
 				secondaryText: progressText.running ? progressText.text : CommonWords.add_device
-				enabled: root.selectedDeviceServiceName
-				onClicked: root.addDevice()
+				enabled: root.selectedDeviceServiceName && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				onClicked: {
+					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+						return
+					}
+					root.addDevice()
+				}
 				implicitWidth: 100
 			}
 		}
 	}
 
 	function addDevice() {
+		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+			return
+		}
 		if (!root.selectedDeviceServiceName)
 			return
 		if (progressText.running)

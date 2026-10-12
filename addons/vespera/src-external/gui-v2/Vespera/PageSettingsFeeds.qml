@@ -13,12 +13,17 @@ Page {
 
 	Component.onCompleted: refreshFeeds()
 
+	function installerAccess() {
+		//% "No access"
+		if (Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) return true
+		Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+	}
+
 	ProgressBar {
 		id: progressBar
 		visible: loadingLabel.visible
 		width: parent.width / 2
-		anchors.horizontalCenter: parent.horizontalCenter
-		anchors.centerIn: parent
+		anchors {horizontalCenter: parent.horizontalCenter ; centerIn: parent}
 		indeterminate : true
 	}
 	Label {
@@ -34,32 +39,30 @@ Page {
 		id: settingsListView
 		clip: true
 		anchors.fill: parent
-		anchors {
-			top: parent.top;
-			left: parent.left;
-			right: parent.right;
-			bottom: actionsRow.top;
-		}
+		anchors { 	top: parent.top; left: parent.left; right: parent.right; bottom: actionsRow.top; }
 		delegate: ListNavigation {
 			required property var modelData
 
+			showAccessLevel: VenusOS.User_AccessType_User
+			writeAccessLevel: VenusOS.User_AccessType_Installer
 			text: formatName(modelData)
-			caption: root.vesperaManager.showCompact ? "" : modelData.url
+			caption: modelData.url
 
-			onClicked: Global.pageManager.pushPage(
-				"qrc:/Vespera/PageSettingsFeedEdit.qml", {
-					title: modelData.name,
-					vesperaManager: root.vesperaManager,
-					model: modelData,
-					loadFeedsModelCallback: root.loadFeeds
-				}
-			)
+			onClicked: {
+				if (!installerAccess) return
+				Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeedEdit.qml", {
+						title: modelData.name,
+						vesperaManager: root.vesperaManager,
+						model: modelData,
+						loadFeedsModelCallback: root.loadFeeds
+					}
+				)
+			}
 		}
 	}
 
 	function formatName(modelData) {
-    return modelData.name
-        .replace(/[-_]+/g, " ")
+    return modelData.name.replace(/[-_]+/g, " ")
         .replace(/\b\w/g, function(c) { return c.toUpperCase() })
 	}
 
@@ -87,12 +90,16 @@ Page {
 			//% "Add New Feed"
 			text: qsTrId("vespera_add_new_feed")
 			anchors {right: parent.right}
-			onClicked: function() {Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeedEdit.qml", {
+			enabled: Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			onClicked: function() {
+				if (!installerAccess) return
+				Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeedEdit.qml", {
 						title: qsTrId("vespera_add_new_feed"),
 						vesperaManager: root.vesperaManager,
 						model: {name:"", url:"", builtin: false, isNew: true},
-						loadFeedsModelCallback: root.loadFeeds})}
+						loadFeedsModelCallback: root.loadFeeds})
 			}
+		}
 	}
 
 }

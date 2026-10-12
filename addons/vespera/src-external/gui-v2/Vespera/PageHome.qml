@@ -4,17 +4,15 @@ import "qrc:/Vespera/components" as Vespera
 
 Page {
 	id: page
-	//% "Vespera Package Manager"
-	title: qsTrId("vespera_open_package_manager")
+	title: "Vespera"
 	Component.onDestruction: vesperaManager?.cleanup()
 
-	Vespera.VesperaManager {
-		id: vesperaManager
-		traceEnabled: true
-		function showToastNotification(level, message, duration) {
-			Global.showToastNotification(level, message, duration)
-			// console.log("vespera:" + level + ", " + message)
-		}
+	Vespera.VesperaManager { id: vesperaManager; traceEnabled: true }
+	
+	function installerAccess() {
+		//% "No access"
+		if (Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) return true
+		Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
 	}
 
 	GradientListView {
@@ -24,14 +22,24 @@ Page {
 			ListNavigation {
 				//% "Packages"
 				text: qsTrId("vespera_packages")
-				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsPackages.qml", {
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				onClicked: {
+					if (!installerAccess()) return
+					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsPackages.qml", {
 						title: text, vesperaManager: vesperaManager })
+				}
 			}
 			ListNavigation {
 				//% "Feeds"
 				text: qsTrId("vespera_feeds")
-				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeeds.qml", {
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				onClicked: {
+					if (!installerAccess()) return
+					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeeds.qml", {
 						title: text, vesperaManager: vesperaManager })
+				}
 			}
 
 			ListNavigation {
@@ -39,8 +47,13 @@ Page {
 				bottomInset: Theme.geometry_listItem_itemSeparator_height
 				//% "Custom Devices"
 				text: qsTrId("vespera_custom_devices")
-				onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettingsDevicesList.qml", {
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				onClicked: {
+					if (!installerAccess()) return
+					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsDevicesList.qml", {
 						title: text, vesperaManager: vesperaManager })
+				}
 			}
 			// ListNavigation {
 			// 	//% "Settings"
@@ -48,8 +61,8 @@ Page {
 			// 	onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {title: text,vesperaManager: vesperaManager})
 			// }
 			ListLink {
-				//% "Documentation"
-				text: qsTrId("pagecontrollableloads_documentation")
+				//: "Documentation"
+				text: qsTrId("pagesettingsgeneral_documentation")
 				url: "https://thespinmaster.github.io/venus-os-addons/"
 			}
 			ListText {

@@ -15,7 +15,6 @@ from command_state import CommandState
 log = logging.getLogger(__name__)
 
 VESPERA_PATH = "/data/apps/available/vespera/vespera"
-VESPERA_WORKDIR = "/"
 
 COMMAND_REGISTRY = {
 	"packages": {
@@ -209,17 +208,15 @@ class CommandProcessor:
 				helper_name = family_spec["default"]["helper_name"]
 				helper_path = action_spec.get("helper_path") or family_spec["default"]["helper_path"]
 				prefix_args = action_spec.get("prefix_args", [])
-				helper_args_override = action_spec.get("helper_args")
 
 				if not os.path.isfile(helper_path):
 						raise ValueError(f"Helper not found: {helper_path}")
 				if not os.access(helper_path, os.X_OK):
 						raise ValueError(f"Helper not executable: {helper_path}")
 
-				if helper_args_override is None:
-						helper_args = [*prefix_args, action, *args[2:]]
-				else:
-						helper_args = [*helper_args_override, *args[2:]]
+
+				helper_args = [*prefix_args, action, *args[2:]]
+
 				operation_name = f"{family} {action}"
 				return helper_name, helper_path, helper_args, operation_name
 

@@ -33,7 +33,7 @@ Page {
 			bottomPadding: spacing
 
 			SettingsListHeader {
-				//% "Device properties"
+				//% "Device Properties"
 				text: qsTrId("vespera_device_properties")
 			}
 			ListText {
@@ -58,12 +58,25 @@ Page {
 			ListButton {
 				//% "Remove Device"
 				secondaryText: qsTrId("vespera_remove_device")
-				onClicked: Global.dialogLayer.open(modeConfirmationDialogComponent)
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				enabled: Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+				onClicked: {
+					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+						return
+					}
+					Global.dialogLayer.open(modeConfirmationDialogComponent)
+				}
 			}
 		}
 	}
 
 	function removeDevice() {
+		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+			return
+		}
 		var sid = root.serviceUid.split('/').pop()
 		sid = sid.replace(/^sid_/, "");
 

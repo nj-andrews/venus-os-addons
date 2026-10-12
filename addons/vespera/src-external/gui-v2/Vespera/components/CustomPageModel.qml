@@ -4,11 +4,7 @@ import "qrc:/Vespera/components/VesperaSingleton.js" as VesperaSingleton
 
 QtObject {
 	id: root
-
-	//Component.onDestruction: {
-		//console.debug("CustomPageModel: DESTROYED: ", root)
-	//}
-
+ 
 	Component.onCompleted: {
 		//console.debug("CustomPageModel: CREATED", root)
 		if (allPagesLoaded)
@@ -185,10 +181,10 @@ QtObject {
 	}
 
 	onAllPagesLoadedChanged: {
-		console.debug("CustomPageModel: onAllPagesLoadedChanged:",
-		"allPagesLoaded=", allPagesLoaded,
-		"hadCustomPages=", _customPageItems.length>0,
-		)
+		// console.debug("CustomPageModel: onAllPagesLoadedChanged:",
+		// "allPagesLoaded=", allPagesLoaded,
+		// "hadCustomPages=", _customPageItems.length>0,
+		// )
 
 		VesperaSingleton.setIsReload(true)
 		if (allPagesLoaded == false) {

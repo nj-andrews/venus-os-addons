@@ -8,13 +8,11 @@ Page {
 	title: qsTrId("vespera_packages")
 	tryPop: vesperaManager.tryPop
 
-	required property Vespera.VesperaManager vesperaManager
-	property bool _loading: true
+	required property Vespera.VesperaManager vesperaManager;property bool _loading: true
 
 	Component.onCompleted: root.refreshPackages()
 
 	Vespera.ProgressText {id: progressText}
-
 	Label {
 		id: loadingLabel
 		//% "Loading..."
@@ -34,15 +32,12 @@ Page {
 		id: settingsListView
 		clip: true
 		visible : !root._loading
-		anchors {
-			top: parent.top
-			left: parent.left
-			right: parent.right
-			bottom: actionsRow.top
-		}
+		anchors { top: parent.top; left: parent.left; right: parent.right; bottom: actionsRow.top }
 
 		delegate: ListNavigation {
 			required property var modelData
+			showAccessLevel: VenusOS.User_AccessType_User
+			writeAccessLevel: VenusOS.User_AccessType_Installer
 
 			readonly property color _baseIndicatorColor: (modelData.installedVersion && modelData.availableVersion
 											? Theme.color_orange
@@ -60,15 +55,21 @@ Page {
 							 ? Qt.rgba(_baseIndicatorColor.r, _baseIndicatorColor.g, _baseIndicatorColor.b, _baseIndicatorColor.a * 0.5)
 							 : _baseIndicatorColor
 			text: formatName(modelData)
-			caption: root.vesperaManager.showCompact ? "" : modelData.description
-			onClicked: Global.pageManager.pushPage(
-				"qrc:/Vespera/PageSettingsPackageInstall.qml",
-				{ title: text,
-					vesperaManager: root.vesperaManager,
-					model: root.vesperaManager.snapshotObject(modelData),
-					loadPackagesModelCallback: root.onLoadPackagesModel,
-					formatNameCallback: formatName}
-			)
+			caption: modelData.description
+			onClicked: {
+				if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+					Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+					return
+				}
+				Global.pageManager.pushPage(
+					"qrc:/Vespera/PageSettingsPackageInstall.qml",
+					{ title: text,
+						vesperaManager: root.vesperaManager,
+						model: root.vesperaManager.snapshotObject(modelData),
+						loadPackagesModelCallback: root.onLoadPackagesModel,
+						formatNameCallback: formatName}
+				)
+			}
 		}
 	}
 

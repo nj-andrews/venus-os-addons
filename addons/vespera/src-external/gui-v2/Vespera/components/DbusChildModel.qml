@@ -38,42 +38,4 @@ VeQItemSortTableModel {
 	dynamicSortFilter: true
 	filterFlags: VeQItemSortTableModel.FilterInvalid
 
-	readonly property var values: {
-		// Referencing rowCount creates a QML binding dependency
-		// so subscribers are notified whenever the model changes
-		var _count = rowCount;
-
-		return new Proxy({}, {
-			get: function(target, prop) {
-				// Handle array .length check
-				if (prop === "length")
-					return root.rowCount
-
-				// Intercept integer array index lookups (e.g., values[i])
-				var i = Number(prop)
-				if (Number.isInteger(i) && i >= 0 && i < root.rowCount) {
-					// 1. Get the model index
-					var idx = root.index(i, VeQItemTableModel.ValueColumn);
-					// 2. Fetch data (Qt::DisplayRole, Qt::UserRole, or a custom VeQItem role)
-					var value = root.data(idx, VeQItemTableModel.ValueRole);
-					if (valueDelegate) {
-						var uid = root.data(idx, VeQItemTableModel.UniqueIdRole);
-						var item = root.data(idx, VeQItemTableModel.ItemRole);
-						var buddy = item.itemParent()
-						var model = {
-							id: root.childId,
-							uid:uid,
-							value: value,
-							buddyUid: buddy.uid,
-							buddyId: buddy.id}
-						return valueDelegate(model)
-					}
-
-					return value
-				}
-
-				return target[prop]
-			}
-		})
-	}
 }
