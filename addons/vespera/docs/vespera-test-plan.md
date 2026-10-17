@@ -27,8 +27,8 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 - [x] Verify `vespera inspect` reports app, service, addon, and DBus details without errors.
 
 ### 1.3 Feed and update operations
-- [x] Verify `vespera feeds-conf, '', `list`, `set`, `remove` confirm api works.
-- [x] Verify `vespera feeds-source` `add`, `edit`, `remove` confirm api works.
+- [x] Verify `vespera feed-conf, '', `list`, `set`, `remove` confirm api works.
+- [x] Verify `vespera feed-source` `add`, `edit`, `remove` confirm api works.
 - [x] Verify `vespera update` refreshes package metadata and regenerates indexes cleanly.
 
 ### 1.4 Device operations
@@ -45,7 +45,7 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 - [x] Verify unknown commands are passed through to `opkg` using the active combined config.
 - [x] Verify `vespera install <pkg>`, `vespera remove <pkg>`, and `vespera upgrade <pkg>` execute as expected via opkg passthrough.
 - [x] Verify opkg passthrough preserves exit codes for success and failure cases.
-- [ ] Verify opkg passthrough output remains visible for troubleshooting (stdout/stderr not swallowed).
+- [x] Verify opkg passthrough output remains visible for troubleshooting (stdout/stderr not swallowed).
 
 ---
 
@@ -58,7 +58,7 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 
 ### 2.2 Bridge and operation wiring
 - [x] Trigger package list refresh from GUI-v2 and verify data is returned and rendered.
-- [ ] Trigger feed operations from GUI-v2 and verify status, completion, and error messages are shown.
+- [x] Trigger feed operations from GUI-v2 and verify status, completion, and error messages are shown.
 - [x] Trigger device scan/bind/remove from GUI-v2 and verify UI state updates match backend results.
 - [x] Trigger Install/Upgrade/Remove works and signals the Gui will restart.
 - [x] Indidator is blue for installed apps, orange for installed apps when upgrade is available.
@@ -67,7 +67,7 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 
 ### 2.3 Runtime behavior and resilience
 - [x] Verify GUI-v2 reflects long-running CLI operations with clear progress or busy state.
-- [ ] Verify GUI-v2 recovers cleanly after an operation failure or canceled action.
+- [x] Verify GUI-v2 recovers cleanly after an operation failure or canceled action.
 - [x] Verify no stale data remains after returning to the page after a completed operation.
 
 ---
@@ -75,18 +75,18 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 ## Phase 3: GUI-v1 Vespera integration in Venus GUI
 
 ### 3.1 Legacy page behavior
-- [ ] Verify GUI-v1 Vespera menu entry is visible where expected on the target firmware.
-- [ ] Verify GUI-v1 pages open and render package/feed/device information correctly.
-- [ ] Verify legacy navigation and back stack behavior is stable.
+- [x] Verify GUI-v1 Vespera menu entry is visible where expected on the target firmware.
+- [x] Verify GUI-v1 pages open and render package/feed/device information correctly.
+- [x] Verify legacy navigation and back stack behavior is stable.
 
 ### 3.2 Feature parity checks against CLI
-- [ ] Compare GUI-v1 package operations against equivalent CLI commands for expected outcomes.
-- [ ] Compare GUI-v1 feed operations against equivalent CLI commands for expected outcomes.
-- [ ] Compare GUI-v1 device actions against equivalent CLI commands for expected outcomes.
+- [x] Compare GUI-v1 package operations against equivalent CLI commands for expected outcomes.
+- [x] Compare GUI-v1 feed operations against equivalent CLI commands for expected outcomes.
+- [x] Compare GUI-v1 device actions against equivalent CLI commands for expected outcomes.
 
 ### 3.3 Error handling
-- [ ] Verify GUI-v1 reports operation failures in a user-visible and actionable way.
-- [ ] Verify GUI-v1 does not enter broken state after failed operations.
+- [x] Verify GUI-v1 reports operation failures in a user-visible and actionable way.
+- [x] Verify GUI-v1 does not enter broken state after failed operations.
 
 ---
 
@@ -112,14 +112,14 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 ## Phase 5: Core package lifecycle checks
 
 ### 5.1 Fresh install
-- [x] Install or refresh the Vespera package with the project package workflow.
-- [x] Verify the package files land under `/data/apps/available/vespera/` in the target machine.
-- [x] Verify all Vespera GUI pages are present in the Venus GUI asset tree.
-- [x] Verify basic functionality works, refresh packages.
+- [ ] Install or refresh the Vespera package with the project package workflow.
+- [ ] Verify the package files land under `/data/apps/available/vespera/` in the target machine.
+- [ ] Verify all Vespera GUI pages are present in the Venus GUI asset tree.
+- [ ] Verify basic functionality works, refresh packages.
 
 ### 5.2 Runtime enablement
-- [x] Confirm Vespera services start cleanly after install.
-- [x] Verify the main Vespera pages are visible and selectable.
+- [ ] Confirm Vespera services start cleanly after install.
+- [ ] Verify the main Vespera pages are visible and selectable.
 
 ---
 
@@ -131,9 +131,9 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 - [ ] Check that feed metadata still loads when the cache is empty or stale.
 
 ### 6.2 Feed refresh
-- [x] Trigger a feed refresh through the Vespera CLI or package logic.
-- [x] Verify the update path completes without an invalid index state.
-- [x] Confirm the cached package list is refreshed and parseable.
+- [ ] Trigger a feed refresh through the Vespera CLI or package logic.
+- [ ] Verify the update path completes without an invalid index state.
+- [ ] Confirm the cached package list is refreshed and parseable.
 
 ---
 
@@ -150,7 +150,7 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 - [ ] Confirm remove logic does not leave stale symlinks or generated metadata behind.
 
 ### 7.3 Upgrade/reinstall safety
-- [x] Run an upgrade-install path and verify state transitions are preserved.
+- [ ] Run an upgrade-install path and verify state transitions are preserved.
 - [ ] Verify remove/upgrade flows do not duplicate entries in package or device state files.
 
 ---

@@ -14,7 +14,7 @@
 @insertbefore
 ====
   // vespera 1.0
-  VesperaCustomOverviewPages {}
+  VesperaCustomOverviewPages {id: vesperaCustomOverviewPages}
 ====
 @openfile
 ====

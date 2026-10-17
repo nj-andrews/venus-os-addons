@@ -10,7 +10,19 @@ VESPERA_VENUS_VERSION_FILE="${VESPERA_ROOT:-}${VESPERA_VENUS_VERSION_FILE}"
 # shellcheck source="../libs/opkg-lib"
 source "$__vespera_path/libs/opkg-lib"
 
+__log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
+
 __vespera_overlay() { "${VESPERA_DATA_DIR}/info/vespera.overlay-lib" "$@"; }
+
+__refresh_udevadm() {
+
+	if [[ -d "$VESPERA_DATA_DIR/overlays/_etc_udev_rules.d/merged" ]]; then
+		# overlay for udev rules exists then reload udev rules
+		udevadm control --reload
+		udevadm trigger --action=add --subsystem-match=tty --property-match=ID_BUS=usb >/dev/null
+		udevadm settle >/dev/null
+	fi
+}
 
 __start_all_services() {
 	# launch in background
@@ -51,7 +63,6 @@ __firmware_changed() {
 	echo "*********************************************"
 	echo "Firmware changed, configuring packages"
   echo "$(date '+%Y-%m-%d %H:%M:%S')"
-	echo "$(date -Iseconds)" # (ISO 8601 with timezone: e.g., "2026-10-08T14:30:15+01:00")
 
 	# shellcheck source=../libs/vespera-lib
 	source "$__vespera_path/libs/vespera-lib"
@@ -63,17 +74,28 @@ __firmware_changed() {
 
 	echo "Reconciling overlays"
 	__reconcile_overlays
-	__mount_overlays
 
 	__vespera_lib_initialize
+	VESPERA_VERBOSITY=2
 	: > "${VESPERA_WORKING_DIR}/${VESPERA_VENUS_FIRMWARE_CHANGED_FILE}"
+	echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/$VESPERA_VERBOSITY_FILE"
 
-	local ordered_pkgs; ordered_pkgs="$(opkg_lib_get_configure_order)"
 
 	opkg_ensure_combined_conf_file
 
-	echo "Configuring all packages"
-	opkg_lib_configure_packages "$ordered_pkgs"
+	echo "Configuring packages"
+
+	for app in $(opkg_lib_get_configure_order); do
+		echo "  configuring package ${app}"
+		__vespera_overlay overlay-register "${app}" < "$VESPERA_DATA_DIR/info/${app}.installer-overlays"
+		"$VESPERA_DATA_DIR/info/$app.postinst" "firmware-changed"
+		! vespera_lib_app_enabled "$app" && {
+			__vespera_overlay overlay-unregister "${app}"
+		}
+	done
+	echo "Configuring packages completed"
+
+	__refresh_udevadm
 
 	echo "Starting all services"
 	__start_all_services
@@ -82,22 +104,19 @@ __firmware_changed() {
 
 	echo "Executing all rcS.local startup scripts for enabled apps"
 	"$__vespera_path/scripts/execute-startup-scripts" rcS.local
-}
 
-__mount_overlays() {
-	__vespera_overlay overlay-mount
-
-	if [[ -d "$VESPERA_DATA_DIR/overlays/_etc_udev_rules.d/merged" ]]; then
-		# overlay for udev rules exists then reload udev rules
-		udevadm control --reload
-		udevadm trigger --action=add --subsystem-match=tty --property-match=ID_BUS=usb >/dev/null
-		udevadm settle >/dev/null
-	fi
+	echo "done"
 }
 
 declare log_file="${VESPERA_ROOT:-}/var/log/vespera/rcS-local.log"
 mkdir -p "$(dirname "$log_file")"
-exec > "$log_file" 2>&1 # note file overwrite for each reboot
+
+VESPERA_VERBOSITY=-1
+[[ -n "${1:-}" ]] && VESPERA_VERBOSITY="${1}"
+
+((VESPERA_VERBOSITY < 0)) && {
+	VESPERA_VERBOSITY=$((-VESPERA_VERBOSITY));
+	exec > "$log_file" 2>&1; } # note file overwrite for each reboot
 
 if [[ ! -f "$VESPERA_VENUS_VERSION_FILE" ]]; then
 	# no version file exists copy
@@ -106,7 +125,8 @@ fi
 
 if cmp -s "$VESPERA_VENUS_VERSION_FILE" "${VESPERA_ROOT:-}/opt/victronenergy/version"; then
 	echo "Firmware versions match; mounting"
-	__mount_overlays
+	__vespera_overlay overlay-mount
+	__refresh_udevadm
 	__start_all_services
 	"$__vespera_path/scripts/execute-startup-scripts" rcS.local
 	exit 0

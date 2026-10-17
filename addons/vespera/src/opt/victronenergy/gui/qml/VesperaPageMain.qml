@@ -5,14 +5,33 @@ import "vespera-utils.js" as VesperaUtils
 import Vespera 1.0
 
 QtObject {
-	id: vesperaRoot
+	id: vRoot
+
+  property VesperaTranslator localeLoader: VesperaTranslator {}
 
   property VeQuickItem moveSettingsToTop: VeQuickItem {
-    uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenus/PageMain/PageHome"
-    onValueChanged: vesperaRoot.movePageSettingsToTop()
+    uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenuPages/PageMain/PageHome"
+    onValueChanged: vRoot.movePageSettingsToTop()
+  }
+
+	function loadLanguage() {
+
+    var langId = String(languageItem.value ?? "")
+    if (langId.length > 0)
+        localeLoader.loadLanguage("Vespera", langId)
+
+		console.log("VESPERA: lang:", languageItem.value,", test:", qsTrId("vespera_add_new_feed"))
+		// to grab tranlated strings from other pages use qsTranslate
+		console.log("VESPERA:Add=", qsTranslate("PageSettingsModbusDevices", "Add") )
+	}
+
+  property VeQuickItem languageItem: VeQuickItem {
+    uid: "dbus/com.victronenergy.settings/Settings/Gui/Language"
+    onValueChanged: vRoot.loadLanguage()
   }
 
   Component.onCompleted: {
+		vRoot.loadLanguage()
 		movePageSettingsToTop()
 		insertCustomDevicesModel()
 	}
@@ -56,15 +75,17 @@ QtObject {
 		if (modelIndexes[DELEGATE_MODEL_INDEX] === -1 || modelIndexes[SETTINGS_MODEL_INDEX] === -1)
 			return // not found, bail
 
-    var action = vesperaRoot.moveSettingsToTop.value
+    var action = vRoot.moveSettingsToTop.value
 
     if (action == "^") {
       // move to top
 
 			if (modelIndexes[2] < modelIndexes[1])
         return // already moved
+
 			root.model.move(modelIndexes[SETTINGS_MODEL_INDEX], 0, 1)
     } else {
+
       // revert
       if (modelIndexes[2] > modelIndexes[1])
         return  // already moved

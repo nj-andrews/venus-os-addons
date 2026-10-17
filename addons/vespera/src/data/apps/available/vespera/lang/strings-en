@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="Language : %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="Install Action: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="Package build time: %s"
 LANG_PACKAGE_PATCHING_FILES="Patching files"
 LANG_PROCESSING_DBUS_SETTINGS="Processing Dbus settings"
 LANG_STOPPING_AND_REMOVING_SERVICES="Stopping and Removing Services"
@@ -13,3 +12,6 @@ LANG_UPDATING_DATABASE="Updating database"
 # removing
 LANG_REVERTING_PATCHED_FILES="Reverting patched files"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Removed previous install, upgrading now..."
+
+LANG_INSTALLED_ARG1_DISABLED="Installed %s (disabled)"
+LANG_INSTALLED_ARG1_ENABLING="Enabling %s"

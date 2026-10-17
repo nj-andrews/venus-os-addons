@@ -21,7 +21,7 @@ function qmlFileExists(qmlFileName) {
   var exists = component.status === 1
 
   if (!exists) {
-    console.log("QML file not found or invalid: " + qmlFileName)
+    console.log("vespera: QML file not found or invalid: " + qmlFileName)
     console.log(component.errorString())
   }
 

@@ -1,5 +1,5 @@
-// SYM LINKED
 import QtQuick 2
+import com.victron.velib 1.0
 
 QtObject {
 	id: root
@@ -11,6 +11,7 @@ QtObject {
 
 	property int _lastStdoutSeq: 0
 	property int _lastFinishedSeq: 0
+	readonly property string serviceUid: "dbus/com.victronenergy.vespera"
 
 	// When stop() is called, snapshot the seq values at that moment.
 	// Any output events with seq > these values are in-flight MQTT
@@ -25,28 +26,22 @@ QtObject {
 
 	function _toInt(value) {
 		var n = Number(value)
-		if (!isFinite(n)) {
-			return 0
-		}
+		if (!isFinite(n)) return 0
 		return Math.floor(n)
 	}
 
 	function _toString(value) {
-		if (value === undefined || value === null) {
-			return ""
-		}
+		if (value === undefined || value === null) return ""
 		return String(value)
 	}
 
 	function _trace(line, isError) {
-		if (!traceEnabled) {
+		if (!traceEnabled) return
+		if (isError) {
+			console.error("[Bridge] " + line)
 			return
 		}
-		if (isError) {
-			console.error("[VesperaBridge] " + line)
-		} else {
-			console.log("[VesperaBridge] " + line)
-		}
+		console.log("[Bridge] " + line)
 	}
 
 	function _snapshotSeqState() {
@@ -56,9 +51,7 @@ QtObject {
 
 	function waitForFinished(msecs) {
 		var _unused = msecs
-		if (_unused < 0) {
-			return !running
-		}
+		if (_unused < 0) return !running
 		return !running
 	}
 
@@ -95,9 +88,7 @@ QtObject {
 	}
 
 	function stop() {
-		if (stopping || !running) {
-			return
-		}
+		if (stopping || !running) return
 
 		// Snapshot seq values now so we can discard in-flight messages that
 		// were already published to MQTT before the service sees the cancel.
@@ -107,7 +98,7 @@ QtObject {
 		_cancelRequestSeq = _cancelRequestSeq + 1
 		cancelItem.setValue(_cancelRequestSeq)
 		_trace("stop(): cancel requested seqStdout=" + _cancelStdoutSeq, false)
-		root.output("Cancelling...")
+		root.output(qsTrId("vespera_cancelling"))
 	}
 
 	function cleanup() {
@@ -126,45 +117,33 @@ QtObject {
 		return true
 	}
 
-	property VeperaQuickItemAdapter stdoutSeqItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Event/StdoutSeq"
+	property VeQuickItem stdoutSeqItem: VeQuickItem {
+		uid: root.serviceUid + "/Event/StdoutSeq"
 		onValueChanged: {
 			var seq = root._toInt(root.stdoutSeqItem.value)
-			if (!root._acceptEventSeq(seq, "_lastStdoutSeq")) {
-				return
-			}
-			if (root._isCancelling && seq > root._cancelStdoutSeq) {
-				return
-			}
+			if (!root._acceptEventSeq(seq, "_lastStdoutSeq")) return
+			if (root._isCancelling && seq > root._cancelStdoutSeq) return
 
 			var line = root._toString(root.stdoutLineItem.value)
-			if (line.length > 0) {
-				root.output(line)
-			}
+			if (line.length > 0) root.output(line)
 		}
 	}
 
-	property VeperaQuickItemAdapter finishedSeqItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Event/FinishedSeq"
+	property VeQuickItem finishedSeqItem: VeQuickItem {
+		uid: root.serviceUid + "/Event/FinishedSeq"
 		onValueChanged: {
 			var seq = root._toInt(root.finishedSeqItem.value)
-			if (!root._acceptEventSeq(seq, "_lastFinishedSeq")) {
-				return
-			}
+			if (!root._acceptEventSeq(seq, "_lastFinishedSeq")) return
 
 			var exitCode = root._toInt(root.exitCodeItem.value)
 			var exitStatus = root._toInt(root.exitStatusItem.value)
-			if (root._isCancelling) {
-				root.output("Cancelled")
-			}
+			if (root._isCancelling) root.output(qsTrId("vespera_cancelled"))
 			var cancelled = root._isCancelling
 			root._isCancelling = false
 
 			if (exitCode !== 0) {
 				var msg = root._toString(root.resultErrorItem.value)
-				if (msg.length > 0) {
-					root.error(msg)
-				}
+				if (msg.length > 0) root.error(msg)
 			}
 
 			var result = {
@@ -179,20 +158,8 @@ QtObject {
 		}
 	}
 
-	property VeperaQuickItemAdapter argsJsonItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Request/ArgsJson"
-	}
-
-	property VeperaQuickItemAdapter startItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Request/Start"
-	}
-
-	property VeperaQuickItemAdapter cancelItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Request/Cancel"
-	}
-
-	property VeperaQuickItemAdapter statusItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/State/Status"
+	property VeQuickItem statusItem: VeQuickItem {
+		uid: root.serviceUid + "/State/Status"
 		onValueChanged: {
 			var value = root._toInt(root.statusItem.value)
 			root.running = value !== 0
@@ -200,25 +167,14 @@ QtObject {
 		}
 	}
 
-	property VeperaQuickItemAdapter stdoutLineItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Event/StdoutLine"
-	}
-
-	property VeperaQuickItemAdapter exitCodeItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Result/ExitCode"
-	}
-
-	property VeperaQuickItemAdapter exitStatusItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Result/ExitStatus"
-	}
-
-	property VeperaQuickItemAdapter resultErrorItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Result/Error"
-	}
-
-	property VeperaQuickItemAdapter resultJsonItem: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Result/Json"
-	}
+	property VeQuickItem argsJsonItem: VeQuickItem { uid: root.serviceUid + "/Request/ArgsJson"}
+	property VeQuickItem startItem: VeQuickItem {uid: root.serviceUid + "/Request/Start"}
+	property VeQuickItem cancelItem: VeQuickItem {uid: root.serviceUid + "/Request/Cancel"}
+	property VeQuickItem stdoutLineItem: VeQuickItem { uid: root.serviceUid + "/Event/StdoutLine"}
+	property VeQuickItem exitCodeItem: VeQuickItem { uid: root.serviceUid + "/Result/ExitCode"}
+	property VeQuickItem exitStatusItem: VeQuickItem { uid: root.serviceUid + "/Result/ExitStatus"}
+	property VeQuickItem resultErrorItem: VeQuickItem { uid: root.serviceUid + "/Result/Error"}
+	property VeQuickItem resultJsonItem: VeQuickItem { uid: root.serviceUid + "/Result/Json"}
 
 	Component.onCompleted: {
 		var status = _toInt(statusItem.value)

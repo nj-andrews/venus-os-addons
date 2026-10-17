@@ -24,6 +24,8 @@ VesperaCustomOverviewPage {
 
 	property color selectedColor: mbStyleSelected.backgroundColor
 	property color groupBackgroundColor: backgroundColor
+	property bool deviceValid: bindPrefix.length > 0
+
 	//property color groupBorderColor: selectedColor
  	onSelectedColorChanged: {
 		groupBackgroundColor = selectedColor
@@ -107,6 +109,11 @@ VesperaCustomOverviewPage {
 		}
 	}
 
+	Text {
+		text: "No Device Found"
+		anchors.centerIn: parent
+		visible: !deviceValid
+	}
 
 	// Water
 	Rectangle {
@@ -327,6 +334,7 @@ VesperaCustomOverviewPage {
 	}
 
 }
+
 
 // Aircon
 Rectangle {

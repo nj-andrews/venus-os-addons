@@ -1,0 +1,3 @@
+module Vespera
+plugin vesperalocale
+singleton VesperaDeviceModel 1.0 VesperaDeviceModel.qml

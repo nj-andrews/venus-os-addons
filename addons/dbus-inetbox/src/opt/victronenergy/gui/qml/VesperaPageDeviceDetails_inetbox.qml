@@ -7,3 +7,4 @@ VesperaPageDeviceDetails {
 	property string summary: root.connected ? "Ok" : "Not Connected"
 
 }
+

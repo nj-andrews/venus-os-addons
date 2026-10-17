@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+BUILD_DIR="${SCRIPT_DIR}/build"
+TARGET_DIR="${REPO_ROOT}/src/opt/victronenergy/gui/qml/Vespera"
+TRANSLATION_SOURCE_DIR="${REPO_ROOT}/src-external/gui-v2/Vespera/translations"
+TARGET_ARCH="${1:-armhf}"
+
+if [[ "${TARGET_ARCH}" != "armhf" ]]; then
+  echo "Unsupported target architecture: ${TARGET_ARCH}. This plugin is armhf-only." >&2
+  exit 1
+fi
+
+mkdir -p "${BUILD_DIR}"
+
+SYSROOT="${SDKTARGETSYSROOT:-}"
+VENUS_ENV_SCRIPT="/opt/venus/scarthgap-arm-cortexa8hf-neon/environment-setup-cortexa8hf-neon-ve-linux-gnueabi"
+
+if [[ -f "${VENUS_ENV_SCRIPT}" ]]; then
+  set +u
+  . "${VENUS_ENV_SCRIPT}"
+  set -u
+  SYSROOT="${SDKTARGETSYSROOT:-${SYSROOT}}"
+fi
+
+CMAKE_ARGS=(
+  -S "${SCRIPT_DIR}"
+  -B "${BUILD_DIR}"
+  -G "Unix Makefiles"
+)
+
+if [[ -n "${SYSROOT}" && -d "${SYSROOT}/usr/lib/cmake/Qt6" ]]; then
+  QT_PREFIX="${QT_PREFIX:-${SYSROOT}/usr}"
+  CC_BIN="${CC_BIN:-$(command -v arm-ve-linux-gnueabi-gcc || true)}"
+  CXX_BIN="${CXX_BIN:-$(command -v arm-ve-linux-gnueabi-g++ || true)}"
+
+  WRAPPER_DIR="${BUILD_DIR}/toolchain-wrapper"
+  mkdir -p "${WRAPPER_DIR}"
+
+  cat > "${WRAPPER_DIR}/arm-ve-linux-gnueabi-gcc" <<EOF
+#!/usr/bin/env bash
+exec "${CC_BIN}" --sysroot="${SYSROOT}" -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a8 -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 "\$@"
+EOF
+  chmod +x "${WRAPPER_DIR}/arm-ve-linux-gnueabi-gcc"
+
+  cat > "${WRAPPER_DIR}/arm-ve-linux-gnueabi-g++" <<EOF
+#!/usr/bin/env bash
+exec "${CXX_BIN}" --sysroot="${SYSROOT}" -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a8 -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 "\$@"
+EOF
+  chmod +x "${WRAPPER_DIR}/arm-ve-linux-gnueabi-g++"
+
+  CC_BIN="${WRAPPER_DIR}/arm-ve-linux-gnueabi-gcc"
+  CXX_BIN="${WRAPPER_DIR}/arm-ve-linux-gnueabi-g++"
+fi
+
+if [[ -z "${CC_BIN:-}" ]]; then
+  CC_BIN="${CC:-/usr/bin/arm-linux-gnueabihf-gcc}"
+fi
+if [[ -z "${CXX_BIN:-}" ]]; then
+  CXX_BIN="${CXX:-/usr/bin/arm-linux-gnueabihf-g++}"
+fi
+if [[ -z "${QT_PREFIX:-}" ]]; then
+  QT_PREFIX="/usr/lib/arm-linux-gnueabihf/qt6"
+fi
+
+if [[ ! -x "${CC_BIN}" ]]; then
+  echo "ARM C compiler not found: ${CC_BIN}" >&2
+  exit 1
+fi
+
+if [[ ! -x "${CXX_BIN}" ]]; then
+  echo "ARM C++ cross-compiler not found: ${CXX_BIN}" >&2
+  exit 1
+fi
+
+if [[ ! -d "${QT_PREFIX}" ]]; then
+  echo "ARM Qt6 prefix not found: ${QT_PREFIX}" >&2
+  echo "Install the ARM Qt package or set QT_PREFIX to the cross Qt installation" >&2
+  exit 1
+fi
+
+CMAKE_ARGS+=(
+  -DCMAKE_C_COMPILER="${CC_BIN}"
+  -DCMAKE_CXX_COMPILER="${CXX_BIN}"
+  -DCMAKE_PREFIX_PATH="${QT_PREFIX}"
+  -DCMAKE_SYSROOT="${SYSROOT:-}"
+  -DCMAKE_FIND_ROOT_PATH="${QT_PREFIX}"
+  -DCMAKE_SYSTEM_NAME=Linux
+  -DCMAKE_SYSTEM_PROCESSOR=arm
+  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
+  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
+  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+)
+
+cmake "${CMAKE_ARGS[@]}"
+cmake --build "${BUILD_DIR}"
+
+mkdir -p "${TARGET_DIR}/lang"
+if [[ ! -f "${TARGET_DIR}/libvesperalocale.so" ]]; then
+  cp -f "${BUILD_DIR}/libvesperalocale.so" "${TARGET_DIR}/"
+fi
+cp -f "${SCRIPT_DIR}/qmldir" "${TARGET_DIR}/qmldir"
+find "${TRANSLATION_SOURCE_DIR}" -maxdepth 1 -name '*.qm' -exec cp -f {} "${TARGET_DIR}/lang/" \;
+
+echo "Built Vespera locale QML plugin for ${TARGET_ARCH} into ${TARGET_DIR}"

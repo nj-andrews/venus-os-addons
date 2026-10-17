@@ -1,0 +1,78 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "vespera_locale_loader",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "vesperalocale::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vesperalocale-Debug-d6ab5a444965bbf52baf.json",
+					"name" : "vesperalocale",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vesperalocale_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vesperalocale_autogen-Debug-83ab4edb06e6d442e829.json",
+					"name" : "vesperalocale_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vesperalocale_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vesperalocale_autogen_timestamp_deps-Debug-d2a6b1bdf582ecfd530f.json",
+					"name" : "vesperalocale_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/data/dev/addons/vespera/build",
+		"source" : "/data/dev/addons/vespera/src-external/vespera-locale-loader"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

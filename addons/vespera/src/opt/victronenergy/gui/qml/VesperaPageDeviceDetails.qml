@@ -4,7 +4,7 @@ import "utils.js" as Utils
 
 MbPage {
 	id: root
-	title: qsTr("Device")
+	title: qsTrId("vespera_device_properties")
 
 	property string sid
 	property string bindPrefix
@@ -35,18 +35,14 @@ MbPage {
 			? productName.value + (deviceInstanceItem.value === undefined ? "" : " (" + deviceInstanceItem.value + ")")
 			: "Unknown Device"
 
-	property string summary: !root.connected
-		? "Not Connected"
-		: "Connected"
-
 	function onRemoveDevice(removeDeviceCallback) {
 		return false
 	}
-
+qsTrEx
 	model: VisibleItemModel {
 		MbSubMenu {
 			id: device
-			description: qsTr("Device")
+			description: qsTranslate("PageAcCharger", "Device")
 			subpage: Component {
 				PageDeviceInfo {
 					title: device.description

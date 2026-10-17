@@ -13,10 +13,11 @@ Page {
 	required property string port
 	required property string serviceUid
 
-	property string selectedDeviceServiceName: ""
+	property var availableServices: []
+	property string selectedDeviceServiceName
 	property var addingDeviceText: progressText.running ? progressText.text : ""
 	property var jsonUsbProps: usbPropsItem.valid ? usbPropsToFormatedJson(usbPropsItem.value) : {}
-	property var availableServices: []
+
 
 	function usbPropsToFormatedJson(str) {
 		return str.split(",").map(function(p) {
@@ -61,7 +62,7 @@ Page {
 					if (!byServiceMap[packageBase])
 						byServiceMap[packageBase] = { enabled: false }
 					byServiceMap[packageBase].enabled = (Number(value) === 1)
-					console.log( "enabled=",byServiceMap[packageBase].enabled)
+					// console.log( "enabled=",byServiceMap[packageBase].enabled)
 					continue
 				}
 				var serviceBase = ""
@@ -87,8 +88,6 @@ Page {
 					return { display: s.displayName || s.serviceName, value: s.serviceName }
 					})
 
-			if (!root.selectedDeviceServiceName && root.availableServices.length > 0)
-				root.selectedDeviceServiceName = root.availableServices[0].value
 		}
 	}
 
@@ -107,7 +106,10 @@ Page {
 				optionModel: root.availableServices
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
-
+				optionHeader: Component {
+					//% "No service templates installed"
+					ListText { text: qsTrId("vespera_no_service_templates"); preferredVisible: root.availableServices.length == 0 }
+				}
 				//% "Serial Device Service"
 				text: qsTrId("vespera_serial_device_service")
 				//% "Press to select service"
@@ -118,7 +120,6 @@ Page {
 					if (index >= 0 && index < root.availableServices.length)
 						root.selectedDeviceServiceName = root.availableServices[index].value
 				}
-
 			}
 
 			SettingsListHeader {
@@ -146,34 +147,25 @@ Page {
 			topPadding: spacing
 			ListButton {
 				secondaryText: progressText.running ? progressText.text : CommonWords.add_device
-				enabled: root.selectedDeviceServiceName && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+				enabled: root.selectedDeviceServiceName && root.selectedDeviceServiceName.length > 0 && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
-				onClicked: {
-					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-						return
-					}
-					root.addDevice()
-				}
+				onClicked: root.addDevice()
 				implicitWidth: 100
 			}
 		}
 	}
 
 	function addDevice() {
-		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-			return
-		}
+		if (!root.vesperaManager.installerAccess()) return
+
 		if (!root.selectedDeviceServiceName)
 			return
 		if (progressText.running)
 			return
 
 		//% "Adding Device"
-		var addingDevice = qsTrId("vespera_adding_device")
-		progressText.start(addingDevice)
+		progressText.start(qsTrId("vespera_adding_device"))
 
 		// var sid = root.serviceUid.split('/').pop()
 		// sid = sid.replace(/^sid_/, "");
@@ -184,7 +176,7 @@ Page {
 				if (progressText)
 					progressText.stop()
 
-				if (result) {
+				if (result.success) {
 					Global.pageManager.popPage()
 					//% "Device Added Successfully\nThe service will start shortly..."
 					var successMessage = qsTrId("vespera_added_device_success")

@@ -5,8 +5,6 @@ MbPage {
 	id: root
 
 	model: VesperaSafeDelegateModel {
-
-
 		property Vespera vespera
 
 		model: VeQItemSortTableModel {

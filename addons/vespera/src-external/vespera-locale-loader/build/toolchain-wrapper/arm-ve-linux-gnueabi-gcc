@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi/arm-ve-linux-gnueabi-gcc" --sysroot="/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi" -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a8 -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 "$@"

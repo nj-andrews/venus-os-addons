@@ -5,12 +5,23 @@ MbPage {
 	id: root
 
 	required property VesperaManager vesperaManager
+	required property MbStyle mbStyle: MbStyle {}
 
 	VesperaDbusChildModel {
 		id: devicesModel
 		uid: "dbus/com.victronenergy.vespera/Discovered"
 		filterRegExp: "\/sid_[^/]+$"
 		childId: "Port"
+	}
+	listview.visible: devicesModel.rowCount > 0
+
+	Text {
+		text: qsTrId("vespera_no_devices_discovered")
+		font.pixelSize: root.mbStyle.fontPixelSize
+		horizontalAlignment: Text.AlignHCenter
+		color: root.mbStyle.textColor
+		visible: devicesModel.rowCount == 0
+		anchors.centerIn: parent
 	}
 
 	model: VesperaSafeDelegateModel {

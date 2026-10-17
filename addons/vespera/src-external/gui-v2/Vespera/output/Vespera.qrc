@@ -12,12 +12,11 @@
 <file>../PageSettingsDiscoveredDevices.qml</file>
 <file>../components/ProgressText.qml</file>
 <file>../components/CustomPageModel.qml</file>
-<file>../components/VeperaBridge.qml</file>
 <file>../components/ActionsRow.qml</file>
-<file>../components/VeperaQuickItemAdapter.qml</file>
-<file>../components/JsonReader.qml</file>
 <file>../components/DbusChildModel.qml</file>
 <file>../components/VesperaManager.qml</file>
+<file>../components/VesperaJsonReader.qml</file>
+<file>../components/VesperaBridge.qml</file>
 <file>../components/VesperaSingleton.js</file>
 <file>../Vespera_zh.qm</file>
 <file>../Vespera_fi.qm</file>

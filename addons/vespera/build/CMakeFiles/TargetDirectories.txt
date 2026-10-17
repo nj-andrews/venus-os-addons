@@ -1,0 +1,5 @@
+/data/dev/addons/vespera/build/CMakeFiles/vesperalocale.dir
+/data/dev/addons/vespera/build/CMakeFiles/edit_cache.dir
+/data/dev/addons/vespera/build/CMakeFiles/rebuild_cache.dir
+/data/dev/addons/vespera/build/CMakeFiles/vesperalocale_autogen_timestamp_deps.dir
+/data/dev/addons/vespera/build/CMakeFiles/vesperalocale_autogen.dir

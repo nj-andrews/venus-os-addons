@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="Idioma: %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="Ação de instalação: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="Hora de build do pacote: %s"
 LANG_PACKAGE_PATCHING_FILES="Aplicando patches nos arquivos"
 LANG_PROCESSING_DBUS_SETTINGS="Processando configurações dbus"
 LANG_STOPPING_AND_REMOVING_SERVICES="Parando e removendo serviços"
@@ -13,6 +12,8 @@ LANG_STOPPING_AND_REMOVING_SERVICES="Parando e removendo serviços"
 # removing
 LANG_REVERTING_PATCHED_FILES="Revertendo arquivos corrigidos"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Instalação anterior removida, atualizando agora..."
+LANG_INSTALLED_ARG1_DISABLED="Instalado %s (desativado)"
+LANG_INSTALLED_ARG1_ENABLING="Ativando %s"
 
 # vespera installer
 LANG_UPDATING_DATABASE="Atualizando banco de dados"

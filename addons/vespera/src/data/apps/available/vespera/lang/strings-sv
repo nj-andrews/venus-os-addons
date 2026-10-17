@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="Språk: %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="Installationsåtgärd: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="Byggtid för paket: %s"
 LANG_PACKAGE_PATCHING_FILES="Patchar filer"
 LANG_PROCESSING_DBUS_SETTINGS="Bearbetar dbus-inställningar"
 LANG_STOPPING_AND_REMOVING_SERVICES="Stoppar och tar bort tjänster"
@@ -13,6 +12,8 @@ LANG_STOPPING_AND_REMOVING_SERVICES="Stoppar och tar bort tjänster"
 # removing
 LANG_REVERTING_PATCHED_FILES="Återställer patchade filer"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Föregående installation borttagen, uppdaterar nu..."
+LANG_INSTALLED_ARG1_DISABLED="Installerat %s (inaktiverat)"
+LANG_INSTALLED_ARG1_ENABLING="Aktiverar %s"
 
 # vespera installer
 LANG_UPDATING_DATABASE="Uppdaterar databasen"

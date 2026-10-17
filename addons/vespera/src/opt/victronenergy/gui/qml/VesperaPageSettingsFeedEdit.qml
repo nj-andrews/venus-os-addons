@@ -4,44 +4,35 @@ import com.victron.velib 1.0
 
 MbPage {
 	id: root
-	title: qsTr("Edit Feed")
+	title: qsTrId("vespera_edit_feed")
 	pageToolbarHandler: customToolbar
 
 	required property var feedModel
 	required property VesperaManager vesperaManager
-	required property var loadFeedsModelCallback
+	required property var feedUpdatedCallback
 	property bool isNew: false
-	property string _removeButtonText: isNew ? "Cancel" : "Remove"
-	property string _saveButtonText: "Save"
+	property string _removeButtonText: isNew ? qsTrId("vespera_cancel") : qsTrId("vespera_remove")
+	property string _saveButtonText: qsTrId("vespera_save")
 
 	model: VisibleItemModel {
 		MbEditBox {
 			id: feedNameTextField
 			readonly: !userHasWriteAccess || (isNew ? false : feedModel?.builtin ?? true)
 			useVirtualKeyboard: false
-			description: qsTr("Name")
+			description: qsTrId("vespera_feed_name")
 			maximumLength: 20
 			enableSpaceBar: false
-			item.value: (!isNew && root.feedsModel) ? feedModel.name : ""
+			item.value: (!isNew && root.feedModel) ? feedModel.name : ""
 		}
 
 		VesperaEditBoxLargeText {
 			id: feedUrlTextField
 			readonly: !userHasWriteAccess || (isNew ? false : feedModel?.builtin ?? true)
-			description: qsTr("Url")
+			description: qsTrId("vespera_feed_url")
 			maximumLength: 256
 			matchString: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()-_=+[]{}\\;:|/.,<>?"
 			enableSpaceBar: false
-			item.value:  (!isNew && root.feedsModel) ? feedModel.url : ""
-		}
-
-		MbTextDescription {
-			text: "(Readonly)"
-			opacity: 0.5
-			isCurrentItem: false
-			width: parent ? parent.width : 0
-			horizontalAlignment: Text.AlignHCenter
-			visible: !isNew && feedModel?.builtin
+			item.value:  (!isNew && root.feedModel) ? feedModel.url : ""
 		}
 	}
 
@@ -67,15 +58,15 @@ MbPage {
 
 		var completedCallback = function(result) {
 			if (!result.success) {
-				root._removeButtonText = "Remove"
+				root._removeButtonText = qsTrId("vespera_remove")
 				return
 			}
 
-			loadFeedsModelCallback?.(result.data)
+			feedUpdatedCallback?.(result.data)
 			pageStack.pop()
 		}
 
-		root._removeButtonText = "Removing..."
+		root._removeButtonText = qsTrId("vespera_removing")
 		vesperaManager.removeFeed(root.model.name, completedCallback)
 
 	}
@@ -93,7 +84,7 @@ MbPage {
 				: status2
 
 		if (error) {
-			toast.createToast(qsTr(error), 3000, "icon-info-active");
+			toast.createToast(error, 3000, "icon-info-active");
 			return
 		}
 
@@ -102,16 +93,16 @@ MbPage {
 
 		var completedCallback = function(result) {
 			if (!result.success) {
-				root._saveButtonText = "Save"
+				root._saveButtonText = qsTrId("vespera_save")
 				return
 			}
-			root.title = "Edit Feed" // update breadcrumb
+			root.title = feedName // update breadcrumb
 			root._isNew = false
-			loadFeedsModelCallback?.(result.data, feedName, root.refreshModel)
+			feedUpdatedCallback?.(feedName, root.refreshModel)
 
 		}
 
-		root._saveButtonText = "Saving..."
+		root._saveButtonText = qsTrId("vespera_saving")
 
 		if (root._isNew) {
 			vesperaManager.addFeed(feedName, feedUrl, completedCallback)

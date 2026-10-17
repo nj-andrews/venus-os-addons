@@ -131,12 +131,8 @@ class ChunkProcessor:
 						self._dbusservice[result_root + "/Data"] = chunk.decode("utf-8")
 						self._dbusservice[result_root + "/EndOfData"] = dbus.UInt16(end_of_data)
 						self._dbusservice[result_root + "/SourceVersion"] = mtime
-						log.debug(
-								"Chunk served session=%s name=%s bytes=%s end_of_data=%s",
-								session_id,
-								name,
-								len(chunk),
-								end_of_data,
+						log.debug("Chunk served session=%s name=%s bytes=%s end_of_data=%s",
+								session_id,	name, len(chunk), end_of_data
 						)
 				except Exception as err:
 						self._dbusservice[result_root + "/Error"] = f"Read error: {err}"

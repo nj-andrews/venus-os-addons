@@ -24,7 +24,7 @@ __list_service_status() {
 		[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 		local file="$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_SERVICES_FILE}"
 		for service in $(cat "$file"); do
-			[[ ! -e $service ]] && echo "$service not available"
+			[[ ! -e "/service/$service" ]] && echo "/service/$service not available"
 			svstat "/service/$service"
 		done
 

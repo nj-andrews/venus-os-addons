@@ -4,6 +4,8 @@ declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
 
 repo_root="$(realpath "$__this_path/../")"
 
+echo "in build-external" >&3
+
 needs_rebuild() {
 	local _src_dir=${1}
 	local _output_bin=${2}
@@ -15,7 +17,6 @@ src_dir="$__this_path/gui-v2/Vespera"
 output_bin="$repo_root/src/data/apps/available/vespera/gui-v2/vespera.json.install"
 
 if needs_rebuild "$src_dir" "$output_bin"; then
-
 	echo "  building plugin..." >&3
 	cd "$src_dir" || exit
 	./build-plugin 2>&3 # 192.168.10.24
@@ -26,7 +27,24 @@ output_dir="$repo_root/src/data/apps/available/vespera/bin"
 output_bin="$output_dir/opkg-json-indexer"
 
 if needs_rebuild "$src_dir" "$output_bin"; then
-
 	echo "  building opkg-json-indexer..." >&3
 	$src_dir/build-indexer
+fi
+
+src_dir="$repo_root/src-external/gui-v2/Vespera"
+output_dir="$repo_root/src/opt/victronenergy/gui/qml/Vespera/lang"
+output_bin="$output_dir/Vespera_en.qm"
+
+if needs_rebuild "$src_dir/translations" "$output_bin"; then
+	echo "  building gui-v1 translations..." >&3
+	$repo_root/src-external/build-gui-v1-translations
+fi
+
+src_dir="$repo_root/src-external/vespera-locale-loader"
+output_dir="$repo_root/src/opt/victronenergy/gui/qml/Vespera"
+output_bin="$output_dir/libvesperalocale.so"
+
+if needs_rebuild "$src_dir" "$output_bin"; then
+	echo "  building vespera-locale-loader..." >&3
+	$src_dir/build-locale-loader
 fi

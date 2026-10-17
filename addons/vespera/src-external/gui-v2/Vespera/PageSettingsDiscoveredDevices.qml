@@ -17,7 +17,7 @@ Page {
 		childId: "Port"
 		sortColumn: VeQItemTableModel.ValueColumn
 	}
-	Vespera.ProgressText {}
+	Vespera.ProgressText {id:progressText}
 
  	GradientListView {
 		id: listview

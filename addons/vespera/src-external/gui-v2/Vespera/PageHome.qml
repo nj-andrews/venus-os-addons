@@ -8,12 +8,12 @@ Page {
 	Component.onDestruction: vesperaManager?.cleanup()
 
 	Vespera.VesperaManager { id: vesperaManager; traceEnabled: true }
-	
-	function installerAccess() {
-		//% "No access"
-		if (Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) return true
-		Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+
+	function dummy_v1_gui_translations() {
+		//% "Move settings to top"
+		_ = qsTrId("vespera_move_settings_to_top")
 	}
+
 
 	GradientListView {
 		id: settingsListView
@@ -25,7 +25,7 @@ Page {
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				onClicked: {
-					if (!installerAccess()) return
+					if (!vesperaManager.installerAccess()) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsPackages.qml", {
 						title: text, vesperaManager: vesperaManager })
 				}
@@ -36,7 +36,7 @@ Page {
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				onClicked: {
-					if (!installerAccess()) return
+					if (!vesperaManager.installerAccess()) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeeds.qml", {
 						title: text, vesperaManager: vesperaManager })
 				}
@@ -50,7 +50,7 @@ Page {
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				onClicked: {
-					if (!installerAccess()) return
+					if (!vesperaManager.installerAccess()) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsDevicesList.qml", {
 						title: text, vesperaManager: vesperaManager })
 				}
@@ -61,7 +61,7 @@ Page {
 			// 	onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {title: text,vesperaManager: vesperaManager})
 			// }
 			ListLink {
-				//: "Documentation"
+				// "Documentation"
 				text: qsTrId("pagesettingsgeneral_documentation")
 				url: "https://thespinmaster.github.io/venus-os-addons/"
 			}

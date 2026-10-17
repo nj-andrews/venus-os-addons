@@ -116,22 +116,22 @@ installer_lib_initialize() {
 	PACKAGE_DBUS_LIST_FILE="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.dbus-list"
 
 	[[ -f /var/lock/vespera-gui ]] && RUNNING_FROM_GUI=1 || RUNNING_FROM_GUI=0
-	[[ -f "$VESPERA_WORKING_DIR/$VESPERA_VENUS_FIRMWARE_CHANGED_FILE" ]] && FIRMWARE_CHANGED=1 || FIRMWARE_CHANGED=0
 
-	if [[ $PACKAGE_ACTION == "configure" ]]; then
-		if [[ $FIRMWARE_CHANGED == 1 ]]; then
-			PACKAGE_ACTION="firmware-changed"
-		else
-			PACKAGE_VERSION_NEW="$(awk '/Version:/ {print $2}' "${PACKAGE_DATA_INFO_DIR}/${PACKAGE_NAME}".control 2>/dev/null)"
-			PACKAGE_VERSION_CURRENT="$(vespera status "$PACKAGE_NAME" 2>/dev/null | awk '/Version:/ {print $2}' 2>/dev/null)"
+	if [[ $PACKAGE_ACTION == "configure" || $PACKAGE_ACTION == "firmware-changed" ]]; then
+		echo "PACKAGE_ACTION AAA=$PACKAGE_ACTION"
+		PACKAGE_VERSION_NEW="$(awk '/Version:/ {print $2}' "${PACKAGE_DATA_INFO_DIR}/${PACKAGE_NAME}".control 2>/dev/null)"
+		PACKAGE_VERSION_CURRENT="$(vespera status "$PACKAGE_NAME" 2>/dev/null | awk '/Version:/ {print $2}' 2>/dev/null)"
+		if [[ $PACKAGE_ACTION != "firmware-changed" ]]; then
 			[[ -z "$PACKAGE_VERSION_CURRENT" ]] && PACKAGE_ACTION="install" || PACKAGE_ACTION="upgrade-install"
-
 		fi
+		echo "PACKAGE_ACTION BBB=$PACKAGE_ACTION"
 	elif [[ "$PACKAGE_ACTION" == "upgrade" ]]; then
 		PACKAGE_ACTION="upgrade-remove"
+	#elif [[ $PACKAGE_ACTION == "firmware-changed" ]]; then
+
 	fi
 
-	if ! installer_lib_is_remove  && installer_lib_is_upgrade; then
+	if ! installer_lib_is_remove && installer_lib_is_upgrade; then
 		echo_lang "$LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW"
 	fi
 

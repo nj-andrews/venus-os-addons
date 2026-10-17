@@ -17,7 +17,7 @@ __write_dbus_settings_to_dbus_list_file() {
 		"${PACKAGE_DEVICES:-}"
 }
 
-__add_patch_files() {
+__insatll_patch_files() {
 	echo_lang "$LANG_PACKAGE_PATCHING_FILES"
 
 	shopt -s nullglob
@@ -96,14 +96,9 @@ __install() {
 
 	__process_default_conf_files
 
-	[[ -f "${PACKAGE_DATA_INFO_DIR}/buildtime" ]] &&
-		echo_lang "$LANG_PACKAGE_BUILD_TIME_ARG1" "$(< "${PACKAGE_DATA_INFO_DIR}/buildtime")"
-
 	# Phase 1: prepare package DBus manifest
 	__write_dbus_settings_to_dbus_list_file
 	installer_lib_phase_sync_custom_nav_pages "add" || return 1
-
-	__try_call "post_install"
 
 	__add_vespera_startup_scripts
 
@@ -118,13 +113,18 @@ __install() {
 	installer_lib_update_install_list
 	__register_services
 
+	[[ $PACKAGE_NAME == "vespera" ]] &&
+		cp "${VESPERA_ROOT:-}/opt/victronenergy/version" "$VESPERA_VENUS_VERSION_FILE"
+
+	__try_call "post_install"
+
 	echo_lang "$LANG_UPDATING_DATABASE"
 	return 0
 }
 
 __firmware_changed() {
 	installer_lib_log_verbose2 && echo "In installer_lib_firmware_changed"
-	__add_patch_files
+	#__insatll_patch_files
 	__try_call "firmware_changed"
 }
 

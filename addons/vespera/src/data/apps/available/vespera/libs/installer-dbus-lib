@@ -8,7 +8,6 @@ __this_path="$(cd "${__this_path}/.." && pwd)"
 # shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
 source "${VESPERA_ROOT:-}$__this_path/libs/source-lib"
 addsource "libs/dbus-lib"
-addsource "libs/json-lib"
 
 installer_dbus_lib_manifest_init() {
 	local manifest_file="${1:-}"
@@ -45,6 +44,7 @@ installer_dbus_lib_manifest_add_custom_service() {
 	local manifest_file="${1:-}"
 	local package_dbus_name="${2:-}"
 	local package_device="${3:-}"
+	local -n service_count"${4:-}"
 	local service_name display_name entry
 	local service_index=0
 
@@ -61,6 +61,8 @@ installer_dbus_lib_manifest_add_custom_service() {
 		printf '%s\n' "{\"path\":\"/Settings/Vespera/Packages/${package_dbus_name}/DeviceServices/${service_index}/ServiceName\", \"default\":\"${service_name}\"}" >> "$manifest_file"
 		((service_index++))
 	done <<< "$package_device"
+
+	service_count=$service_index
 
 }
 __installer_dbus_lib_manifest_apply_all() {
@@ -84,28 +86,72 @@ installer_dbus_lib_nav_pages_sync() {
 	local plugin_name="${2:-}"
 	local pages="${3:-}"
 	local dbus_path="/Settings/Vespera/CustomNavPages"
-	local json_values=""
-	local page
+	local csv_values=""
+	local page item current qrc_path exists idx csv_out
+	local -a nav_items raw_items filtered_items
 
 	[[ -n "$plugin_name" && -n "$pages" ]] || return 0
 	[[ "$action" == "add" || "$action" == "remove" ]] || return 1
 
-	dbus_lib_get_value "$dbus_path" json_values '' || json_values='[]'
-	if [[ "$json_values" == "" ]]; then
-		json_values='[]'
+	dbus_lib_get_value "$dbus_path" csv_values '' || csv_values=''
+
+	if [[ -n "$csv_values" ]]; then
+		IFS=',' read -r -a raw_items <<< "$csv_values"
+		for item in "${raw_items[@]}"; do
+			item="${item#"${item%%[![:space:]]*}"}"
+			item="${item%"${item##*[![:space:]]}"}"
+			[[ -n "$item" ]] || continue
+
+			exists=0
+			for current in "${nav_items[@]}"; do
+				if [[ "$current" == "$item" ]]; then
+					exists=1
+					break
+				fi
+			done
+
+			if [[ "$exists" -eq 0 ]]; then
+				nav_items+=("$item")
+			fi
+		done
 	fi
 
 	for page in ${pages}; do
-		local qrc_path="qrc:/${plugin_name}/${page}.qml"
+		qrc_path="qrc:/${plugin_name}/${page}.qml"
 		if [[ "$action" == "add" ]]; then
-			json_values=$(json_lib_ary_add_unique_items "$json_values" "$qrc_path")
+			exists=0
+			for current in "${nav_items[@]}"; do
+				if [[ "$current" == "$qrc_path" ]]; then
+					exists=1
+					break
+				fi
+			done
+
+			if [[ "$exists" -eq 0 ]]; then
+				nav_items+=("$qrc_path")
+			fi
 		else
-			json_values=$(json_lib_ary_remove_items "$json_values" "$qrc_path")
+			filtered_items=()
+			for current in "${nav_items[@]}"; do
+				if [[ "$current" != "$qrc_path" ]]; then
+					filtered_items+=("$current")
+				fi
+			done
+			nav_items=("${filtered_items[@]}")
 		fi
 	done
 
-	dbus_lib_set_string_value "$dbus_path" "$json_values" 1>/dev/null 2>/dev/null || {
-		dbus -y com.victronenergy.settings / AddSetting "${dbus_path%/*}" "${dbus_path##*/}" "$json_values" s 0 0
+	csv_out=''
+	for idx in "${!nav_items[@]}"; do
+		if [[ -z "$csv_out" ]]; then
+			csv_out="${nav_items[$idx]}"
+		else
+			csv_out+", ${nav_items[$idx]}"
+		fi
+	done
+
+	dbus_lib_set_string_value "$dbus_path" "$csv_out" 1>/dev/null 2>/dev/null || {
+		dbus -y com.victronenergy.settings / AddSetting "${dbus_path%/*}" "${dbus_path##*/}" "$csv_out" s 0 0
 	}
 }
 

@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/data/dev/addons/vespera/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QMLINTEGRATION_LIB -DQT_QML_LIB -Dvesperalocale_EXPORTS -I/data/dev/addons/vespera/build/vesperalocale_autogen/include -I/data/dev/addons/vespera/src-external/vespera-locale-loader/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtQmlIntegration -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork -g -std=gnu++17 -fPIC -fPIC -o CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o -c /data/dev/addons/vespera/build/vesperalocale_autogen/mocs_compilation.cpp",
+  "file": "/data/dev/addons/vespera/build/vesperalocale_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/data/dev/addons/vespera/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QMLINTEGRATION_LIB -DQT_QML_LIB -Dvesperalocale_EXPORTS -I/data/dev/addons/vespera/build/vesperalocale_autogen/include -I/data/dev/addons/vespera/src-external/vespera-locale-loader/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtQmlIntegration -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork -g -std=gnu++17 -fPIC -fPIC -o CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o -c /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp",
+  "file": "/data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp",
+  "output": "CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o"
+},
+{
+  "directory": "/data/dev/addons/vespera/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_QMLINTEGRATION_LIB -DQT_QML_LIB -Dvesperalocale_EXPORTS -I/data/dev/addons/vespera/build/vesperalocale_autogen/include -I/data/dev/addons/vespera/src-external/vespera-locale-loader/src -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtQml -isystem /usr/include/x86_64-linux-gnu/qt6/QtQmlIntegration -isystem /usr/include/x86_64-linux-gnu/qt6/QtNetwork -g -std=gnu++17 -fPIC -fPIC -o CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o -c /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp",
+  "file": "/data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp",
+  "output": "CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o"
+}
+]

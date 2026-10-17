@@ -14,11 +14,18 @@ __vespera_path="$(cd "${__vespera_path}/.." && pwd)"
 source "$__vespera_path/libs/source-lib"
 addsource "conf/vespera.conf"
 addsource "libs/opkg-lib"
+addsource "libs/lang-lib" "$__vespera_path"
 
 vespera_lib_log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
 vespera_lib_log_verbose3() { [[ "${VESPERA_VERBOSITY}" -gt 2 ]]; }
 
-vespera_lib_index() {	[[ -f "$VESPERA_INDEXER" ]] && "$VESPERA_INDEXER"; }
+vespera_lib_index() {
+	opkg_ensure_combined_conf_file
+	[[ -f "$VESPERA_INDEXER" ]] && "$VESPERA_INDEXER" "$VESPERA_VERBOSITY";
+}
+vespera_lib_app_enabled() {
+	test -e "/data/apps/enabled/${1}"
+}
 
 vespera_lib_set_conf_value() {
   local name="$1"
@@ -62,8 +69,8 @@ __vespera_lib_cleanup() {
 
 	___remove_file_if_empty "$VESPERA_DATA_DIR/status"
 	rmdir "$VESPERA_DATA_DIR/info" 2>/dev/null
-	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/indexer.md5"
-	rm -f "$PACKAGE_DBUS_LIST_FILE" "$VESPERA_DATA_DIR/opkg.conf"
+	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/indexer.md5" \
+					"$VESPERA_DATA_DIR/opkg.conf" "$VESPERA_DATA_DIR/venus-version"
 
 	find "$VESPERA_DATA_DIR" -type d -empty -exec rmdir -p {} \; 2>/dev/null
 
@@ -93,7 +100,7 @@ vespera_lib_pre_install() {
 
 	grep -qE " / .* rw[ ,]" /proc/mounts && echo "WARNING: file system is read-write";
 
-	echo "Vespera version $VESPERA_VERSION"
+	echo "Vespera: $VESPERA_VERSION"
 	if vespera_lib_log_verbose2; then
 		echo "Args: $*"
 		echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/$VESPERA_VERBOSITY_FILE"
@@ -135,6 +142,7 @@ __vespera_lib_post_install() {
 		echo "$2"
 		local output_vars; output_vars="$("$__vespera_path/scripts/$action" "${app}")"
 		eval "$output_vars"
+		# shellcheck disable=SC2154 # vars are set by eval call
 		venus_services_to_restart+=("${_venus_services_to_restart[@]}")
 		# shellcheck disable=SC2154
 		[[ $refresh_devices == false ]] && refresh_devices="$_refresh_devices"
@@ -156,9 +164,9 @@ __vespera_lib_post_install() {
 				venus_services_to_restart+=("$VESPERA_WORKING_DIR/$app.installer-services")
 				;;
 			disabled)
-				__do_enable_disable "disable" "Installed ${app} (disabled)";;
+				__do_enable_disable "disable" "$(echo_lang "$LANG_INSTALLED_ARG1_DISABLED")";;
 			enabled)
-				__do_enable_disable "enable" "Enabling ${app}"
+				__do_enable_disable "enable" "$(echo_lang "$LANG_INSTALLED_ARG1_ENABLING")"
 				;;
 		esac
 
@@ -238,5 +246,5 @@ vespera_lib_enable_disable() {
   __vespera_lib_restart_venus_services _venus_services_to_restart
 	[[ $_refresh_devices == true ]] && vespera_lib_refresh_devices
 
-	
+
 }

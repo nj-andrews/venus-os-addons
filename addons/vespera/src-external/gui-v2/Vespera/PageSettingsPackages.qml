@@ -6,32 +6,33 @@ Page {
 	id: root
 	//% "Packages"
 	title: qsTrId("vespera_packages")
-	tryPop: vesperaManager.tryPop
+	tryPop: vesperaManager?.tryPop
 
-	required property Vespera.VesperaManager vesperaManager;property bool _loading: true
+	required property Vespera.VesperaManager vesperaManager
 
 	Component.onCompleted: root.refreshPackages()
 
 	Vespera.ProgressText {id: progressText}
+
 	Label {
 		id: loadingLabel
 		//% "Loading..."
 		text: qsTrId("vespera_loading")
-		visible: root._loading
+		visible: root.vesperaManager.running
 		anchors.centerIn: parent
 		font.pixelSize: Theme.font_size_body3
 	}
 	ProgressBar {
-		visible: loadingLabel.visible
+		visible: root.vesperaManager.running
 		width: parent.width / 2
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.top: loadingLabel.bottom
 		indeterminate : true
 	}
 	GradientListView {
-		id: settingsListView
+		id: packagesListview
 		clip: true
-		visible : !root._loading
+		visible : !root.vesperaManager.running
 		anchors { top: parent.top; left: parent.left; right: parent.right; bottom: actionsRow.top }
 
 		delegate: ListNavigation {
@@ -54,7 +55,7 @@ Page {
 			indicatorColor: modelData.enabled === false
 							 ? Qt.rgba(_baseIndicatorColor.r, _baseIndicatorColor.g, _baseIndicatorColor.b, _baseIndicatorColor.a * 0.5)
 							 : _baseIndicatorColor
-			text: formatName(modelData)
+			text: root.formatName(modelData)
 			caption: modelData.description
 			onClicked: {
 				if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
@@ -66,37 +67,37 @@ Page {
 					{ title: text,
 						vesperaManager: root.vesperaManager,
 						model: root.vesperaManager.snapshotObject(modelData),
-						loadPackagesModelCallback: root.onLoadPackagesModel,
+						packageUpdatedCallback: root.onPackageUpdated,
 						formatNameCallback: formatName}
 				)
 			}
 		}
 	}
 
-	function formatName(modelData) {
-    return modelData.packageName
+	function formatName(model) {
+    return model.packageName
         .replace(/[-_]+/g, " ")
         .replace(/\b\w/g, function(c) { return c.toUpperCase() })
-				+ "  " + modelData.installedVersion
+				+ "  " + model.installedVersion
 	}
 	function refreshPackages(update) {
-		_loading = true
-		vesperaManager.loadPackages(update, function(result) {
-				if (result.success)
-					onLoadPackagesModel(result.data)
-				_loading = false
-			})
+		root.vesperaManager.loadPackages(update, function(result) {
+			if (result.success)
+				packagesListview.model = result.data;
+		})
 	}
 
-	function onLoadPackagesModel(packages, refreshPackageName, refreshModelCallback) {
-		settingsListView.model = packages;
-
-		// Refresh the model (from PageSettingsPackageInstall.qml)
-		if (refreshModelCallback)
-			for (var i = 0; i < packages.length; i++) {
-				if (packages[i].packageName == refreshPackageName) {
-					refreshModelCallback(packages[i])}
-		}
+	function onPackageUpdated(refreshPackageName, refreshModelCallback) {
+		vesperaManager.loadPackages(false, function(result) {
+				if (result.success)
+					packagesListview.model = result.data;
+					for (var i = 0; i < packagesListview.model.length; i++) {
+						if (packagesListview.model[i].packageName == refreshPackageName) {
+							refreshModelCallback(packagesListview.model[i])
+							break
+						}
+					}
+			})
 	}
 
 	Vespera.ActionsRow {

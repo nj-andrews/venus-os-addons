@@ -7,12 +7,13 @@ MbPage {
 	required property VesperaManager vesperaManager
 	property string service: "com.victronenergy.vespera"
 	property string settings: "com.victronenergy.settings/Settings/Vespera"
+	function qsTrEx(str) { return qsTranslate("PageSettingsModbusDevices", str)}
 
 	function scan() {
 		if (vesperaManager.running)
 			return
 
-		progressText.start("Scanning")
+		progressText.start(qsTrEx("Scanning"))
 		vesperaManager.usbScan(function (result) {
 			progressText.stop()
 		})
@@ -23,23 +24,22 @@ MbPage {
 	model: VisibleItemModel {
 		MbOK {
 			id: scanItem
-			description: qsTr("Scan for devices")
-			value: progressText.running ? progressText.text : qsTr("Press to scan")
+			description: qsTrEx("Scan for devices")
+			value: progressText.running ? progressText.text : qsTrEx("Press to scan")
 			onClicked: scan()
 			show: userHasWriteAccess
 		}
 
 		MbSubMenu {
 			id: savedDevices
-			description: qsTr("Saved devices")
+			description: qsTrEx("Saved devices")
 			item.value: subpage.model.count;
 			subpage: VesperaPageSavedDevices {title: savedDevices.description; vesperaManager: root.vesperaManager}
 		}
 
 		MbSubMenu {
 			id: discoveredDevices
-			description: qsTr("Discovered devices")
-			//item.bind: service + "/DiscoveredCount"
+			description: qsTrEx("Discovered devices")
 			item.value: subpage.model.count
 			subpage: VesperaPageDiscoveredDevices {
 					title: discoveredDevices.description

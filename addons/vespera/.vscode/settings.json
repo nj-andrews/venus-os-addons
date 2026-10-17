@@ -8,5 +8,6 @@
 	],
 	"files.associations": {
 		"*.bats": "shellscript"
-	}
+	},
+	"cmake.sourceDirectory": "/data/dev/addons/vespera/src-external/vespera-locale-loader"
 }

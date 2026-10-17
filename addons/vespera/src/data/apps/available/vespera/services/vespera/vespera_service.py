@@ -57,6 +57,8 @@ class VesperaService:
 				)
 
 				self._dbusservice.add_path("/ServiceName", "vespera")
+				# TODO:ProductVersion
+				self._dbusservice.add_path("/ProductVersion", "1.1")
 
 				self._dbusservice.add_path("/Request/ArgsJson", "[]", writeable=True, valuetype=dbus.String)
 				self._dbusservice.add_path(

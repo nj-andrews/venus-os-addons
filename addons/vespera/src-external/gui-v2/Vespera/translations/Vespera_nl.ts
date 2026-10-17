@@ -12,7 +12,6 @@
     <message id="pagesettingsgeneral_documentation">
         <location filename="../PageHome.qml" line="65"/>
         <source></source>
-        <extracomment>&quot;Documentation&quot;</extracomment>
         <translation></translation>
     </message>
     <message id="vespera_feeds">
@@ -21,6 +20,10 @@
         <source>Feeds</source>
         <translation>Feeds</translation>
     </message>
+    <message id="vespera_settings_to_top">
+        <source>Move settings to top</source>
+        <translation type="obsolete">Instellingen naar boven verplaatsen</translation>
+    </message>
     <message id="vespera_custom_devices">
         <location filename="../PageHome.qml" line="49"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
@@ -28,12 +31,12 @@
         <translation>Aangepaste apparaten</translation>
     </message>
     <message id="page_settings_modbus_scan_for_devices">
-        <location filename="../PageSettingsDevicesList.qml" line="59"/>
+        <location filename="../PageSettingsDevicesList.qml" line="54"/>
         <source></source>
         <translation></translation>
     </message>
     <message id="page_settings_modbus_saved_devices">
-        <location filename="../PageSettingsDevicesList.qml" line="75"/>
+        <location filename="../PageSettingsDevicesList.qml" line="67"/>
         <source></source>
         <translation></translation>
     </message>
@@ -48,39 +51,39 @@
         <translation>USB-serieelapparaat toevoegen</translation>
     </message>
     <message id="vespera_device_options">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="103"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="102"/>
         <source>Device Options</source>
         <translation>Apparaatopties</translation>
     </message>
     <message id="vespera_serial_device_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="112"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="113"/>
         <source>Serial Device Service</source>
         <translation>Seriële apparaatservice</translation>
     </message>
     <message id="vespera_press_to_select_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="115"/>
         <source>Press to select service</source>
         <translation>Druk om service te selecteren</translation>
     </message>
     <message id="vespera_device_properties">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="126"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="127"/>
         <location filename="../PageSettingsSavedDevice.qml" line="37"/>
         <source>Device Properties</source>
         <oldsource>Device properties</oldsource>
-        <translation type="unfinished">Apparaateigenschappen</translation>
+        <translation>Apparaateigenschappen</translation>
     </message>
     <message id="vespera_port">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="130"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="131"/>
         <source>Port</source>
         <translation>Poort</translation>
     </message>
     <message id="vespera_adding_device">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="175"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="170"/>
         <source>Adding Device</source>
         <translation>Apparaat toevoegen</translation>
     </message>
     <message id="vespera_added_device_success">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="190"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="185"/>
         <source>Device Added Successfully
 The service will start shortly...</source>
         <translation>Apparaat toegevoegd
@@ -122,80 +125,82 @@ De service start binnenkort...</translation>
         <translation>Als je op Ja klikt, worden de instellingen van dit apparaat permanent verwijderd</translation>
     </message>
     <message id="vespera_package_upgrade">
-        <location filename="../PageSettingsPackageInstall.qml" line="18"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="19"/>
         <source>Upgrade</source>
         <translation>Upgraden</translation>
     </message>
-    <message id="vespera_package_intsall">
-        <location filename="../PageSettingsPackageInstall.qml" line="20"/>
+    <message id="vespera_package_install">
+        <location filename="../PageSettingsPackageInstall.qml" line="21"/>
         <source>Install</source>
         <translation>Installeren</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="67"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="62"/>
         <source>Installed</source>
         <translation>Geïnstalleerd</translation>
     </message>
+    <message id="vespera_none">
+        <location filename="../PageSettingsPackageInstall.qml" line="69"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="87"/>
+        <source></source>
+        <oldsource>None</oldsource>
+        <translation type="unfinished">Geen</translation>
+    </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="85"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
         <source>Available</source>
         <translation>Beschikbaar</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="107"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="102"/>
         <source>Feed</source>
         <translation>Feed</translation>
     </message>
     <message id="vespera_disable">
-        <location filename="../PageSettingsPackageInstall.qml" line="181"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="170"/>
         <source>Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>Uitschakelen</translation>
     </message>
     <message id="vespera_enable">
-        <location filename="../PageSettingsPackageInstall.qml" line="183"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="172"/>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>Inschakelen</translation>
     </message>
     <message id="vespera_remove">
         <location filename="../PageSettingsFeedEdit.qml" line="25"/>
         <source>Remove</source>
-        <translation type="unfinished">Verwijderen</translation>
+        <translation>Verwijderen</translation>
     </message>
     <message id="vespera_loading">
-        <location filename="../PageSettingsPackageInstall.qml" line="124"/>
-        <location filename="../PageSettingsFeeds.qml" line="32"/>
-        <location filename="../PageSettingsPackages.qml" line="19"/>
+        <location filename="../PageSettingsFeeds.qml" line="18"/>
+        <location filename="../PageSettingsPackages.qml" line="20"/>
         <source>Loading...</source>
         <translation>Laden...</translation>
     </message>
     <message id="listItem_no_access">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="154"/>
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="166"/>
-        <location filename="../PageHome.qml" line="15"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="28"/>
-        <location filename="../PageSettingsDevicesList.qml" line="27"/>
-        <location filename="../PageSettingsDevicesList.qml" line="45"/>
-        <location filename="../PageSettingsDevicesList.qml" line="65"/>
-        <location filename="../PageSettingsDevicesList.qml" line="81"/>
-        <location filename="../PageSettingsDevicesList.qml" line="95"/>
-        <location filename="../PageSettingsFeeds.qml" line="19"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="161"/>
         <location filename="../PageSettingsSavedDevice.qml" line="66"/>
         <location filename="../PageSettingsSavedDevice.qml" line="77"/>
-        <location filename="../PageSettingsPackages.qml" line="61"/>
-        <location filename="../PageSettingsFeedEdit.qml" line="109"/>
-        <location filename="../PageSettingsFeedEdit.qml" line="122"/>
-        <location filename="../PageSettingsFeedEdit.qml" line="159"/>
-        <location filename="../PageSettingsFeedEdit.qml" line="182"/>
+        <location filename="../PageSettingsPackages.qml" line="62"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="108"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="121"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="158"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="179"/>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
-        <source></source>
-        <oldsource>No access</oldsource>
-        <translation></translation>
+        <location filename="../components/VesperaManager.qml" line="29"/>
+        <source>No access</source>
+        <translation type="unfinished"></translation>
     </message>
     <message id="vespera_add_new_feed">
-        <location filename="../PageSettingsFeeds.qml" line="91"/>
-        <location filename="../PageSettingsFeeds.qml" line="97"/>
+        <location filename="../PageSettingsFeeds.qml" line="92"/>
+        <location filename="../PageSettingsFeeds.qml" line="98"/>
         <source>Add New Feed</source>
         <translation>Nieuwe feed toevoegen</translation>
+    </message>
+    <message id="vespera_edit_feed">
+        <location filename="../PageSettingsFeedEdit.qml" line="8"/>
+        <source></source>
+        <translation type="unfinished">Geen</translation>
     </message>
     <message id="vespera_save">
         <location filename="../PageSettingsFeedEdit.qml" line="23"/>
@@ -203,60 +208,60 @@ De service start binnenkort...</translation>
         <translation>Opslaan</translation>
     </message>
     <message id="vespera_feed_name">
-        <location filename="../PageSettingsFeedEdit.qml" line="52"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="51"/>
         <source>Feed name</source>
         <translation>Feednaam</translation>
     </message>
     <message id="vespera_feed_url">
-        <location filename="../PageSettingsFeedEdit.qml" line="73"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="72"/>
         <source>Feed Url</source>
         <translation>Feed-URL</translation>
     </message>
     <message id="vespera_invalid_feed_name">
-        <location filename="../PageSettingsFeedEdit.qml" line="138"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="137"/>
         <source>%1 is an invalid feed name</source>
         <translation>%1 is een ongeldige feednaam</translation>
     </message>
     <message id="vespera_invalid_url">
-        <location filename="../PageSettingsFeedEdit.qml" line="150"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="149"/>
         <source>%1 is an invalid feed URL</source>
         <translation>%1 is een ongeldige feed-URL</translation>
     </message>
     <message id="vespera_removing">
-        <location filename="../PageSettingsFeedEdit.qml" line="175"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="172"/>
         <source>Removing...</source>
         <translation>Verwijderen...</translation>
     </message>
-    <message id="vespera_edit_feed">
-        <location filename="../PageSettingsFeedEdit.qml" line="209"/>
-        <source>Edit Feed</source>
-        <translation>Feed bewerken</translation>
-    </message>
     <message id="vespera_saving">
-        <location filename="../PageSettingsFeedEdit.qml" line="216"/>
+        <location filename="../PageSettingsFeedEdit.qml" line="214"/>
         <source>Saving...</source>
         <translation>Opslaan...</translation>
     </message>
     <message id="vespera_refresh">
-        <location filename="../PageSettingsPackages.qml" line="109"/>
+        <location filename="../PageSettingsPackages.qml" line="110"/>
         <source>Refresh</source>
         <translation>Vernieuwen</translation>
     </message>
+    <message id="vespera_move_settings_to_top">
+        <location filename="../PageHome.qml" line="14"/>
+        <source>Move settings to top</source>
+        <translation>Instellingen naar boven verplaatsen</translation>
+    </message>
     <message id="vespera_wait_for_operation_to_finish">
-        <location filename="../components/VesperaManager.qml" line="25"/>
+        <location filename="../components/VesperaManager.qml" line="21"/>
         <source>Please wait for the operation to finish</source>
         <translation>Wacht tot de bewerking is voltooid</translation>
     </message>
     <message id="vespera_finalize_install">
-        <location filename="../components/VesperaManager.qml" line="82"/>
+        <location filename="../components/VesperaManager.qml" line="91"/>
         <source>Finalizing. The UI will restart shortly</source>
         <oldsource>Finiazing install. The UI will restart shortly</oldsource>
-        <translation type="unfinished">Installatie wordt afgerond. De interface wordt binnenkort opnieuw gestart</translation>
+        <translation>Installatie wordt afgerond. De interface wordt binnenkort opnieuw gestart</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="101"/>
+        <location filename="../components/VesperaManager.qml" line="110"/>
         <source>Operation failed</source>
-        <translation type="unfinished">Bewerking mislukt</translation>
+        <translation>Bewerking mislukt</translation>
     </message>
     <message id="vespera_no_devices_saved">
         <location filename="../PageSettingsSavedDevices.qml" line="24"/>

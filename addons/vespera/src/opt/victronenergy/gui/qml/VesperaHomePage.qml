@@ -4,13 +4,11 @@ import "utils.js" as Utils
 
 MbPage {
 	id: root
-	title: qsTr("Vespera")
+	title: "Vespera"
 
-	property var VesperaManager: VesperaManager {
+	property var vesperaManager: VesperaManager {
 		id: vesperaManager
-		function showToastNotification(level, message, duration) {
-			toast.createToast(message, duration);
-		}
+		toastNotifier: toast
 	}
 
 	Component.onDestruction: {
@@ -20,22 +18,30 @@ MbPage {
 
 	model: VisibleItemModel {
 		MbSubMenu {
-			description: qsTr("Packages")
+			description: qsTrId("vespera_packages")
 			subpage: Component { VesperaPageSettingsPackages {vesperaManager: root.vesperaManager} }
 		}
 		MbSubMenu {
-			description: qsTr("Feeds")
+			description: qsTrId("vespera_feeds")
 			subpage: Component { VesperaPageSettingsFeeds {vesperaManager: root.vesperaManager} }
 		}
 
 		MbSubMenu {
 			id:cdi
-			description: qsTr("Custom Devices")
+			description: qsTrId("vespera_custom_devices")
 			subpage: Component {VesperaPageSettingsDevices {title:cdi.description; vesperaManager:root.vesperaManager} }
 		}
 
+		MbItemValue {
+			description: qsTrId("vespera_version")
+			item {
+				bind: vesperaManager.serviceUid + "/ProductVersion"
+				invalidate: false
+			}
+		}
+
 		// MbSubMenu {
-		// 	description: qsTr("Settings")
+		// 	description: qsT("Settings")
 		// 	subpage: Component { VesperaSettingsPage {} }
 		// }
 

@@ -3,17 +3,24 @@ import com.victron.velib 1.0
 
 MbPage {
 	id: root
-	title: "Add USB serial device"
+	title: qsTrId("vespera_add_usb_serial_device")
 
 	required property VesperaManager vesperaManager
 	required property string serviceUid
 	required property string port
 	required property var deviceAddedCallback
 
-	property string selectedServiceTypePath: ""
+	property string selectedDeviceServiceName: ""
 	property var addingDeviceText: progressText.running ? progressText.text : ""
 	property bool deviceAdded: deviceAddedCallback !== undefined ? deviceAddedCallback() : false
-	property var usbProps: usbPropsItem.value ? JSON.parse(usbPropsItem.value) : {}
+	property var jsonUsbProps: usbPropsItem.value != undefined ? usbPropsToFormatedJson(usbPropsItem.value) : {}
+
+	function usbPropsToFormatedJson(str) {
+		return str.split(",").map(function(p) {
+			var a = p.split("="), n = a[0].replace(/^ID_|_ID$/g, "").replace(/[-_]+/g, " ")
+			return {name: n.charAt(0).toUpperCase() + n.slice(1).toLowerCase(), value: a.slice(1).join("=")}
+		})
+	}
 
 	pageToolbarHandler: addDeviceToolbarHandler
 
@@ -27,20 +34,19 @@ MbPage {
 			MbItemOptions {
 				id: selectServiceType
 
-				description: qsTr("Serial Device Service")
-				unknownOptionText: qsTr("Press to select service")
-				message: root.serviceTypesModel?.length === 0 ? qsTr("No custom devices currently installed") : ""
-				value: root.selectedServiceTypePath
+				description: qsTrId("vespera_serial_device_service")
+				unknownOptionText: qsTrId("vespera_press_to_select_service")
+				value: root.selectedDeviceServiceName
 				onOptionSelected: function (newValue) { root.onSerialDeviceServiceSelected(newValue) }
 				//Fix for spacebar not working after DelegateModel use!
 				Keys.onSpacePressed: { edit() }
 			}
-			MbItemRow { description: qsTr("Port")
+			MbItemRow { description: qsTrId("vespera_port")
 				values: [MbTextBlock { item.text: root.port} ]}
 		}
 
 		DelegateModel {
-			model: root.usbProps
+			model: root.jsonUsbProps
 			delegate: MbItemRow { description: modelData.name
 				values: [MbTextBlock { item.text: modelData.value} ]}
 		}
@@ -50,55 +56,120 @@ MbPage {
 	VesperaProgressText { id: progressText}
 	Component  { id: mbOptionFactory; MbOption {}}
 
-	VesperaDbusChildModel {
-		id: customDevices
-		uid: "dbus/com.victronenergy.settings/Settings/Vespera/Devices"
-		childId: "ProductName"
-		valueDelegate: function (model) {
-			return mbOptionFactory.createObject(root, {description:model.value, value: model.buddyId})
+	VeQItemSortTableModel {
+		id: enabledDeviceServices
+		dynamicSortFilter: true
+		filterRole: VeQItemTableModel.UniqueIdRole
+		filterRegExp: "\\/Packages\\/[^/]+\\/(DeviceServices\\/[0-9]+\\/(DisplayName|ServiceName)|Enabled)$"
+
+		model: VeQItemTableModel {
+			uids: ["dbus/com.victronenergy.settings/Settings/Vespera/Packages"]
+			flags: VeQItemTableModel.AddAllChildren |
+					VeQItemTableModel.AddNonLeaves |
+					VeQItemTableModel.DontAddItem
 		}
-		//MbOptions uses list<MbOption> so we need this hack
-		onValuesChanged: selectServiceType.possibleValues = Array.prototype.slice.call(values)
+		filterFlags: VeQItemSortTableModel.FilterOffline
+
+		Component.onCompleted: enabledDeviceServices.updateAvailableServices()
+		onRowCountChanged: enabledDeviceServices.updateAvailableServices()
+
+		function updateAvailableServices() {
+			var byServiceMap = {}
+
+			for (var row = 0; row < rowCount; row++) {
+				var idx = index(row, VeQItemTableModel.ValueColumn)
+				var uid = data(idx, VeQItemTableModel.UniqueIdRole)
+				var value = data(idx, VeQItemTableModel.ValueRole)
+				if (/\/Packages\/[^/]+\/Enabled$/.test(uid)) {
+					var packageBase = uid.replace(/\/Enabled$/, "")
+					if (!byServiceMap[packageBase])
+						byServiceMap[packageBase] = { enabled: false }
+					byServiceMap[packageBase].enabled = (Number(value) === 1)
+					// console.log( "enabled=",byServiceMap[packageBase].enabled)
+					continue
+				}
+				var serviceBase = ""
+				if (/\/DeviceServices\/[0-9]+\/(DisplayName|ServiceName)$/.test(uid))
+					serviceBase = uid.replace(/\/(DisplayName|ServiceName)$/, "")
+
+				if (serviceBase) {
+					if (!byServiceMap[serviceBase])
+						byServiceMap[serviceBase] = { packageBase: serviceBase.replace(/\/DeviceServices\/[0-9]+$/, ""),displayName: "", serviceName: "" }
+
+					if (/\/DisplayName$/.test(uid))
+						byServiceMap[serviceBase].displayName = value
+					else if (/\/ServiceName$/.test(uid))
+						byServiceMap[serviceBase].serviceName = value
+				}
+			}
+
+			var availableServices = Object.keys(byServiceMap)
+					.map(function(base) { return byServiceMap[base] })
+					.filter(function(s) {
+							return s.serviceName &&
+										s.packageBase &&
+										byServiceMap[s.packageBase] &&
+										byServiceMap[s.packageBase].enabled === true
+					})
+
+			var options = availableServices.map(function(s) {
+					return mbOptionFactory.createObject(root, {
+							description: s.displayName || s.serviceName,
+							value: s.serviceName
+					})
+			})
+			selectServiceType.possibleValues = options
+
+			if (!root.selectedDeviceServiceName &&  availableServices.length > 0)
+				root.selectedDeviceServiceName = availableServices[0].serviceName
+		}
 	}
 
 	function onSerialDeviceServiceSelected(newValue)	{
-		var changed = root.selectedServiceTypePath != "" && root.selectedServiceTypePath != newValue
-		root.selectedServiceTypePath = newValue
+		var changed = root.selectedDeviceServiceName != "" && root.selectedDeviceServiceName != newValue
+		root.selectedDeviceServiceName = newValue
 	}
+
 
 	function addDevice() {
-		if (root.deviceAdded || !root.selectedServiceTypePath)
+		// if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
+		// 	Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+		// 	return
+		// }
+		if (progressText.running || !root.selectedDeviceServiceName)
 			return
 
-		var checkStable = 1
+		//% "Adding Device"
+		var addingDevice = qsTrId("vespera_adding_device")
+		progressText.start(addingDevice)
 
-		progressText.start("Adding Device")
-
+		// var sid = root.serviceUid.split('/').pop()
+		// sid = sid.replace(/^sid_/, "");
+		// console.log("BBB:",root.selectedDeviceServiceName)
 		root.vesperaManager.bindDeviceToService(
-			deviceProps.hash, deviceProps.port, root.selectedServiceTypePath, checkStable,
+			root.port, root.selectedDeviceServiceName,
 			function(result) {
-				progressText.stop()
-				if (result.success) {
-						deviceAddedCallback(true)
-					toast.createToast("Device Added Successfully\nThe service will start shortly...", 5000)
+				if (progressText)
+					progressText.stop()
+
+				if (result) {
+					Global.pageManager.popPage()
+					//% "Device Added Successfully\nThe service will start shortly..."
+					var successMessage = qsTrId("vespera_added_device_success")
+					Global.showToastNotification(VenusOS.Notification_Info, successMessage, 5000)
 				}
 			}
+
 		)
-		//pageStack.pop();
-	}
-	function cancel() {
-		pageStack.pop();
 	}
 
 	ToolbarHandler {
 		id: addDeviceToolbarHandler
 	  leftText: progressText.running
 			? root.addingDeviceText
-		 	: !root.deviceAdded && root.selectedServiceTypePath
-				? qsTr("Save")
+		 	: !root.deviceAdded && root.selectedDeviceServiceName
+				? qsTranslate("PageSettingsModbusDevices", "Add")
 				: ""
-		rightText: qsTr("Cancel")
 		function leftAction() { root.addDevice() }
-		function rightAction() { root.cancel() }
 	}
 }

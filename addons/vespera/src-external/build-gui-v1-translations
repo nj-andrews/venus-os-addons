@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "${script_dir}/.." && pwd)"
+translations_dir="${repo_root}/src-external/gui-v2/Vespera/translations"
+output_dir="${repo_root}/src/opt/victronenergy/gui/qml/Vespera/lang"
+
+if [[ -x "/usr/lib/qt6/bin/lrelease" ]]; then
+  export PATH="/usr/lib/qt6/bin:${PATH}"
+  export QT_SELECT=qt6
+  lrelease_bin="/usr/lib/qt6/bin/lrelease"
+elif command -v lrelease >/dev/null 2>&1; then
+  lrelease_bin="$(command -v lrelease)"
+else
+  echo "lrelease not found" >&2
+  exit 1
+fi
+
+mkdir -p "${output_dir}"
+
+cd "${translations_dir}"
+
+for ts_file in ./*.ts; do
+  [[ -e "${ts_file}" ]] || continue
+
+  qm_file="${output_dir}/$(basename "${ts_file%.ts}.qm")"
+  echo "Compiling ${ts_file} -> ${qm_file}"
+  "${lrelease_bin}" -idbased -silent "${ts_file}" -qm "${qm_file}"
+done
+
+echo "Built GUI-v1 translations in ${output_dir}"

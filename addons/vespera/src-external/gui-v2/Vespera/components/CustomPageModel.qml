@@ -4,9 +4,8 @@ import "qrc:/Vespera/components/VesperaSingleton.js" as VesperaSingleton
 
 QtObject {
 	id: root
- 
+
 	Component.onCompleted: {
-		//console.debug("CustomPageModel: CREATED", root)
 		if (allPagesLoaded)
 			root.syncPages()
 	}
@@ -40,14 +39,17 @@ QtObject {
 		if (!_customPagesItem.valid)
 			return
 		if (!value)
-			value = "[]"
+			value = ""
 
 		console.debug("CustomPageModel: onCustomPagesChanged:", "pages=", value)
 
-		var customPagesArray = JSON.parse(value)
-		if (!customPagesArray) {
-			console.error("CustomPageModel: Unable to parse data from", value)
-			return
+		var customPagesArray = []
+		if (value) {
+			var parts = value.split(",")
+			for (var i = 0; i < parts.length; ++i) {
+				var item = parts[i].trim()
+				if (item) customPagesArray.push(item)
+			}
 		}
 
 		if (allPagesLoaded == false) {
@@ -82,8 +84,7 @@ QtObject {
 		}
 
 		console.log("CustomPageModel: setting value")
-
-		var pages = JSON.stringify(customPages)
+		var pages = customPages.join(", ")
 		_customPagesItem.setValue(pages)
 
 	}
@@ -181,10 +182,6 @@ QtObject {
 	}
 
 	onAllPagesLoadedChanged: {
-		// console.debug("CustomPageModel: onAllPagesLoadedChanged:",
-		// "allPagesLoaded=", allPagesLoaded,
-		// "hadCustomPages=", _customPageItems.length>0,
-		// )
 
 		VesperaSingleton.setIsReload(true)
 		if (allPagesLoaded == false) {

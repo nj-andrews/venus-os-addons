@@ -4,78 +4,92 @@ import com.victron.velib 1.0
 
 MbPage {
 	id: root
-	title: qsTr("Packages")
+	title: qsTrId("vespera_feeds")
 	//tryPop: vesperaManager.tryPop
-	model: feedsModel
 	pageToolbarHandler: customToolbar
 
 	required property VesperaManager vesperaManager
-	property bool _loading: true
 	property var curPage: pageStack ? (pageStack.currentPage || pageStack.currentItem) : undefined
-	property var feedsModel: []
 
-	onVesperaManagerChanged: {
-		root.refreshFeeds()
+	onVesperaManagerChanged: root.refreshFeeds()
+
+	VesperaProgressBar {
+		text: qsTrId("vespera_loading")
+		visible: vesperaManager.running
+		anchors.centerIn: parent
+		onVisibleChanged: root.listview.visible = !root.vesperaManager.running
 	}
 
 	delegate: VesperaHeaderDescriptionItem {
 		required property var modelData
 		editable: true
-		header: modelData.name
+		header: formatName(modelData)
 		description: "Url: " + modelData.url
 		descriptionWrapMode: Text.WrapAtWordBoundaryOrAnywhere
-		showCompact: vesperaManager.showCompact
-		subpage: Component {
-			VesperaPageSettingsFeedEdit{
-					feedModel: vesperaManager.snapshotObject(modelData)
-					loadFeedsModelCallback: root.loadFeeds
-			}
+		subpage: modelData.builtin ? undefined : editFeedPageComponent
 
+		Component {
+			id: editFeedPageComponent
+			VesperaPageSettingsFeedEdit {
+				feedModel: vesperaManager.snapshotObject(modelData)
+				vesperaManager: root.vesperaManager
+				feedUpdatedCallback: root.onFeedUpdated
+			}
 		}
 	}
-	function loadFeeds(feeds, refreshFeedName, refreshModelCallback) {
-		root.feedsModel = feeds
-		// Refresh the model
-		if (refreshModelCallback)
-			for (var i = 0; i < feeds.length; i++) {
-				if (feeds[i].name == refreshFeedName) {
-					refreshModelCallback(feeds[i])}
-		}
+
+	function formatName(modelData) {
+		return modelData.name
+				.replace(/[-_]+/g, " ")
+				.replace(/\b\w/g, function(c) { return c.toUpperCase() })
 	}
 
 	function refreshFeeds() {
-		_loading = true
+		if (root.vesperaManager == undefined) return
+
 		root.vesperaManager.loadFeeds(false, function(result) {
 			if (result.success)
-				loadFeeds(result.data)
-			_loading = false
+				root.model = result.data
 		})
 	}
+
+	function onFeedUpdated(refreshFeedName, refreshModelCallback) {
+		vesperaManager.loadFeeds(false, function(result) {
+			if (result.success) {
+				root.model = result.data;
+				for (var i = 0; i < root.model.length; i++) {
+					if (root.model[i].feedName == refreshFeedName) {
+						refreshModelCallback(root.model[i])
+						break
+					}
+				}
+			}
+		})
+	}
+
 	Component {
-		id: editFeedPageComponent
+		id: newFeedPageComponent
 		VesperaPageSettingsFeedEdit {}
 	}
 
 	ToolbarHandler {
 		id: customToolbar
-		rightText: "Add New Feed"
+		rightText: qsTrId("vespera_add_new_feed")
 
 		function rightAction() {
 			if (root.vesperaManager.running) {
 				return
 			}
 
-			var feedModel = {name:"", description:"", builtin:false}
-			var page = editFeedPageComponent.createObject(
-				pageStack, {
-					vesperaManager: root.vesperaManager,
-					isNew: true,
-					feedModel: feedModel,
-					loadFeedsModelCallback: root.loadFeeds
-					});
-
+			var feedModel = { name: "", description: "", builtin: false }
+			var page = newFeedPageComponent.createObject(pageStack, {
+				isNew: true,
+				feedModel: feedModel,
+				vesperaManager: root.vesperaManager,
+				feedUpdatedCallback: root.onFeedUpdated
+			})
 			if (page) {
-				pageStack.push(page);
+				pageStack.push(page)
 			}
 		}
 	}

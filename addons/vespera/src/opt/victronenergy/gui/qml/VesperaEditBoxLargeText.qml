@@ -32,6 +32,7 @@ MbItem {
 	property alias unit: _unitText.text
 	property int _cursorWidth: -1
 	property var deftoolbarHandler: null
+	function qsTrEx(str) { return qsTranslate("MbEditBox", str)}
 
 	// internal
 	property string _editText
@@ -504,9 +505,9 @@ function setCursorPosition(position, direction) {
 
 			width: root.width
 			shown:  !readonly && editMode && !root.useVirtualKeyboard
-			leftRightText: qsTr("Select position")
-			upDownText: qsTr("Select character")
-			centerText: enableSpaceBar ? qsTr("Add space") : qsTr("Apply changes")
+			leftRightText: qsTrEx("Select position")
+			upDownText: qsTrEx("Select character")
+			centerText: enableSpaceBar ? qsTrEx("Add space") : qsTrEx("Apply changes")
 
 			onAnimatingChanged: {
 				if (!animating)

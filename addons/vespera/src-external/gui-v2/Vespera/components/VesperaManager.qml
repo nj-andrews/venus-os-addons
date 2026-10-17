@@ -7,7 +7,8 @@ QtObject {
 	signal log(string str)
 
 	property alias traceEnabled: bridge.traceEnabled
-	readonly property bool running: _operationName != ""
+	readonly property bool running: _running
+	property bool _running
 	readonly property string operationName: _operationName
 	property string _operationName: ""
 	property var _completionCallback: undefined
@@ -17,11 +18,23 @@ QtObject {
 	function tryPop(toPage) {
 		if (!running) return true
 		//% "Please wait for the operation to finish"
-		Global.showToastNotification(0, qsTrId("vespera_wait_for_operation_to_finish"), 2000)
+		showToastNotification(0, qsTrId("vespera_wait_for_operation_to_finish"), 2000)
 		return false
 	}
 
-	property VeperaBridge bridge: VeperaBridge {
+	function installerAccess() {
+		if (Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer))
+			return true
+		//% "No access"
+		showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
+		return false
+	}
+
+	function showToastNotification(level, message, duration) {
+		Global.showToastNotification(level, message, duration)
+	}
+
+	property VesperaBridge bridge: VesperaBridge {
 		id: bridge
 		traceEnabled: true
 		onOutput: function(line) { root._writeLog(line)}
@@ -29,7 +42,7 @@ QtObject {
 		onFinished: function (result) { root._onFinished(result) }
 	}
 
-	property JsonReader dataReader: JsonReader {
+	property VesperaJsonReader dataReader: VesperaJsonReader {
 		id: dataReader
 		onFinished: function (result) { root._onFinished(result) }
 		onError: function(error) { root._writeLog(error) }
@@ -62,8 +75,9 @@ QtObject {
 			root._notifyCompletion(result)
 
 		} catch (e) {
-			root._writeLog("ERROR:onFinished: " + e)
-			result.error = e
+			var errorText = e && e.stack ? (e.name + ": " + e.message + " @ " + e.stack.split("\n")[0]) : String(e)
+			root._writeLog("ERROR:onFinished: " + errorText)
+			result.error = errorText
 			result.success = false
 			if (!notifyCalled)
 				root._notifyCompletion(result)
@@ -75,7 +89,7 @@ QtObject {
 			const Notification_Info=2
 			//% "Finalizing. The UI will restart shortly"
 			line = qsTrId("vespera_finalize_install")
-			Global.showToastNotification(Notification_Info, line, 5000)
+			showToastNotification(Notification_Info, line, 5000)
 		}
 
 		if (traceEnabled) console.log(line)
@@ -94,64 +108,69 @@ QtObject {
 		if (!result.success && !result.cancelled) {
 			//% "Operation failed"
 			var warnText = qsTrId("vespera_operation_failed")
-			Global.showToastNotification(0, warnText, 3000)
+			showToastNotification(0, warnText, 3000)
 		}
 
 		callback?.(result)
+		_running = false
 	}
 
 	function addFeed(feedName, url, completionCallback) {
-		executeCommand(null,"feed", "add", [feedName, url], completionCallback)
+		_executeCommand(null,"feed", "add", [feedName, url], completionCallback)
 	}
 
 	function removeFeed(feedName, completionCallback) {
-		executeCommand(null,"feed", "remove", [feedName], completionCallback)
+		_executeCommand(null,"feed", "remove", [feedName], completionCallback)
 	}
 	function updateFeed(feedName, url, origFeedName, completionCallback) {
-		executeCommand(null,"feed", "edit", [feedName, url, origFeedName], completionCallback)
+		_executeCommand(null,"feed", "edit", [feedName, url, origFeedName], completionCallback)
 	}
 
 	function loadPackages(update, completionCallback) {
-		if (update)
-			executeCommand("package load","packages", "update", [], completionCallback)
-		else if (initCommand("load packages", completionCallback)) {
-			dataReader.readAll("packages")
-		}
+		_load_feeds_packages("packages", update, completionCallback)
 	}
 	function loadFeeds(update, completionCallback) {
-		if (update)
-			executeCommand("feed load","packages", "update", [], completionCallback)
-		else if (initCommand("load feeds", completionCallback)) {
-			dataReader.readAll("feeds")
+		_load_feeds_packages("feeds", update, completionCallback)
+	}
+
+	function _load_feeds_packages(name, update, completionCallback) {
+		if (update) {
+			_executeCommand(name + " update", "packages", "update", [], function (result) {
+				if (result.success)
+					if (initCommand(name + " load", completionCallback))
+								dataReader.readAll(name)
+			})
+		} else if (initCommand(name + " load", completionCallback)) {
+			dataReader.readAll(name)
 		}
 	}
 
 	function installPackage(packageName, completionCallback) {
-		executeCommand(null,"package", "install", [packageName], completionCallback)
+		_executeCommand(null, "package", "install", [packageName], completionCallback)
 	}
 
 	function upgradePackage(packageName, completionCallback) {
-		executeCommand(null,"package", "upgrade", [packageName], completionCallback)
+		_executeCommand(null,"package", "upgrade", [packageName], completionCallback)
 	}
 
 	function removePackage(packageName, completionCallback) {
-		executeCommand(null,"package", "remove", [packageName], completionCallback)
+		_executeCommand(null,"package", "remove", [packageName], completionCallback)
 	}
 
 	function setPackageEnabledState(packageName, state, completionCallback) {
 		const command = state ? "enable" : "disable"
-		executeCommand(null,"package", command, [packageName], completionCallback)
+		_executeCommand(null,"package", command, [packageName], completionCallback)
 	}
 
 	function usbScan(completionCallback) {
-		executeCommand(null, "device", "scan", [], completionCallback)
+		_executeCommand(null, "device", "scan", [], completionCallback)
 	}
 	function bindDeviceToService(port, serviceName, completionCallback) {
-		executeCommand(null,"device", "bind", [port, serviceName], completionCallback)
+		_executeCommand(null,"device", "bind", [port, serviceName], completionCallback)
 	}
 
 	function removeDevice(sid, completionCallback) {
-		executeCommand(null,"device", "remove", [sid], completionCallback)
+		_executeCommand(null,"device", "remove", [sid], completionCallback)
 	}
 
 	function initCommand(operationName, completionCallback) {
@@ -161,21 +180,23 @@ QtObject {
 		if (!error && bridge.running) error = "Command processor already running"
 		if (error) {
 			var result = {success: false, error: error}
-			Global.showToastNotification(0,result.error, 3000)
+			showToastNotification(0,result.error, 3000)
 			completionCallback?.(result)
 			return false
 		}
 		root._operationName = operationName
- 		root._completionCallback = (completionCallback && completionCallback.call) ? completionCallback : undefined
 
+ 		root._completionCallback = (completionCallback && completionCallback.call) ? completionCallback : undefined
+		root._running = true
 		return true
 	}
 
-	function executeCommand(operationName, familyName, commandName, args, completionCallback) {
+	function _executeCommand(operationName, familyName, commandName, args, completionCallback) {
 		var opName = operationName || familyName + " " + commandName
 		if (!initCommand(opName, completionCallback))
 			return
-		bridge.start(familyName, commandName, (args || []))
+
+		bridge.start(familyName, commandName, ...(args || []))
 	}
 
 }

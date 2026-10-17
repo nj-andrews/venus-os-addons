@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="Kieli: %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="Asennustoiminto: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="Paketin build-aika: %s"
 LANG_PACKAGE_PATCHING_FILES="Paikataan tiedostoja"
 LANG_PROCESSING_DBUS_SETTINGS="Käsitellään dbus-asetuksia"
 LANG_STOPPING_AND_REMOVING_SERVICES="Pysäytetään ja poistetaan palveluita"
@@ -13,6 +12,8 @@ LANG_STOPPING_AND_REMOVING_SERVICES="Pysäytetään ja poistetaan palveluita"
 # removing
 LANG_REVERTING_PATCHED_FILES="Palautetaan paikatut tiedostot"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Edellinen asennus poistettu, päivitetään nyt..."
+LANG_INSTALLED_ARG1_DISABLED="Asennettu %s (pois käytöstä)"
+LANG_INSTALLED_ARG1_ENABLING="Otetaan käyttöön %s"
 
 # vespera installer
 LANG_UPDATING_DATABASE="Päivitetään tietokantaa"

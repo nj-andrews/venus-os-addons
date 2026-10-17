@@ -1,0 +1,4 @@
+# Hashes of file build rules.
+0407f50595f7ab924bcdcf608da0d117 CMakeFiles/vesperalocale_autogen
+0407f50595f7ab924bcdcf608da0d117 CMakeFiles/vesperalocale_autogen_timestamp_deps
+9bae4f837cd455e17a6619465f14c0ae vesperalocale_autogen/timestamp

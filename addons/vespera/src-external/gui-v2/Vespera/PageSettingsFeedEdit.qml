@@ -5,12 +5,12 @@ import "qrc:/Vespera/components" as Vespera
 
 Page {
 	id: root
-	title: "Edit Feed"
+	title: qsTrId("vespera_edit_feed")
 	//temp tryPop: vesperaManager?.tryPop
 
 	required property var model
 	required property Vespera.VesperaManager vesperaManager
-	required property var loadFeedsModelCallback
+	required property var feedUpdatedCallback
 	property bool _isNew: false
 	property bool _builtin: false
 	property string _removeButtonText
@@ -25,7 +25,6 @@ Page {
 		root._removeButtonText = qsTrId("vespera_remove")
 	}
 
-	//also called from parent feeds page
 	function refreshModel(newModel) {
 		if (newModel !== undefined) {
 			root.model = newModel
@@ -163,12 +162,10 @@ Page {
 			return
 
 		var completedCallback = function(result) {
-			if (!result.success) {
-				resetButtonText()
-				return
-			}
+			resetButtonText()
+			if (!result.success) return
 
-			loadFeedsModelCallback?.(result.data)
+			loadFeedsModelCallback?.(null)
 			Global.pageManager.popPage()
 		}
 		//% "Removing..."
@@ -201,14 +198,15 @@ Page {
 		var feedUrl = feedUrlTextField.text
 
 		var completedCallback = function(result) {
+			console.log("PageSettingsFeedEdit:result.success=",result.success)
+			resetButtonText()
 			if (!result.success) {
-				resetButtonText()
 				return
 			}
-			//% "Edit Feed"
-			root.title = qsTrId("vespera_edit_feed") // update breadcrumb
+
+			root.title = feedName // update breadcrumb
 			root._isNew = false
-			loadFeedsModelCallback?.(result.data, feedName, root.refreshModel)
+			feedUpdatedCallback?.(feedName, root.refreshModel)
 
 		}
 

@@ -1,102 +1,83 @@
-// SYM LINKED
-// VesperaJsonReader.qml
-//
+// JsonReader.qml
 // Self-contained chunk-based JSON reader for vespera.
 // Reads named datasets (e.g. "packages", "feeds") from the
 // com.victronenergy.vespera service via the /Chunk/ D-Bus paths.
 
-pragma ComponentBehavior: Bound
-
 import QtQuick 2
+import com.victron.velib 1.0
 
 QtObject {
 	id: root
 
 	// Emitted when a dataset has been fully read and parsed.
-	signal jsonReady(var jsonData, string jsonText, string name)
-	signal jsonError(string error, string name)
-	readonly property bool running: _active
+	signal finished(var result)
+	signal error(string error)
+	readonly property bool running: _name != ""
 
 	// -- private read-session state --
 
 	property string  _sessionId:     ""
 	property string  _sessionBase:   ""
 	property string  _name:          ""
-	property var     _callback:      null
 	property string  _buffer:        ""
 	property string  _sourceVersion: ""
 	property int     _nextOffset:    0
 	property int     _pendingSeq:    0
-	property bool    _active:        false
+	property string vesperaServiceUid: "dbus/com.victronenergy.vespera/Chunk"
 
 	// -- control + request paths (writable) --
-	property VeperaQuickItemAdapter _createSession: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Chunk/Control/CreateSessionId"
-	}
-	property VeperaQuickItemAdapter _closeSession: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Chunk/Control/CloseSessionId"
-	}
-	property VeperaQuickItemAdapter _requestJson: VeperaQuickItemAdapter {
-		uid: vesperaServiceUid + "/Chunk/RequestJson"
-	}
+
+	property VeQuickItem _createSession: VeQuickItem { uid: root.vesperaServiceUid + "/Control/CreateSessionId"}
+	property VeQuickItem _closeSession: VeQuickItem { uid: root.vesperaServiceUid + "/Control/CloseSessionId"}
+	property VeQuickItem _requestJson: VeQuickItem { uid: root.vesperaServiceUid + "/RequestJson"}
 
 	// -- result paths (readable) --
-	property VeperaQuickItemAdapter _resSeq: VeperaQuickItemAdapter {
+	property VeQuickItem _resSeq: VeQuickItem {
 		uid: root._sessionBase.length > 0 ? root._sessionBase + "/Result/Seq" : ""
 		onValueChanged: root._onResultSeq(value)
 	}
-	property VeperaQuickItemAdapter _resData: VeperaQuickItemAdapter {
+	property VeQuickItem _resData: VeQuickItem {
 		uid: root._sessionBase.length > 0 ? root._sessionBase + "/Result/Data" : ""
 	}
-	property VeperaQuickItemAdapter _resEndOfData: VeperaQuickItemAdapter {
+	property VeQuickItem _resEndOfData: VeQuickItem {
 		uid: root._sessionBase.length > 0 ? root._sessionBase + "/Result/EndOfData" : ""
 	}
-	property VeperaQuickItemAdapter _resSourceVersion: VeperaQuickItemAdapter {
+	property VeQuickItem _resSourceVersion: VeQuickItem {
 		uid: root._sessionBase.length > 0 ? root._sessionBase + "/Result/SourceVersion" : ""
 	}
-	property VeperaQuickItemAdapter _resError: VeperaQuickItemAdapter {
+	property VeQuickItem _resError: VeQuickItem {
 		uid: root._sessionBase.length > 0 ? root._sessionBase + "/Result/Error" : ""
 	}
 
 	property Timer _timeoutTimer: Timer {
-		interval: 20000 //# need to wait for opkg update
+		interval: 5000
 		repeat: false
 		onTriggered: {
-			if (!root._active)
-				return
-			root._fail("Chunk request timed out for aa: " + root._name)
+			if (!root.running) return
+			root._fail("Chunk request timed out for: " + root._name)
 		}
 	}
 
 	// -- public API --
 
-	function readAll(name, callback) {
-		if (_active) {
-			var busyError = "VesperaJsonReader is busy"
-			jsonError(busyError, name)
-			if (callback) {
-				callback(busyError, null, null)
-			}
+	function readAll(name) {
+		if (running) {
+			var busyError = "JsonReader is busy"
+			error(busyError)
 			return
 		}
+		_reset()
 		_sessionId     = _newSessionId()
-		_sessionBase   = _reqName.vesperaServiceUid + "/Chunk/Sessions/" + _sessionId
+		_sessionBase   = root.vesperaServiceUid + "/Sessions/" + _sessionId
 		_createSession.setValue(_sessionId)
 		_name          = name
-		_callback      = callback
-		_buffer        = ""
-		_sourceVersion = ""
-		_nextOffset    = 0
-		_pendingSeq    = 0
-		_active        = true
 		_requestNextChunk()
 	}
 
 	// -- private --
 
 	function _requestNextChunk() {
-		if (!_active)
-			return
+		if (!running) return
 		_pendingSeq += 1
 
 		var requestPayload = {
@@ -111,14 +92,11 @@ QtObject {
 	}
 
 	function _onResultSeq(seq) {
-		if (!_active)
-			return
-		if (seq === undefined || seq === null)
-			return
-		if (parseInt(seq) !== _pendingSeq)
-			return
+		if (!running) return
+		if (seq === undefined || seq === null) return
+		if (parseInt(seq) !== _pendingSeq) return
 
-		_timeoutTimer.stop()
+		if (_timeoutTimer)_timeoutTimer.stop()
 
 		var errText = _resError.value || ""
 		if (errText.length > 0) {
@@ -142,54 +120,22 @@ QtObject {
 
 		var endOfData = parseInt(_resEndOfData.value || 0)
 		if (endOfData) {
-			_complete()
+			var result={success:true, json:_buffer}
+			_reset()
+			finished(result)
 		} else {
 			_requestNextChunk()
 		}
 	}
 
-	function _complete() {
-		var cb = _callback
-		var result = _buffer
-		var name = _name
-		var parsed
-		var trimmed = result.trim()
-
-		if (trimmed.length > 0 && trimmed[0] !== "{" && trimmed[0] !== "[") {
-			_fail("Unexpected payload format (" + name + "): expected JSON text")
-			return
-		}
-
-		try {
-			parsed = JSON.parse(result)
-		} catch (e) {
-			_fail("JSON parse error (" + name + "): " + e)
-			return
-		}
-
-		_reset()
-		jsonReady(parsed, result, name)
-		if (cb) {
-			cb(null, result, parsed)
-		}
-	}
-
 	function _fail(reason) {
-		console.warn("VesperaJsonReader: " + reason)
-		var cb = _callback
-		var name = _name
 		_reset()
-		jsonError(reason, name)
-		if (cb) {
-			cb(reason, null, null)
-		}
+		error(reason)
 	}
 
 	function _reset() {
 		var sessionId = _sessionId
-		_active        = false
-		_timeoutTimer.stop()
-		_callback      = null
+		if (_timeoutTimer) root._timeoutTimer.stop()
 		_buffer        = ""
 		_sourceVersion = ""
 		_name          = ""

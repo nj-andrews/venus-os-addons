@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="언어: %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="설치 작업: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="패키지 빌드 시간: %s"
 LANG_PACKAGE_PATCHING_FILES="파일 패치 중"
 LANG_PROCESSING_DBUS_SETTINGS="dbus 설정 처리 중"
 LANG_STOPPING_AND_REMOVING_SERVICES="서비스 중지 및 제거 중"
@@ -13,6 +12,8 @@ LANG_STOPPING_AND_REMOVING_SERVICES="서비스 중지 및 제거 중"
 # removing
 LANG_REVERTING_PATCHED_FILES="패치된 파일 되돌리는 중"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="이전 설치를 제거했습니다. 지금 업데이트 중..."
+LANG_INSTALLED_ARG1_DISABLED="설치됨 %s (비활성화)"
+LANG_INSTALLED_ARG1_ENABLING="%s 활성화 중"
 
 # vespera installer
 LANG_UPDATING_DATABASE="데이터베이스 업데이트 중"

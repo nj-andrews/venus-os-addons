@@ -50,9 +50,17 @@ def run_lrelease(tsFiles, name):
 				tsFiles.append(os.path.join("translations", name + "_en.ts"))
 		for filename in tsFiles:
 				qmFile = os.path.basename(filename)[:-2] + "qm"
+
 				cmd = ['lrelease']
 				cmd.extend([filename])
 				cmd.extend(['-idbased'])
+
+				if not filename.endswith('_en.ts'):
+					cmd.extend(['-nounfinished'])
+					cmd.extend(['-removeidentical'])
+
+				cmd.extend(['-silent'])
+
 				cmd.extend(['-qm', qmFile])
 				try:
 						result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -94,60 +102,35 @@ def write_qrc(qmlFiles, qmFiles, imageFiles, name):
 				print(f"    Error writing to file: {e}", e.stderr, file=sys.stderr)
 
 def _minify_qml_text(relative_path):
-    """
-    Safely minifies QML text by stripping comments, trimming padding,
-    removing empty lines, and pulling lonely closing braces up onto the previous line.
-    """
-    with open(relative_path, "r", encoding="utf-8") as f:
-        content = f.read()
+	"""
+	Minify QML text using either jsmin.exe or the standalone Python minifier.
+	"""
+	optimized_text_path = relative_path + ".tmp"
 
-    # 1. Strip multi-line block comments /* ... */
-    content = re.sub(r'/\*[\s\S]*?\*/', '', content)
+	use_jsmin_exe = False
 
-    # 2. Strip single-line comments // (ignoring occurrences inside URLs like http://)
-    content = re.sub(r'(?<!:)\/\/.*', '', content)
+	if use_jsmin_exe:
+		jsmin_path = os.path.expanduser('~/dev-local/bin/jsmin.exe')
 
-    cleaned_lines = []
+		with open(relative_path, 'r', encoding='utf-8') as source_file, open(
+			optimized_text_path,
+			'w',
+			encoding='utf-8',
+		) as optimized_file:
+			subprocess.run(
+				[jsmin_path],
+				stdin=source_file,
+				stdout=optimized_file,
+				check=True,
+			)
+	else:
+		python_minify_path = '/data/dev/tooling/minify-qml.py'
+		subprocess.run(
+			[sys.executable, python_minify_path, relative_path, optimized_text_path],
+			check=True,
+		)
 
-    # 3. Clean line padding and remove empty lines
-    for line in content.splitlines():
-        stripped_line = line.strip()
-        if stripped_line:
-            cleaned_lines.append(stripped_line)
-
-    # Rejoin the lines to apply structural newline collapsing
-    collapsed_content = "\n".join(cleaned_lines)
-
-    # 4. Safe structural collapsing
-    # Pull opening braces up: Item\n{ -> Item {
-    collapsed_content = re.sub(r'\n\s*\{', ' {', collapsed_content)
-
-    # Pull the next line up when the current line ends with an opening brace:
-    # Item {\n    width: 100 -> Item { width: 100
-    collapsed_content = re.sub(r'\{\s*\n\s*', '{ ', collapsed_content)
-
-    # Pull the next line up when it starts with a ternary continuation:
-    # cond\n    ? valueA\n    : valueB -> cond ? valueA : valueB
-    collapsed_content = re.sub(r'\n\s*([?:])\s*', r' \1 ', collapsed_content)
-
-    # Pull the next line up when it starts with +, preserving spaces around the operator.
-    collapsed_content = re.sub(r'\n\s*\+\s*', ' + ', collapsed_content)
-
-    # Pull chained member calls up without inserting spaces before the dot.
-    collapsed_content = re.sub(r'(?<=\S)\n\s*\.\s*', '.', collapsed_content)
-
-    # Pull closing group tokens up without introducing stray spaces before them.
-    collapsed_content = re.sub(r'\n\s*\)', ')', collapsed_content)
-
-    # Pull lonely closing braces up: Statement\n} -> Statement}
-    # This removes the newline character entirely before a closing brace
-    collapsed_content = re.sub(r'\n\s*\}', '}', collapsed_content)
-
-    optimized_text_path = relative_path + ".tmp"
-    with open(optimized_text_path, "w", encoding="utf-8") as f:
-        f.write(collapsed_content)
-
-    return optimized_text_path
+	return optimized_text_path
 
 def _precompile_qml_resources(qrc_file, temp_qrc_file, qmlcachegen_path, pre_compile, minify):
 		"""

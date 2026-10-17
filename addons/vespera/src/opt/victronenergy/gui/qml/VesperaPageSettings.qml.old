@@ -1,18 +1,18 @@
 import QtQuick 2
 import com.victron.velib 1.0
- 
+
 MbPage {
 	id: root
-	title: qsTr("Settings")
+	title: qsTrId("vespera_settings")
 
 	model: VisibleItemModel {
 
 		MbSwitch {
-			name: qsTr("Show Compact")
+			name: qsTrId("vespera_show_compact")
 			bind: Utils.path("com.victronenergy.settings", "/Settings/Vespera/ShowCompact")
 		}
 		MbSwitch {
-			name: qsTr("No Action")
+			name: qsTrId("vespera_no_action")
 			// description: "For testing installs, does not install"
 			bind: Utils.path("com.victronenergy.settings", "/Settings/Vespera/NoAction")
 		}

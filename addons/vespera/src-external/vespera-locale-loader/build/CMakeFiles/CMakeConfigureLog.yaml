@@ -1,0 +1,413 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:228 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The target system is: Linux -  - arm
+      The host system is: Linux - 6.8.0-124-generic - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ 
+      Build flags: -O2;-pipe;-g;-feliminate-unused-debug-types;-Wno-psabi
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is GNU, found in:
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/3.28.3/CompilerIdCXX/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:62 (try_compile)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb"
+      binary: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O2 -g -feliminate-unused-debug-types  -Wno-psabi"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed"
+      CMAKE_SYSROOT: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb'
+        
+        Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_618f8/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_618f8.dir/build.make CMakeFiles/cmTC_618f8.dir/build
+        gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb'
+        Building CXX object CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi   -O2 -g -feliminate-unused-debug-types  -Wno-psabi    -v -o CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -c /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
+        Using built-in specs.
+        COLLECT_GCC=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi/arm-ve-linux-gnueabi-g++
+        Target: arm-ve-linux-gnueabi
+        Configured with: ../../../../../../work-shared/gcc-13.4.0-r0/gcc-13.4.0/configure --build=x86_64-linux --host=x86_64-ve-linux --target=arm-ve-linux-gnueabi --prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --exec_prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --bindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --sbindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --libexecdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi --datadir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share --sysconfdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/etc --sharedstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/com --localstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/var --libdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi --includedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --oldincludedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --infodir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/info --mandir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/man --disable-silent-rules --disable-dependency-tracking --with-libtool-sysroot=/host --with-gnu-ld --enable-shared --enable-languages=c,c++ --enable-threads=posix --enable-multilib --enable-c99 --enable-long-long --enable-symvers=gnu --enable-libstdcxx-pch --program-prefix=arm-ve-linux-gnueabi- --without-local-prefix --disable-install-libiberty --disable-libssp --enable-libitm --enable-lto --disable-bootstrap --with-system-zlib --with-linker-hash-style=gnu --enable-linker-build-id --with-ppl=no --with-cloog=no --enable-checking=release --enable-cheaders=c_global --without-isl --with-gxx-include-dir=/not/exist/usr/include/c++/13.4.0 --with-build-time-tools=/host-native/usr/arm-ve-linux-gnueabi/bin --with-sysroot=/not/exist --with-build-sysroot=/host --with-plugin-ld=ld --enable-poison-system-directories --enable-nls --with-glibc-version=2.28 --enable-initfini-array
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.4.0 (GCC) 
+        COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/'
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/cc1plus -quiet -v -isysroot /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -D_GNU_SOURCE -D _TIME_BITS=64 -D _FILE_OFFSET_BITS=64 /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_618f8.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a8 -mtls-dialect=gnu -marm -mlibarch=armv7-a+sec+simd -march=armv7-a+sec+simd -g -O2 -Wno-psabi -version -feliminate-unused-debug-types -o /tmp/cc2lfbKX.s
+        GNU C++17 (GCC) version 13.4.0 (arm-ve-linux-gnueabi)
+        	compiled by GNU C version 13.4.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version none
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/local/include"
+        ignoring nonexistent directory "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/../../../../../arm-ve-linux-gnueabi/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/
+        End of search list.
+        Compiler executable checksum: c831605feb461cda776efe9bb7f0de15
+        COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/'
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/as -v -march=armv7-a+sec+simd -mfloat-abi=hard -mfpu=neon -meabi=5 -o CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc2lfbKX.s
+        GNU assembler version 2.42.0 (arm-ve-linux-gnueabi) using BFD version (GNU Binutils) 2.42.0.20240723
+        COMPILER_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/
+        LIBRARY_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/
+        COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_618f8
+        /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_618f8.dir/link.txt --verbose=1
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -g -feliminate-unused-debug-types  -Wno-psabi  -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed -v CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_618f8 
+        Using built-in specs.
+        COLLECT_GCC=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi/arm-ve-linux-gnueabi-g++
+        COLLECT_LTO_WRAPPER=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/lto-wrapper
+        Target: arm-ve-linux-gnueabi
+        Configured with: ../../../../../../work-shared/gcc-13.4.0-r0/gcc-13.4.0/configure --build=x86_64-linux --host=x86_64-ve-linux --target=arm-ve-linux-gnueabi --prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --exec_prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --bindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --sbindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --libexecdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi --datadir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share --sysconfdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/etc --sharedstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/com --localstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/var --libdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi --includedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --oldincludedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --infodir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/info --mandir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/man --disable-silent-rules --disable-dependency-tracking --with-libtool-sysroot=/host --with-gnu-ld --enable-shared --enable-languages=c,c++ --enable-threads=posix --enable-multilib --enable-c99 --enable-long-long --enable-symvers=gnu --enable-libstdcxx-pch --program-prefix=arm-ve-linux-gnueabi- --without-local-prefix --disable-install-libiberty --disable-libssp --enable-libitm --enable-lto --disable-bootstrap --with-system-zlib --with-linker-hash-style=gnu --enable-linker-build-id --with-ppl=no --with-cloog=no --enable-checking=release --enable-cheaders=c_global --without-isl --with-gxx-include-dir=/not/exist/usr/include/c++/13.4.0 --with-build-time-tools=/host-native/usr/arm-ve-linux-gnueabi/bin --with-sysroot=/not/exist --with-build-sysroot=/host --with-plugin-ld=ld --enable-poison-system-directories --enable-nls --with-glibc-version=2.28 --enable-initfini-array
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.4.0 (GCC) 
+        COMPILER_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/
+        LIBRARY_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/
+        COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'cmTC_618f8' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'cmTC_618f8.'
+         /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/collect2 -plugin /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/liblto_plugin.so -plugin-opt=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccVdJVqF.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi --build-id --eh-frame-hdr --hash-style=gnu -dynamic-linker /lib/ld-linux-armhf.so.3 -X -m armelf_linux_eabi -o cmTC_618f8 /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crt1.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crti.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtbegin.o -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0 -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0 -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib -O1 --hash-style=gnu --as-needed CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtend.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crtn.o
+        COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'cmTC_618f8' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'cmTC_618f8.'
+        gmake[1]: Leaving directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:132 (message)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed]
+          add: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/]
+        end of search list found
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed]
+        collapse include dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include]
+        implicit include dirs: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:164 (message)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(arm-ve-linux-gnueabi-ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_618f8/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_618f8.dir/build.make CMakeFiles/cmTC_618f8.dir/build]
+        ignore line: [gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-wmjobb']
+        ignore line: [Building CXX object CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi   -O2 -g -feliminate-unused-debug-types  -Wno-psabi    -v -o CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -c /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi/arm-ve-linux-gnueabi-g++]
+        ignore line: [Target: arm-ve-linux-gnueabi]
+        ignore line: [Configured with: ../../../../../../work-shared/gcc-13.4.0-r0/gcc-13.4.0/configure --build=x86_64-linux --host=x86_64-ve-linux --target=arm-ve-linux-gnueabi --prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --exec_prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --bindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --sbindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --libexecdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi --datadir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share --sysconfdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/etc --sharedstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/com --localstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/var --libdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi --includedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --oldincludedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --infodir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/info --mandir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/man --disable-silent-rules --disable-dependency-tracking --with-libtool-sysroot=/host --with-gnu-ld --enable-shared --enable-languages=c,c++ --enable-threads=posix --enable-multilib --enable-c99 --enable-long-long --enable-symvers=gnu --enable-libstdcxx-pch --program-prefix=arm-ve-linux-gnueabi- --without-local-prefix --disable-install-libiberty --disable-libssp --enable-libitm --enable-lto --disable-bootstrap --with-system-zlib --with-linker-hash-style=gnu --enable-linker-build-id --with-ppl=no --with-cloog=no --enable-checking=release --enable-cheaders=c_global --without-isl --with-gxx-include-dir=/not/exist/usr/include/c++/13.4.0 --with-build-time-tools=/host-native/usr/arm-ve-linux-gnueabi/bin --with-sysroot=/not/exist --with-build-sysroot=/host --with-plugin-ld=ld --enable-poison-system-directories --enable-nls --with-glibc-version=2.28 --enable-initfini-array]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.4.0 (GCC) ]
+        ignore line: [COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/']
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/cc1plus -quiet -v -isysroot /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -D_GNU_SOURCE -D _TIME_BITS=64 -D _FILE_OFFSET_BITS=64 /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_618f8.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a8 -mtls-dialect=gnu -marm -mlibarch=armv7-a+sec+simd -march=armv7-a+sec+simd -g -O2 -Wno-psabi -version -feliminate-unused-debug-types -o /tmp/cc2lfbKX.s]
+        ignore line: [GNU C++17 (GCC) version 13.4.0 (arm-ve-linux-gnueabi)]
+        ignore line: [	compiled by GNU C version 13.4.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version none]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/../../../../../arm-ve-linux-gnueabi/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/arm-ve-linux-gnueabi]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/c++/13.4.0/backward]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/include]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/include-fixed]
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: c831605feb461cda776efe9bb7f0de15]
+        ignore line: [COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/']
+        ignore line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/as -v -march=armv7-a+sec+simd -mfloat-abi=hard -mfpu=neon -meabi=5 -o CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc2lfbKX.s]
+        ignore line: [GNU assembler version 2.42.0 (arm-ve-linux-gnueabi) using BFD version (GNU Binutils) 2.42.0.20240723]
+        ignore line: [COMPILER_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/]
+        ignore line: [LIBRARY_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_618f8]
+        ignore line: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_618f8.dir/link.txt --verbose=1]
+        ignore line: [/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -g -feliminate-unused-debug-types  -Wno-psabi  -Wl -O1 -Wl --hash-style=gnu -Wl --as-needed -v CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_618f8 ]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi/arm-ve-linux-gnueabi-g++]
+        ignore line: [COLLECT_LTO_WRAPPER=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/lto-wrapper]
+        ignore line: [Target: arm-ve-linux-gnueabi]
+        ignore line: [Configured with: ../../../../../../work-shared/gcc-13.4.0-r0/gcc-13.4.0/configure --build=x86_64-linux --host=x86_64-ve-linux --target=arm-ve-linux-gnueabi --prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --exec_prefix=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr --bindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --sbindir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/bin/arm-ve-linux-gnueabi --libexecdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi --datadir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share --sysconfdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/etc --sharedstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/com --localstatedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/var --libdir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi --includedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --oldincludedir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/include --infodir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/info --mandir=/usr/local/oe-sdk-hardcoded-buildpath/sysroots/x86_64-ve-linux/usr/share/man --disable-silent-rules --disable-dependency-tracking --with-libtool-sysroot=/host --with-gnu-ld --enable-shared --enable-languages=c,c++ --enable-threads=posix --enable-multilib --enable-c99 --enable-long-long --enable-symvers=gnu --enable-libstdcxx-pch --program-prefix=arm-ve-linux-gnueabi- --without-local-prefix --disable-install-libiberty --disable-libssp --enable-libitm --enable-lto --disable-bootstrap --with-system-zlib --with-linker-hash-style=gnu --enable-linker-build-id --with-ppl=no --with-cloog=no --enable-checking=release --enable-cheaders=c_global --without-isl --with-gxx-include-dir=/not/exist/usr/include/c++/13.4.0 --with-build-time-tools=/host-native/usr/arm-ve-linux-gnueabi/bin --with-sysroot=/not/exist --with-build-sysroot=/host --with-plugin-ld=ld --enable-poison-system-directories --enable-nls --with-glibc-version=2.28 --enable-initfini-array]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.4.0 (GCC) ]
+        ignore line: [COMPILER_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/]
+        ignore line: [LIBRARY_PATH=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/:/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-mfpu=neon' '-mfloat-abi=hard' '-mcpu=cortex-a8' '-D' '_TIME_BITS=64' '-D' '_FILE_OFFSET_BITS=64' '--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi' '-O2' '-g' '-feliminate-unused-debug-types' '-Wno-psabi' '-v' '-o' 'cmTC_618f8' '-shared-libgcc' '-mtls-dialect=gnu' '-marm' '-mlibarch=armv7-a+sec+simd' '-march=armv7-a+sec+simd' '-dumpdir' 'cmTC_618f8.']
+        link line: [ /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/collect2 -plugin /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/liblto_plugin.so -plugin-opt=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccVdJVqF.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi --build-id --eh-frame-hdr --hash-style=gnu -dynamic-linker /lib/ld-linux-armhf.so.3 -X -m armelf_linux_eabi -o cmTC_618f8 /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crt1.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crti.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtbegin.o -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0 -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0 -L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib -O1 --hash-style=gnu --as-needed CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtend.o /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crtn.o]
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccVdJVqF.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [--sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib/ld-linux-armhf.so.3] ==> ignore
+          arg [-X] ==> ignore
+          arg [-m] ==> ignore
+          arg [armelf_linux_eabi] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_618f8] ==> ignore
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crt1.o] ==> obj [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crt1.o]
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crti.o] ==> obj [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crti.o]
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtbegin.o] ==> obj [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtbegin.o]
+          arg [-L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0] ==> dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0]
+          arg [-L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib] ==> dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib]
+          arg [-L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0] ==> dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0]
+          arg [-L/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib] ==> dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib]
+          arg [-O1] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [CMakeFiles/cmTC_618f8.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lc] ==> lib [c]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtend.o] ==> obj [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtend.o]
+          arg [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crtn.o] ==> obj [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crtn.o]
+        collapse library dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0]
+        collapse library dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib]
+        collapse library dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0]
+        collapse library dir [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib] ==> [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib]
+        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+        implicit objs: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crt1.o;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crti.o;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtbegin.o;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0/crtend.o;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/crtn.o]
+        implicit dirs: [/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/lib/arm-ve-linux-gnueabi/gcc/arm-ve-linux-gnueabi/13.4.0;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/lib;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/arm-ve-linux-gnueabi/13.4.0;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/Qt6Dependencies.cmake:32 (_qt_internal_find_third_party_dependencies)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/Qt6Config.cmake:156 (include)"
+      - "CMakeLists.txt:8 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6"
+      binary: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed"
+      CMAKE_MODULE_PATH: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/kwin"
+      CMAKE_SYSROOT: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6'
+        
+        Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_3165f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_3165f.dir/build.make CMakeFiles/cmTC_3165f.dir/build
+        gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6'
+        Building CXX object CMakeFiles/cmTC_3165f.dir/src.cxx.o
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -DCMAKE_HAVE_LIBC_PTHREAD  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -std=gnu++17 -o CMakeFiles/cmTC_3165f.dir/src.cxx.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6/src.cxx
+        Linking CXX executable cmTC_3165f
+        /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3165f.dir/link.txt --verbose=1
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed  CMakeFiles/cmTC_3165f.dir/src.cxx.o -o cmTC_3165f 
+        gmake[1]: Leaving directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-2lmMq6'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/FindWrapAtomic.cmake:36 (check_cxx_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:35 (_qt_internal_find_third_party_dependencies)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:55 (include)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/Qt6Config.cmake:206 (find_package)"
+      - "CMakeLists.txt:8 (find_package)"
+    checks:
+      - "Performing Test HAVE_STDATOMIC"
+    directories:
+      source: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ"
+      binary: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed"
+      CMAKE_MODULE_PATH: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/kwin"
+      CMAKE_SYSROOT: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi"
+    buildResult:
+      variable: "HAVE_STDATOMIC"
+      cached: true
+      stdout: |
+        Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ'
+        
+        Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_abe39/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_abe39.dir/build.make CMakeFiles/cmTC_abe39.dir/build
+        gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ'
+        Building CXX object CMakeFiles/cmTC_abe39.dir/src.cxx.o
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -DHAVE_STDATOMIC  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -std=gnu++17 -o CMakeFiles/cmTC_abe39.dir/src.cxx.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ/src.cxx
+        Linking CXX executable cmTC_abe39
+        /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_abe39.dir/link.txt --verbose=1
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed  CMakeFiles/cmTC_abe39.dir/src.cxx.o -o cmTC_abe39 
+        gmake[1]: Leaving directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-GliIzZ'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake:128 (check_cxx_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/FindGLESv2.cmake:13 (find_package)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Gui/Qt6GuiDependencies.cmake:36 (_qt_internal_find_third_party_dependencies)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Gui/Qt6GuiConfig.cmake:53 (include)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/Qt6Config.cmake:206 (find_package)"
+      - "CMakeLists.txt:8 (find_package)"
+    checks:
+      - "Performing Test HAVE_EGL"
+    directories:
+      source: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB"
+      binary: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed"
+      CMAKE_MODULE_PATH: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/kwin"
+      CMAKE_SYSROOT: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi"
+    buildResult:
+      variable: "HAVE_EGL"
+      cached: true
+      stdout: |
+        Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB'
+        
+        Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f8568/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f8568.dir/build.make CMakeFiles/cmTC_f8568.dir/build
+        gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB'
+        Building CXX object CMakeFiles/cmTC_f8568.dir/src.cxx.o
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -DHAVE_EGL  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -std=gnu++17 -o CMakeFiles/cmTC_f8568.dir/src.cxx.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB/src.cxx
+        Linking CXX executable cmTC_f8568
+        /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f8568.dir/link.txt --verbose=1
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed  CMakeFiles/cmTC_f8568.dir/src.cxx.o -o cmTC_f8568  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libEGL.so 
+        gmake[1]: Leaving directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-SQ5EEB'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/FindGLESv2.cmake:28 (check_cxx_source_compiles)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Gui/Qt6GuiDependencies.cmake:36 (_qt_internal_find_third_party_dependencies)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6Gui/Qt6GuiConfig.cmake:53 (include)"
+      - "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/Qt6Config.cmake:206 (find_package)"
+      - "CMakeLists.txt:8 (find_package)"
+    checks:
+      - "Performing Test HAVE_GLESv2"
+    directories:
+      source: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo"
+      binary: "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed"
+      CMAKE_MODULE_PATH: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/cmake/Qt6/3rdparty/kwin"
+      CMAKE_SYSROOT: "/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi"
+    buildResult:
+      variable: "HAVE_GLESv2"
+      cached: true
+      stdout: |
+        Change Dir: '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo'
+        
+        Run Build Command(s): /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8c68c/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_8c68c.dir/build.make CMakeFiles/cmTC_8c68c.dir/build
+        gmake[1]: Entering directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo'
+        Building CXX object CMakeFiles/cmTC_8c68c.dir/src.cxx.o
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi -DHAVE_GLESv2  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -std=gnu++17 -o CMakeFiles/cmTC_8c68c.dir/src.cxx.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo/src.cxx
+        Linking CXX executable cmTC_8c68c
+        /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8c68c.dir/link.txt --verbose=1
+        /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi  -O2 -pipe -g -feliminate-unused-debug-types  -Wno-psabi  -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed  CMakeFiles/cmTC_8c68c.dir/src.cxx.o -o cmTC_8c68c  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libGLESv2.so /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libEGL.so 
+        gmake[1]: Leaving directory '/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/CMakeScratch/TryCompile-PrftRo'
+        
+      exitCode: 0
+...

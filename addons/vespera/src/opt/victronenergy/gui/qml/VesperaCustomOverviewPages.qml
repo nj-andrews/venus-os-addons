@@ -27,7 +27,7 @@ QtObject {
 	}
 
 	Component.onCompleted: {
-		onPagesInserted(0, pages.rowCount)
+		if (pages.rowCount>0) onPagesInserted(0, pages.rowCount)
 	}
 
 	function getPageInfo(index) {
@@ -44,7 +44,7 @@ QtObject {
 	}
 
 	property VeQuickItem customMenuItems: VeQuickItem {
-		uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenus"
+		uid: "dbus/com.victronenergy.settings/Settings/Vespera/CustomMenuPages"
 		onValueChanged: VesperaUtils.initCreateComponent(customMenuItems)
 	}
 

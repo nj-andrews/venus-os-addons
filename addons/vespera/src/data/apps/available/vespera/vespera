@@ -64,6 +64,29 @@ EOF
 declare -a args=()
 declare command=
 
+function getOptions() {
+	local -n __options="${1}"
+	shift
+	options=()
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			-*) __options+=("$1") ;;
+		esac
+		shift
+	done
+}
+
+function onlyOptions() {
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			-*);;
+			*) return 1;;
+		esac
+		shift
+	done
+	return 0
+}
+
 function processArgs() {
 
 	command=""
@@ -71,12 +94,14 @@ function processArgs() {
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
 			--in-gui)
+			  # shellcheck disable=SC2034 # used upstream
 				VESPERA_IN_GUI=true;;
 			-V[0-4])
 				VESPERA_VERBOSITY="${1#-V}"
 				args+=("$1");;
 			--help)
 				vespera_show_help;;
+			-f|--conf) echo "$1; Not supported"; exit 1;;
 			*)
 				if [[ -z $command && ${1:0:1} !=  "-" ]]; then
 					command="$1"
@@ -93,6 +118,8 @@ function processArgs() {
 processArgs "$@"
 set -- "${args[@]}"
 
+echo "VESPERA ARGS:$command, $*" > /data/vargs
+
 # [[ $VESPERA_IN_GUI == true ]] && {
 # 	for ((i=1; i<=10; i++)); do
 # 		echo "$command, $1: step $i"
@@ -104,10 +131,12 @@ set -- "${args[@]}"
 opkg_ensure_combined_conf_file
 
 case "$command" in
+	# update-index)
+	# 	vespera_lib_index; exit;;
 	help)
 		vespera_show_help; exit;;
-	fs-ro)
-		mount -o remount,ro /; exit;;
+	fs-ro|fs-rw)
+		mount -o remount,"${command:(-2)}" /; exit;;
 	feed-conf)
 		case "${1:-}" in
 			"") opkg_lib_show_feed_name;;
@@ -119,7 +148,9 @@ case "$command" in
 		exit
 		;;
 	feed-source)
-		opkg_lib_feed_crud "$@"; exit ;;
+		[[ "$#" -eq 0 ]] && { opkg_lib_show_feed_sources; exit; }
+		opkg_lib_feed_crud "$@" && vespera_lib_index; exit
+		;;
 	overlays)
 		if [[ "$#" -eq 0 ]]; then
 			cat "$VESPERA_DATA_DIR/overlays/overlays.conf"
@@ -144,8 +175,10 @@ case "$command" in
 	enable|disable)
 		vespera_lib_enable_disable "$command" "$@"; exit;;
 	update)
-		opkg_lib_update || exit
-		[[ -z "$*" ]] && { vespera_lib_index; exit; }
+		options=
+		getOptions options "$@"
+		opkg_lib_update "${options[@]}"|| exit
+		onlyOptions "$@" && { vespera_lib_index; exit; }
 		processArgs "$@"
 		set -- "${args[@]}"
 		;;

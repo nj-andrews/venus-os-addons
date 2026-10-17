@@ -6,7 +6,7 @@ Page {
 	id: root
 	//% "Custom Devices"
 	title: qsTrId("vespera_custom_devices")
-	tryPop: vesperaManager.tryPop
+	tryPop: vesperaManager?.tryPop
 
 	property Vespera.VesperaManager vesperaManager
 	property string service: "com.victronenergy.vespera"
@@ -23,10 +23,8 @@ Page {
 	}
 
 	function toggleScan() {
-		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-			return
-		}
+		if (!vesperaManager.installerAccess) return
+
 		if (vesperaManager.running) {
 			vesperaManager.cancel()
 			return
@@ -34,17 +32,14 @@ Page {
 
 		progressText.start(CommonWords.scanning.arg("").slice(0, -1))
 		vesperaManager.usbScan(function (result) {
-			if (progressText)
-				progressText.stop()
+			if (progressText) progressText.stop()
+			if (result.success) showDiscoveredDevicesPage()
 		})
-		showDiscoveredDevicesPage()
+
 	}
 
 	function showDiscoveredDevicesPage() {
-		if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-			Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-			return
-		}
+		if (!vesperaManager.installerAccess) return
 		Global.pageManager.pushPage("qrc:/Vespera/PageSettingsDiscoveredDevices.qml", {
 			vesperaManager: root.vesperaManager,
 			progressText: progressText})
@@ -61,10 +56,7 @@ Page {
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				onClicked: {
-					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-						return
-					}
+					if (!vesperaManager.installerAccess) return
 					root.toggleScan()
 				}
 				preferredVisible: userHasWriteAccess
@@ -77,10 +69,7 @@ Page {
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				//secondaryText: subpage.model.count //TODO
 				onClicked: {
-					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-						return
-					}
+					if (!vesperaManager.installerAccess) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsSavedDevices.qml", {"title": text, vesperaManager: root.vesperaManager})
 				}
 			}
@@ -91,10 +80,7 @@ Page {
 				writeAccessLevel: VenusOS.User_AccessType_Installer
 				//secondaryText: subpage.model.count //TODO
 				onClicked: {
-					if (!Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)) {
-						Global.showToastNotification(VenusOS.Notification_Info, qsTrId("listItem_no_access"))
-						return
-					}
+					if (!vesperaManager.installerAccess) return
 					root.showDiscoveredDevicesPage()
 				}
 			}

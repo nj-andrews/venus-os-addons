@@ -24,7 +24,6 @@ OverviewPage {
 
 	readonly property string bindPrefix: service?.value ?? ""
 	property string settingsPrefix
-
 	required property string source
 
 	VBusItem { id:service; bind: settingsPrefix + "/ServiceName"}
@@ -34,9 +33,9 @@ OverviewPage {
 	}
 
 	function addServices() {
-		//see Main.qml for customOverviewPages
-		for (var i = 0; i < customOverviewPages.pages.rowCount; i++) {
-			let [uid, pageName] = customOverviewPages.getPageInfo(i)
+		//see Main.qml for vesperaCustomOverviewPages
+		for (var i = 0; i < vesperaCustomOverviewPages.pages.rowCount; i++) {
+			let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
 			if (addService(uid, pageName))
 				return
 		}
@@ -67,11 +66,11 @@ OverviewPage {
 	}
 
 	Connections {
-		target: customOverviewPages.pages
+		target: vesperaCustomOverviewPages.pages
 
 		function onRowsInserted(parent, first, last) {
 			for (var i = first; i <= last; i++) {
-				let [uid, pageName] = customOverviewPages.getPageInfo(i)
+				let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
 				if (addService(uid, pageName))
 					return
 			}
@@ -79,7 +78,7 @@ OverviewPage {
 
 		function onRowsAboutToBeRemoved(parent, first, last) {
 			for (var i = first; i <= last; i++) {
-				let [uid, pageName] = customOverviewPages.getPageInfo(i)
+				let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
 				if (removeService(uid, pageName))
 					return
 			}

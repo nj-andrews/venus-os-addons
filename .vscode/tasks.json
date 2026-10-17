@@ -368,6 +368,25 @@
 			},
 			"problemMatcher": [],
 			"detail": "Extract selected/open .ipk into sibling folder and unpack control/data tarballs."
+		},
+		{
+			"label": "transfer active file to rpi",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"src=\"${file}\"; dest=\"${src#/data/dev/addons/*/src}\"; scp \"$src\" \"root@192.168.10.24:$dest\"; echo \"$src -> root@192.168.10.24:$dest\""
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true
+			},
+			"problemMatcher": [],
+			"detail": "SCP the active file to the RPi, stripping /data/dev/addons/vespera/src from the remote destination path."
 		}
 	]
 }

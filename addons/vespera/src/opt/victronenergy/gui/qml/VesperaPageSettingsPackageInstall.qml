@@ -4,16 +4,15 @@ import "utils.js" as Utils
 
 MbPage {
 	id: root
-	title: qsTr("Package details")
 	pageToolbarHandler: customToolbar
 
 	required property var model
 	required property VesperaManager vesperaManager
-	required property var loadPackagesModelCallback
+	required property var packageUpdatedCallback
 
 	readonly property bool hasInstalled: model?.installedVersion.length > 0
 	readonly property bool hasAvailable: model?.availableVersion.length > 0
-	readonly property string actionLabel: hasInstalled && hasAvailable ? qsTr("Upgrade") : !hasInstalled ? qsTr("Install") : qsTr("")
+	readonly property string actionLabel: hasInstalled && hasAvailable ? qsTrId("vespera_package_upgrade"): !hasInstalled ? qsTrId("vespera_package_install") : ""
 
 	readonly property MbStyle mbStyle: MbStyle {}
 
@@ -23,19 +22,13 @@ MbPage {
 	readonly property int secondaryFontSize: Math.round(root.mbStyle.fontPixelSize * 0.8)
 	readonly property var secondaryFontColor: mbStyle.color2
 
-	Component.onCompleted: {
-		vesperaManager.setOutputLog(logViewer)
- 	}
-	Component.onDestruction: {
-		vesperaManager.setOutputLog(null)
-	}
-
 	// protect the back button from being pressed while processing commands.
  	MouseArea {
 		x:0; y:-mbTools.height
 		width: mbTools.height; height: mbTools.height
 		visible: vesperaManager.running
 	}
+
 
 	Column {
 		id: column
@@ -53,7 +46,7 @@ MbPage {
 			leftPadding: root.hMargin
 			rightPadding: root.hMargin
 			topPadding: root.vMargin
-			text: root.model?.packageName
+			text: root.title
 			color: root.primaryFontColor
 			wrapMode: Text.Wrap
 		}
@@ -73,20 +66,20 @@ MbPage {
 			leftPadding: root.hMargin
 			rightPadding: root.hMargin
 			topPadding: root.vMargin
-			//spacing: mbStyle.marginItemHorizontal
+			spacing: mbStyle.marginItemHorizontal
 
 			// Label 1: Installed
 			Row {
 				spacing: mbStyle.marginItemHorizontal
 				Label {
-					text: qsTr("Installed:")
+					text: qsTrId("vespera_installed") + ":"
 					font.pixelSize: root.secondaryFontSize
 					color: root.secondaryFontColor
 				}
 				Label {
 					text: (root.hasInstalled)
 							? root.model?.installedVersion + (root.model.installedVersionSuffix ? "." + root.model.installedVersionSuffix : "")
-							: qsTr("none")
+							: qsTrId("vespera_none")
 					font.pixelSize: root.secondaryFontSize
 					color: root.primaryFontColor
 				}
@@ -94,29 +87,28 @@ MbPage {
 
 			// Label 2: Available
 			Row {
-				leftPadding: mbStyle.marginItemHorizontal
+				rightPadding: root.hMargin
 				spacing: mbStyle.marginItemHorizontal
 				Label {
-					text: qsTr("Available:")
+					text: qsTrId("vespera_available") + ":"
 					font.pixelSize: root.secondaryFontSize
 					color: root.secondaryFontColor
 				}
 				Label {
 					text: (root.hasAvailable)
 							? root.model?.availableVersion + (root.model.availableVersionSuffix ? "." + root.model.availableVersionSuffix : "")
-							: qsTr("none sd sd ")
+							: qsTrId("vespera_none")
 					font.pixelSize: root.secondaryFontSize
 					color: root.primaryFontColor
 				}
 			}
 			Row {
 				id: row
-				//leftPadding: root.hMargin
-				topPadding: root.vMargin
+				rightPadding: root.hMargin
 				spacing: mbStyle.marginItemHorizontal
 
 				Label {
-					text: qsTr("Feed:")
+					text: qsTrId("vespera_feed") + ":"
 					font.pixelSize: root.secondaryFontSize
 					color: root.secondaryFontColor
 				}
@@ -130,10 +122,10 @@ MbPage {
 
 	}
 
-	// Non-selectable, scrollable log area
-	VesperaLogViewer {
-		id: logViewer
-
+	VesperaProgressBar {
+		id: progressBar
+		visible: root.vesperaManager.running
+		text: root.vesperaManager.running ? root.vesperaManager.logLine : ""
 		anchors {
 			top: column.bottom; topMargin: root.vMargin
 			bottom: parent.bottom; bottomMargin: root.vMargin
@@ -142,9 +134,29 @@ MbPage {
 		}
 	}
 
+		MbOK {
+			id: scanItem
+			anchors.bottom: root.bottom
+			description: qstr("State")
+			enabled: !root.vesperaManager.running
+			visible: root.model.enabled != undefined && root.model.packageName != "vespera"
+			value: root.model.enabled === true
+				//% "Disable"
+				? qsTrId("vespera_disable")
+				//% "Enable"
+				: qsTrId("vespera_enable")
+			onClicked: function() {
+				if (!enabled) return
+				var appEnabled = root.model.enabled === true
+				root.vesperaManager.setPackageEnabledState(root.model.packageName, !appEnabled, completionCallback)
+			}
+
+		}
+
+
 	ToolbarHandler {
 		id: customToolbar
-		leftText: root.model && !root.vesperaManager.running && root.hasInstalled && root.model.packageName != "vespera" ? "Remove" : ""
+		leftText: root.model && !root.vesperaManager.running && root.hasInstalled && root.model.packageName != "vespera" ? qsTrId("vespera_remove") : ""
 		function leftAction() {
 			root.vesperaManager.removePackage(root.model.packageName, completionCallback)
 		}
@@ -171,15 +183,11 @@ MbPage {
 	}
 
 	function completionCallback(result) {
+		if (!result.success) return
 
-		if (!result.success)
-			return
-
-		root.loadPackagesModelCallback?.(result.data, root.model.packageName, function(updatedModel) {
+		root.packageUpdatedCallback?.(root.model.packageName, function(updatedModel) {
 			root.model = updatedModel
 		})
-
-		logViewer.log("--- Finished " + result.operationName + ". Exit code: " + result.exitCode + ", status: " + result.exitStatus + " ---")
 	}
 
 }

@@ -5,7 +5,6 @@ LANG_LANGUAGE_ARG1="言語: %s"
 
 # installing
 LANG_INSTALL_ACTION_ARG1="インストール操作: %s"
-LANG_PACKAGE_BUILD_TIME_ARG1="パッケージのビルド時刻: %s"
 LANG_PACKAGE_PATCHING_FILES="ファイルにパッチを適用中"
 LANG_PROCESSING_DBUS_SETTINGS="dbus設定を処理中"
 LANG_STOPPING_AND_REMOVING_SERVICES="サービスを停止して削除中"
@@ -13,6 +12,8 @@ LANG_STOPPING_AND_REMOVING_SERVICES="サービスを停止して削除中"
 # removing
 LANG_REVERTING_PATCHED_FILES="パッチ適用済みファイルを元に戻しています"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="前回のインストールを削除しました。更新を続行します..."
+LANG_INSTALLED_ARG1_DISABLED="インストール済み %s (無効)"
+LANG_INSTALLED_ARG1_ENABLING="%s を有効にしています"
 
 # vespera installer
 LANG_UPDATING_DATABASE="データベースを更新中"

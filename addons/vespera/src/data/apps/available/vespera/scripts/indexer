@@ -1,5 +1,8 @@
 #!/bin/bash
 
+VESPERA_VERBOSITY="${1:-0}"
+vespera_lib_log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
+
 declare __vespera_path; __vespera_path="$(dirname "${BASH_SOURCE[0]}")"
 __vespera_path="$(cd "${__vespera_path}/.." && pwd)"
 # shellcheck source="../conf-default/vespera.conf"
@@ -61,8 +64,11 @@ else
 fi
 
 if [[ "${update_mode}" == "none" ]]; then
-    exit 0
+	vespera_lib_log_verbose2 && echo "Indexer: Upto date"
+	exit 0
 fi
+
+vespera_lib_log_verbose2 && echo "Indexer: updating:${update_mode}"
 
 "$__vespera_path/bin/opkg-json-indexer" "${VESPERA_COMBINED_CONF_FILE}" "${VESPERA_DATA_DIR}" "--update=${update_mode}"
 indexer_status=$?
@@ -71,8 +77,6 @@ if [[ ${indexer_status} -eq 0 ]]; then
 conf_hash=${conf_hash}
 package_hash=${package_hash}
 EOF
-else
-	echo "${indexer_status}"
 fi
 
 exit "${indexer_status}"
