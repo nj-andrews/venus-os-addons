@@ -22,8 +22,6 @@ while ! dbus -y | grep -q "com.victronenergy.settings"; do
 	sleep 1
 done
 
-((settings_up!=2)) && { echo "start-all-services: localsettings service not available"; exit 1; }
-
 for app in $(opkg_lib_list_packages "all"); do
 	echo "starting services for $app"
 	[[ -L "${VESPERA_ROOT:-}/data/apps/enabled/$app" ]] || { echo "cannot start services for $app; not enabled"; continue; }
