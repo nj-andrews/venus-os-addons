@@ -15,7 +15,7 @@ __enable_app() {
 	local enabled_apps_dir="${VESPERA_ROOT:-}/data/apps/enabled"
 	local available_app_path="${VESPERA_ROOT:-}/data/apps/available/${app}"
 	local retVal
-
+	
 	[[ ! -d "$available_app_path" ]] && return
 
 	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}" 2>/dev/null)

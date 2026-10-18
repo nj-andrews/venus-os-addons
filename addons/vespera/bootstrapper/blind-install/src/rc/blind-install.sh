@@ -1,65 +1,50 @@
-#!/bin/bash
+#!/bin/sh
 
-declare log_path=/var/log/vespera/
-declare log=$log_path/blind-install.log
+BOOTSTRAP_URL="https://thespinmaster.github.io/venus-os-addons/feeds"
+BOOTSTRAP_RELEASE="release"
+BASE_SOURCE_FILE=
+log_prefix=
 
-declare URI=http://192.168.10.32:8808
-declare RELEASE="develop"
-# declare URI=https://thespinmaster.github.io/venus-os-addons/feeds
+log() { echo "${log_prefix}$*"; }
 
-mkdir -p "$log_path"
-exec > "$log" 2>&1
+for file in /media/*/venus-data-vespera-blind-install.tgz; do
+	[ -f "$file" ] && BASE_SOURCE_FILE="${file%.tgz}"
+done
 
-echo "Running vespera bind install"
-echo "Installing - vespera from:$URI/$RELEASE"
+[ "${1:-}" = "--dry-run" ] && dry_run=1 || dry_run=0
+[ "$dry_run" -eq 0 ] && log_prefix="blind-install:"
 
-wget -qO /tmp/vespera-bootstrap "$URI/vespera-bootstrap" \
-	&& sh /tmp/vespera-bootstrap "$URI/$RELEASE/vespera" \
-		|| { echo "bootstrap failed, exiting"; exit 1; };
+[ -n "${BASE_SOURCE_FILE}" ] && [ -f "${BASE_SOURCE_FILE}.source" ] &&
+	IFS=' ' read -r BOOTSTRAP_URL BOOTSTRAP_RELEASE < "${BASE_SOURCE_FILE}.source"
 
-declare install_conf
-install_conf=$(find /run/media -mindepth 2 -maxdepth 2 -type f \
-	-name 'venus-data-vespera-blind-install.conf' -print -quit)
+log "running vespera bind install"
 
-if [[ -f "$install_conf" ]]; then
-	declare -a package_commands=()
+log "waiting for dbus settings"
+while ! dbus -y | grep -q "com.victronenergy.settings"; do
+  log "waiting for dbus settings"
+	sleep 1
+done
 
-	while IFS= read -r line || [[ -n "$line" ]]; do
-		if [[ "$line" =~ ^[[:space:]]*$ || "$line" =~ ^[[:space:]]*# ]]; then
-			continue
+log "${log_prefix}installing - vespera from:$BOOTSTRAP_URL/$BOOTSTRAP_RELEASE"
+
+if ! wget -qO /tmp/vespera-bootstrap "$BOOTSTRAP_URL/vespera-bootstrap"; then
+	log "${log_prefix}failed to download vespera-bootstrap, exiting"
+	exit 1
+else
+	echo "executing vespera-bootstrap"
+	if [ "$dry_run" -eq 0 ]; then
+		if ! sh /tmp/vespera-bootstrap --no-prompt --feed "$BOOTSTRAP_URL/$BOOTSTRAP_RELEASE"; then
+			log "${log_prefix}vespera-bootstrap failed, exiting"
+			exit 1
 		fi
-
-		read -r -a tokens <<< "$line"
-
-		case "${tokens[0]}" in
-			package)
-				if [[ ${#tokens[@]} -lt 3 ]]; then
-					echo "Invalid package command: $line"
-					exit 1
-				fi
-				package_commands+=("$line")
-				;;
-			*)
-				echo "Unsupported command: $line"
-				exit 1
-				;;
-		esac
-	done < "$install_conf"
-
-	for command in "${package_commands[@]}"; do
-		read -r -a package_tokens <<< "$command"
-
-		declare package_action="${package_tokens[1]}"
-		declare package_name="${package_tokens[$((${#package_tokens[@]} - 1))]}"
-		declare -a package_args=()
-
-		if [[ ${#package_tokens[@]} -gt 3 ]]; then
-			package_args=("${package_tokens[@]:2:$((${#package_tokens[@]} - 3))}")
-		fi
-
-		vespera "$package_action" "${package_args[@]}" "$package_name"
-	done
+	fi
 fi
 
-rm -f "${BASH_SOURCE[0]}"
-echo "Done"
+log "vespera version: $(vespera version)"
+if [ -n "${BASE_SOURCE_FILE}" ] && [ -f "${BASE_SOURCE_FILE}.sh" ]; then
+	log "${log_prefix}calling post script:${BASE_SOURCE_FILE}.sh"
+	[ "$dry_run" -eq 0 ] &&
+		"${BASE_SOURCE_FILE}.sh"
+fi
+
+[ "$dry_run" -eq 0 ] && rm -f "${0}"

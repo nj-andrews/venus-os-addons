@@ -10,19 +10,15 @@ VESPERA_DATA_DIR="${VESPERA_ROOT:-}${VESPERA_DATA_DIR}"
 source "$__vespera_path/libs/opkg-lib"
 LOCAL_SETTINGS_TRY_COUNT=100
 
-declare -i settings_up=0 counter=0
+declare -i settings_up=0 timeout=60
 echo "start-all-services: waiting for com.victronenergy.settings"
-while true; do
-	if [[ $settings_up == 0 ]]; then
-		svstat "/service/localsettings" 2>/dev/null | grep -Eq 'run|up ' \
-				&& { settings_up=1; continue; }
-	elif dbus -y com.victronenergy.settings /Settings/Vespera/Version GetValue 1>/dev/null 2>&1; then
-		settings_up=2
-		break
-	fi
 
-	counter=$((counter+1))
-	((counter>$LOCAL_SETTINGS_TRY_COUNT)) && break
+while ! dbus -y | grep -q "com.victronenergy.settings"; do
+	timeout=$((timeout - 1))
+	[ "$timeout" -gt 0 ] || {
+			echo "start-all-services: timed out waiting for localsettings service"
+			exit 1
+	}
 	sleep 1
 done
 

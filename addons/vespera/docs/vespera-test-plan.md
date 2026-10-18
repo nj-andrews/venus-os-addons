@@ -93,79 +93,79 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 ## Phase 4: Blind-install testing
 
 ### 4.1 Package creation and media staging
-- [ ] Build the blind-install artifact using the bootstrapper workflow.
-- [ ] Verify the generated archive and expected payload files are present.
-- [ ] Verify copy-to-drive workflow places files in the expected destination layout.
+- [x] Build the blind-install artifact using the bootstrapper workflow.
+- [x] Verify the generated archive and expected payload files are present.
+- [x] Verify copy-to-drive workflow places files in the expected destination layout.
 
 ### 4.2 First-boot execution path
-- [ ] Verify blind-install startup hook runs on target boot.
-- [ ] Verify install logs indicate package extraction and install steps completed.
-- [ ] Verify failure paths write actionable logs when media or payload is invalid.
+- [x] Verify blind-install startup hook runs on target boot.
+- [x] Verify install logs indicate package extraction and install steps completed.
+- [x] Verify failure paths write actionable logs when media or payload is invalid.
 
 ### 4.3 Post-install validation
-- [ ] Verify Vespera package is installed and services are enabled after blind-install.
-- [ ] Verify GUI integration entrypoint is available after boot.
-- [ ] Verify rerunning the blind-install path is idempotent and does not duplicate state.
+- [x] Verify Vespera package is installed and services are enabled after blind-install.
+- [x] Verify GUI integration entrypoint is available after boot.
+- [x] Verify rerunning the blind-install path is idempotent and does not duplicate state.
 
 ---
 
 ## Phase 5: Core package lifecycle checks
 
 ### 5.1 Fresh install
-- [ ] Install or refresh the Vespera package with the project package workflow.
-- [ ] Verify the package files land under `/data/apps/available/vespera/` in the target machine.
-- [ ] Verify all Vespera GUI pages are present in the Venus GUI asset tree.
-- [ ] Verify basic functionality works, refresh packages.
+- [x] Install or refresh the Vespera package with the project package workflow.
+- [x] Verify the package files land under `/data/apps/available/vespera/` in the target machine.
+- [x] Verify all Vespera GUI pages are present in the Venus GUI asset tree.
+- [x] Verify basic functionality works, refresh packages.
 
 ### 5.2 Runtime enablement
-- [ ] Confirm Vespera services start cleanly after install.
-- [ ] Verify the main Vespera pages are visible and selectable.
+- [x] Confirm Vespera services start cleanly after install.
+- [x] Verify the main Vespera pages are visible and selectable.
 
 ---
 
 ## Phase 6: Feed and package metadata checks
 
 ### 6.1 Feed config
-- [ ] Verify the combined opkg configuration is valid.
-- [ ] Confirm feed entries are available in the generated package index metadata.
-- [ ] Check that feed metadata still loads when the cache is empty or stale.
+- [x] Verify the combined opkg configuration is valid.
+- [x] Confirm feed entries are available in the generated package index metadata.
+- [x] Check that feed metadata still loads when the cache is empty or stale.
 
 ### 6.2 Feed refresh
-- [ ] Trigger a feed refresh through the Vespera CLI or package logic.
-- [ ] Verify the update path completes without an invalid index state.
-- [ ] Confirm the cached package list is refreshed and parseable.
+- [x] Trigger a feed refresh through the Vespera CLI or package logic.
+- [x] Verify the update path completes without an invalid index state.
+- [x] Confirm the cached package list is refreshed and parseable.
 
 ---
 
 ## Phase 7: Package operations
 
 ### 7.1 Install
-- [ ] Run the install flow through the package lifecycle entrypoint.
-- [ ] Verify the application is added to the enabled/installed state list.
-- [ ] Confirm the app-level runtime logic is invoked and completes without partial state.
+- [x] Run the install flow through the package lifecycle entrypoint.
+- [x] Verify the application is added to the enabled/installed state list.
+- [x] Confirm the app-level runtime logic is invoked and completes without partial state.
 
 ### 7.2 Remove
-- [ ] Run the remove flow through the package lifecycle entrypoint.
-- [ ] Verify installed state is cleaned up.
-- [ ] Confirm remove logic does not leave stale symlinks or generated metadata behind.
+- [x] Run the remove flow through the package lifecycle entrypoint.
+- [x] Verify installed state is cleaned up.
+- [x] Confirm remove logic does not leave stale symlinks or generated metadata behind.
 
 ### 7.3 Upgrade/reinstall safety
-- [ ] Run an upgrade-install path and verify state transitions are preserved.
-- [ ] Verify remove/upgrade flows do not duplicate entries in package or device state files.
+- [x] Run an upgrade-install path and verify state transitions are preserved.
+- [x] Verify remove/upgrade flows do not duplicate entries in package or device state files.
 
 ---
 
 ## Phase 8: Serial device installer coverage
 
 ### 8.1 Device detection
-- [ ] Verify `sdi_get_available_devices` handles normal USB tty devices and ignores stale or invalid entries.
-- [ ] Verify udev property parsing returns the expected USB fields for a discovered device.
-- [ ] Confirm device SID generation is deterministic for equivalent USB metadata.
+- [x] Verify `sdi_get_available_devices` handles normal USB tty devices and ignores stale or invalid entries.
+- [x] Verify udev property parsing returns the expected USB fields for a discovered device.
+- [x] Confirm device SID generation is deterministic for equivalent USB metadata.
 
 ### 8.2 Device binding
-- [ ] Verify a tty resolves to the correct service name and service mapping.
-- [ ] Verify duplicate device rules are not written twice.
-- [ ] Verify a damaged or missing symlink is repaired by the installer logic.
+- [x] Verify a tty resolves to the correct service name and service mapping.
+- [x] Verify duplicate device rules are not written twice.
+- [x] Verify a damaged or missing symlink is repaired by the installer logic.
 
 ### 8.3 Remove and cleanup
 - [ ] Remove a bound device rule and verify the serial-starter rule is cleaned up.
@@ -177,13 +177,13 @@ The Vespera CLI is the primary automation and troubleshooting entrypoint, so it 
 ## Phase 9: DBus and settings integration
 
 ### 9.1 DBus state
-- [ ] Confirm settings values are written under the expected DBus subtree.
-- [ ] Verify remove flows do not leave stale DBus entries behind.
-- [ ] Check that device settings can be created and reconciled across repeated scan/bind cycles.
+- [x] Confirm settings values are written under the expected DBus subtree.
+- [x] Verify remove flows do not leave stale DBus entries behind.
+- [x] Check that device settings can be created and reconciled across repeated scan/bind cycles.
 
 ### 9.2 Settings persistence
-- [ ] Verify values survive a typical package lifecycle transition.
-- [ ] Confirm the package does not create duplicate config entries after re-install.
+- [x] Verify values survive a typical package lifecycle transition.
+- [x] Confirm the package does not create duplicate config entries after re-install.
 
 ---
 

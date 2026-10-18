@@ -135,15 +135,17 @@ case "$command" in
 	# 	vespera_lib_index; exit;;
 	help)
 		vespera_show_help; exit;;
+	version)
+		exec awk '/Version:/ {print $2}' "${VESPERA_DATA_DIR}/info/vespera.control" 2>/dev/null;;
 	fs-ro|fs-rw)
 		mount -o remount,"${command:(-2)}" /; exit;;
 	feed-conf)
 		case "${1:-}" in
 			"") opkg_lib_show_feed_name;;
-			set)	opkg_lib_feed_conf_set "${2}";;
+			set|add) opkg_lib_feed_conf_set_add "${1:-}" "${2:-}";;
 			list) opkg_lib_feed_conf_available;;
-			remove) opkg_lib_feed_conf_remove "${2}";;
-			*) opkg_lib_show_feed_sources "${1}";;
+			remove) opkg_lib_feed_conf_remove "${2:-}";;
+			*) opkg_lib_show_feed_sources "${1:-}";;
 		esac
 		exit
 		;;
@@ -191,8 +193,6 @@ esac
 }
 
 vespera_lib_pre_install "$command" "$@"
-
-((VESPERA_VERBOSITY>1)) && echo "VESPERA_WORKING_DIR=$VESPERA_WORKING_DIR"
 
 opkg -f "${VESPERA_COMBINED_CONF_FILE}" "$command" "$@"
 retval=$?

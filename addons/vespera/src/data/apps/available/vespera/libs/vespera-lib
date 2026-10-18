@@ -100,7 +100,7 @@ vespera_lib_pre_install() {
 
 	grep -qE " / .* rw[ ,]" /proc/mounts && echo "WARNING: file system is read-write";
 
-	echo "Vespera: $VESPERA_VERSION"
+	echo_lang "$LANG_VESPERA_VERSION" " $VESPERA_VERSION"
 	if vespera_lib_log_verbose2; then
 		echo "Args: $*"
 		echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/$VESPERA_VERBOSITY_FILE"
@@ -123,7 +123,7 @@ vespera_lib_post_install() {
 		local vespera_version=$VESPERA_VERSION
 		source_lib_clear_source_guards # clear all sources
 		addsource "libs/vespera-lib"
-		[[ "$vespera_version" != "$VESPERA_VERSION" ]] && echo "Vespera version $VESPERA_VERSION"
+		[[ "$vespera_version" != "$VESPERA_VERSION" ]] && echo_lang "$LANG_VESPERA_VERSION" " $VESPERA_VERSION"
 	fi
 	shift
 	__vespera_lib_post_install "$@"
@@ -185,6 +185,7 @@ __vespera_lib_post_install() {
 	# 7. cleanup
 	__vespera_lib_cleanup
 
+	echo_lang "$LANG_INSTALL_COMPLETED"
 }
 
 __show_file_contents() {

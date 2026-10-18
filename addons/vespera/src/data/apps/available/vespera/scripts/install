@@ -17,7 +17,7 @@ __write_dbus_settings_to_dbus_list_file() {
 		"${PACKAGE_DEVICES:-}"
 }
 
-__insatll_patch_files() {
+__install_patch_files() {
 	echo_lang "$LANG_PACKAGE_PATCHING_FILES"
 
 	shopt -s nullglob
@@ -103,7 +103,7 @@ __install() {
 	__add_vespera_startup_scripts
 
 	# Phase 2: patch + settings apply
-	__add_patch_files
+	__install_patch_files
 	echo_lang "$LANG_PROCESSING_DBUS_SETTINGS"
 	__add_dbus_settings_from_dbus_list_file
 

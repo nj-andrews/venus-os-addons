@@ -14,6 +14,7 @@ LANG_REVERTING_PATCHED_FILES="Gepatchte bestanden worden teruggedraaid"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Vorige installatie verwijderd, nu wordt bijgewerkt..."
 LANG_INSTALLED_ARG1_DISABLED="Geïnstalleerd %s (uitgeschakeld)"
 LANG_INSTALLED_ARG1_ENABLING="%s wordt ingeschakeld"
+LANG_INSTALL_COMPLETED="Voltooid"
 
 # vespera installer
 LANG_UPDATING_DATABASE="Database wordt bijgewerkt"

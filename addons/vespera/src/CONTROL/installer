@@ -25,13 +25,13 @@
 PACKAGE_DBUS_NAME="Vespera"
 
 RCS_LOCAL_SCRIPT="
-	# vespera (do not edit)
-	/data/apps/available/vespera/scripts/rcS-local
+# vespera (do not edit)
+/data/apps/available/vespera/scripts/rcS-local
 "
 
 RC_LOCAL_SCRIPT="
-	# vespera (do not edit)
-	/data/apps/available/vespera/scripts/rc-local
+# vespera (do not edit)
+/data/apps/available/vespera/scripts/rc-local
 "
 
 PACKAGE_CUSTOM_MENUS="

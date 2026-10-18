@@ -51,8 +51,10 @@ fsresize="/opt/victronenergy/swupdate-scripts/resize2fs.sh"
     ("$fsresize" && mount -o remount,ro /) >"$output" 2>&1
 }
 
+echo "bootstrap:OPKG install"
 opkg -f "${OPKG_CONF}" "$@" install "$FEED/vespera-latest.ipk" || exit
 retval=$?
+echo "bootstrap:OPKG install done"
 
 # shellcheck disable=SC1091
 ( . "/data/apps/available/vespera/libs/vespera-lib"; vespera_lib_bootstrap; )

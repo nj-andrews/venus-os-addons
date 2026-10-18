@@ -8,6 +8,7 @@ __vespera_path="$(cd "${__vespera_path}/.." && pwd)"
 declare log_file="${VESPERA_ROOT:-}/var/log/vespera/rcS-local.log"
 
 mkdir -p "$(dirname "$log_file")"
-exec >> "$log_file" 2>&1
+exec > "$log_file" 2>&1
 echo "Executing all rc.local startup scripts for enabled apps"
+echo "$(date '+%Y-%m-%d %H:%M:%S')"
 exec "$__vespera_path/scripts/execute-startup-scripts" "rc.local"

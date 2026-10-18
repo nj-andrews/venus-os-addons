@@ -118,13 +118,13 @@ installer_lib_initialize() {
 	[[ -f /var/lock/vespera-gui ]] && RUNNING_FROM_GUI=1 || RUNNING_FROM_GUI=0
 
 	if [[ $PACKAGE_ACTION == "configure" || $PACKAGE_ACTION == "firmware-changed" ]]; then
-		echo "PACKAGE_ACTION AAA=$PACKAGE_ACTION"
+
 		PACKAGE_VERSION_NEW="$(awk '/Version:/ {print $2}' "${PACKAGE_DATA_INFO_DIR}/${PACKAGE_NAME}".control 2>/dev/null)"
 		PACKAGE_VERSION_CURRENT="$(vespera status "$PACKAGE_NAME" 2>/dev/null | awk '/Version:/ {print $2}' 2>/dev/null)"
 		if [[ $PACKAGE_ACTION != "firmware-changed" ]]; then
 			[[ -z "$PACKAGE_VERSION_CURRENT" ]] && PACKAGE_ACTION="install" || PACKAGE_ACTION="upgrade-install"
 		fi
-		echo "PACKAGE_ACTION BBB=$PACKAGE_ACTION"
+
 	elif [[ "$PACKAGE_ACTION" == "upgrade" ]]; then
 		PACKAGE_ACTION="upgrade-remove"
 	#elif [[ $PACKAGE_ACTION == "firmware-changed" ]]; then

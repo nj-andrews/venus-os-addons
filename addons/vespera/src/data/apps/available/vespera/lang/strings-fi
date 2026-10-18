@@ -14,6 +14,7 @@ LANG_REVERTING_PATCHED_FILES="Palautetaan paikatut tiedostot"
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Edellinen asennus poistettu, päivitetään nyt..."
 LANG_INSTALLED_ARG1_DISABLED="Asennettu %s (pois käytöstä)"
 LANG_INSTALLED_ARG1_ENABLING="Otetaan käyttöön %s"
+LANG_INSTALL_COMPLETED="Valmis"
 
 # vespera installer
 LANG_UPDATING_DATABASE="Päivitetään tietokantaa"

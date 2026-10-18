@@ -1,8 +1,0 @@
-set -o nounset
-
-this_path="$(dirname "${BASH_SOURCE[0]}")"
-
-echo "copying /feeds/venus-data-vespera-blind-install.tgz -> /run/media/sdb"
-cp $this_path/../../../feeds/venus-data-vespera-blind-install.tgz /run/media/sdb
-
-echo done

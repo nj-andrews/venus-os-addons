@@ -15,3 +15,5 @@ LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="Removed previous install, upgrading
 
 LANG_INSTALLED_ARG1_DISABLED="Installed %s (disabled)"
 LANG_INSTALLED_ARG1_ENABLING="Enabling %s"
+LANG_INSTALL_COMPLETED="Completed"
+LANG_VESPERA_VERSION="Vespera version"

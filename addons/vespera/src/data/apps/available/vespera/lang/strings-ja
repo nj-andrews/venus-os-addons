@@ -14,6 +14,7 @@ LANG_REVERTING_PATCHED_FILES="パッチ適用済みファイルを元に戻し�
 LANG_REMOVED_PREVIOUS_INSTALL_UPGRADING_NOW="前回のインストールを削除しました。更新を続行します..."
 LANG_INSTALLED_ARG1_DISABLED="インストール済み %s (無効)"
 LANG_INSTALLED_ARG1_ENABLING="%s を有効にしています"
+LANG_INSTALL_COMPLETED="完了"
 
 # vespera installer
 LANG_UPDATING_DATABASE="データベースを更新中"

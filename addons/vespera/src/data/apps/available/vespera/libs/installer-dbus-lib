@@ -44,7 +44,6 @@ installer_dbus_lib_manifest_add_custom_service() {
 	local manifest_file="${1:-}"
 	local package_dbus_name="${2:-}"
 	local package_device="${3:-}"
-	local -n service_count"${4:-}"
 	local service_name display_name entry
 	local service_index=0
 
@@ -61,8 +60,6 @@ installer_dbus_lib_manifest_add_custom_service() {
 		printf '%s\n' "{\"path\":\"/Settings/Vespera/Packages/${package_dbus_name}/DeviceServices/${service_index}/ServiceName\", \"default\":\"${service_name}\"}" >> "$manifest_file"
 		((service_index++))
 	done <<< "$package_device"
-
-	service_count=$service_index
 
 }
 __installer_dbus_lib_manifest_apply_all() {

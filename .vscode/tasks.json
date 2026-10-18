@@ -338,7 +338,7 @@
 		{
 			"label": "Build vespera Blind Install",
 			"type": "shell",
-			"command": "bash addons/vespera/blind-install/build_tgz",
+			"command": "bash addons/vespera/bootstrapper/blind-install/build_tgz",
 			"group": {
 				"kind": "build",
 				"isDefault": false
