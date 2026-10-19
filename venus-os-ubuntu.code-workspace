@@ -41,6 +41,7 @@
 		"editor.rulers": [
 			110
 		],
+		"terminal.integrated.cwd": "/home/admin_user/dev-local",
 		"editor.wordWrap": "on",
 		"editor.wordWrapColumn": 110,
 		"qt-qml.qmlls.customExePath": "/home/admin_user/Qt/6.8.3/gcc_64/bin/qmlls",

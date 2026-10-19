@@ -3,8 +3,10 @@
 <file>../InetboxDevicePage.qml</file>
 <file>../MotorhomePage.qml</file>
 <file>../InetboxModel.qml</file>
+<file>../InetboxScheduler.qml</file>
 <file>../InetboxPageSettings.qml</file>
 <file>../MotorhomePage_Landscape.qml</file>
+<file>../InetboxHeatingScheduleDialog.qml</file>
 <file>../MotorhomePage_Portrait.qml</file>
 <file>../components/CycleButton.qml</file>
 <file>../components/CycleButtonGroup.qml</file>

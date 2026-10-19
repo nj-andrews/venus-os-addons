@@ -41,19 +41,19 @@ Rectangle {
 
 			model: [{
 					"value": "0",
-					"valueText": "Off",
+					"display": "Off",
 					"color": "grey"
 				}, {
 					"value": "40.0",
-					"valueText": "Eco",
+					"display": "Eco",
 					"color": "green"
 				}, {
 					"value": "60.0",
-					"valueText": "Hot",
+					"display": "Hot",
 					"color": "green"
 				}, {
 					"value": "200.0",
-					"valueText": "Boost",
+					"display": "Boost",
 					"color": "green"
 				}]
 		}
@@ -73,16 +73,16 @@ Rectangle {
 			}
 			model: [{
 					"value": "off",
-					"valueText": "Off",
+					"display": "Off",
 					"secondaryText": "Hello",
 					"color": "grey"
 				}, {
 					"value": "green",
-					"valueText": "Eco",
+					"display": "Eco",
 					"color": "green"
 				}, {
 					"value": "green",
-					"valueText": "High",
+					"display": "High",
 					"color": "green"
 				}]
 
@@ -108,23 +108,23 @@ Rectangle {
 			}
 			model: [{
 					"value": "off",
-					"valueText": "Off",
+					"display": "Off",
 					"color": "grey"
 				}, {
 					"value": "green",
-					"valueText": "Cool",
+					"display": "Cool",
 					"color": "green"
 				}, {
 					"value": "vent",
-					"valueText": "Vent",
+					"display": "Vent",
 					"color": "green"
 				}, {
 					"value": "hot",
-					"valueText": "Hot",
+					"display": "Hot",
 					"color": "green"
 				}, {
 					"value": "auto",
-					"valueText": "Auto",
+					"display": "Auto",
 					"color": "green"
 				}]
 
@@ -148,23 +148,23 @@ Rectangle {
 			}
 			model: [{
 					"value": "low",
-					"valueText": "Low",
+					"display": "Low",
 					"color": "white"
 				}, {
 					"value": "mid",
-					"valueText": "Mid",
+					"display": "Mid",
 					"color": "white"
 				}, {
 					"value": "high",
-					"valueText": "High",
+					"display": "High",
 					"color": "white"
 				}, {
 					"value": "night",
-					"valueText": "Night",
+					"display": "Night",
 					"color": "white"
 				}, {
 					"value": "auto",
-					"valueText": "Auto",
+					"display": "Auto",
 					"color": "lightseagreen"
 				}]
 		}
@@ -184,22 +184,22 @@ Rectangle {
 			}
 			model: [{
 					"value": "gas",
-					"valueText": "Gas",
+					"display": "Gas",
 					"color": '#ffab03'
 				}, {
 					"value": "mix1",
-					"valueText": "Mix1",
+					"display": "Mix1",
 					"color": "green"
 				}, {
 					"value": "mix2",
-					"valueText": "Mix2",
+					"display": "Mix2",
 					"color": "green"
 				}, {
 					"value": "el1",
-					"valueText": "El1",
+					"display": "El1",
 					"color": "lightskyblue"
 				}, {
-					"valueText": "El2",
+					"display": "El2",
 					"color": "lightskyblue"
 				}]
 		}
@@ -226,7 +226,7 @@ Rectangle {
 		property var model: []
 
 		property alias text: button.text
-		property alias valueText: valueLabel.text
+		property alias display: valueLabel.text
 		property alias secondaryText: secondaryLabel.text
 		property alias valueColor: valueLabel.color
 		property alias secondaryColor: secondaryLabel.color
@@ -259,7 +259,7 @@ Rectangle {
 		Label {
 			id: valueLabel
 			color: "dimgray"
-			text: control.model[control.currentIndex].valueText ?? ""
+			text: control.model[control.currentIndex].display ?? ""
 
 			width: control.group === undefined ? undefined: control.group.valueWidth
 			anchors {

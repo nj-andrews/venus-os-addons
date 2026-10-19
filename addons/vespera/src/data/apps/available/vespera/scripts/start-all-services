@@ -8,9 +8,8 @@ source "$__vespera_path/conf/vespera.conf"
 VESPERA_DATA_DIR="${VESPERA_ROOT:-}${VESPERA_DATA_DIR}"
 # shellcheck source="../libs/opkg-lib"
 source "$__vespera_path/libs/opkg-lib"
-LOCAL_SETTINGS_TRY_COUNT=100
 
-declare -i settings_up=0 timeout=60
+declare -i timeout=60
 echo "start-all-services: waiting for com.victronenergy.settings"
 
 while ! dbus -y | grep -q "com.victronenergy.settings"; do
@@ -24,9 +23,14 @@ done
 
 for app in $(opkg_lib_list_packages "all"); do
 	echo "starting services for $app"
-	[[ -L "${VESPERA_ROOT:-}/data/apps/enabled/$app" ]] || { echo "cannot start services for $app; not enabled"; continue; }
+
+	[[ -L "${VESPERA_ROOT:-}/data/apps/enabled/$app" ]] || {
+		echo "cannot start services for $app; not enabled"; continue; }
+
 	dbus_name="$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}" 2>/dev/null)"
-	[[ -z "$dbus_name" ]] && { echo "cannot start services for $app; $dbus_name is empty."; continue; }
+	[[ -z "$dbus_name" ]] && {
+		echo "cannot start services for $app; $dbus_name is empty."; continue; }
+
 	echo "calling '$__vespera_path/scripts/start-app-services $app $dbus_name'"
 	"$__vespera_path/scripts/start-app-services" "$app" "$dbus_name"
 done

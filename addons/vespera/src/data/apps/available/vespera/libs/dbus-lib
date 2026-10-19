@@ -38,7 +38,7 @@ dbus_lib_add_settings() {
 #    This can be the same source used for dbus_lib_add_settings
 #    Lines with comments and white space are ignored
 dbus_lib_remove_settings () {
-		local settings
+	local settings
 	local paths
 
 	settings="$(cat)"

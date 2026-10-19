@@ -4,7 +4,7 @@ import Victron.VenusOS
 Item {
 		id: root
 
-    required property VeQuickItem binding
+    property VeQuickItem binding
     property int currentIndex
     readonly property var currentValue: binding?.value
 
@@ -12,7 +12,7 @@ Item {
 		property var model: []
 
 		property alias text: button.text
-		property alias valueText: valueLabel.text
+		property alias display: valueLabel.text
 
 		property alias valueColor: valueLabel.color
 		property real fontPixelSize: 24
@@ -96,7 +96,7 @@ Item {
 		Label {
 			id: valueLabel
 			visible: !root.binding || root.binding.valid
-			text: root.model[root.currentIndex].valueText ?? ""
+			text: root.model[root.currentIndex].display ?? ""
 			font.pixelSize: root.fontPixelSize
 			color: Theme.color_font_secondary
 			width: root.group === undefined ? undefined: root.group.valueWidth

@@ -298,7 +298,25 @@ class InetboxController:
 				'/DeviceKey' : [f'{self._settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY_NAME, "", ""],
 				'/LastHeatingTemp' : [f'{self._settingsPath}/LastHeatingTemp', 16, 4, 30],
 				'/OverviewPage': [f'{self._settingsPath}/OverviewPage', dbus_constants.OVERVIEW_PAGE, "", ""],
-				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1]
+				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1],
+
+				'/Scheduler/Heating/Enabled': [f'{self._settingsPath}/Scheduler/Heating/Enabled', 0, 0, 1],
+				'/Scheduler/Heating/Repeat': [f'{self._settingsPath}/Scheduler/Heating/Repeat', 0, 0, 1],
+				'/Scheduler/Heating/Time': [f'{self._settingsPath}/Scheduler/Heating/Time', "", 0, 0],
+				'/Scheduler/Heating/HeatingMode': [f'{self._settingsPath}/Scheduler/Heating/HeatingMode', "", 0, 0],
+				'/Scheduler/Heating/HeatingTargetTemp': [f'{self._settingsPath}/Scheduler/Heating/HeatingTargetTemp', "", 0, 0],
+
+				'/Scheduler/Water/Enabled': [f'{self._settingsPath}/Scheduler/Water/Enabled', 0, 0, 1],
+				'/Scheduler/Water/Repeat': [f'{self._settingsPath}/Scheduler/Water/Repeat', 0, 0, 1],
+				'/Scheduler/Water/Time': [f'{self._settingsPath}/Scheduler/Water/Time', "", 0, 0],
+				'/Scheduler/Water/WaterTargetTemp': [f'{self._settingsPath}/Scheduler/Water/WaterTargetTemp', "", 0, 0],
+
+				'/Scheduler/Aircon/Enabled': [f'{self._settingsPath}/Scheduler/Aircon/Enabled', 0, 0, 1],
+				'/Scheduler/Aircon/Repeat': [f'{self._settingsPath}/Scheduler/Aircon/Repeat', 0, 0, 1],
+				'/Scheduler/Aircon/Time': [f'{self._settingsPath}/Scheduler/Aircon/Time', "", 0, 0],
+				'/Scheduler/Aircon/AirconMode': [f'{self._settingsPath}/Scheduler/Aircon/AirconMode', "", 0, 0],
+				'/Scheduler/Aircon/AirconTargetTemp': [f'{self._settingsPath}/Scheduler/Aircon/AirconTargetTemp', "", 0, 0],
+				'/Scheduler/Aircon/AirconFanSpeed': [f'{self._settingsPath}/Scheduler/Aircon/AirconFanSpeed', "", 0, 0]
 				},
 			eventCallback = self._handle_dbus_setting_changed)
 

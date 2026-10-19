@@ -37,10 +37,16 @@ Page {
 		}
 	}
 
-	Component {
-		id: dateSelectorDialog
-		DateSelectorDialog {}
-	}
+	// Component {
+	// 	id: scheduleDialog
+	// 	InetboxHeatingScheduleDialog {
+	// 		key:"Heating"
+	// 		inetboxModel: root.inetboxModel
+	// 		// scheduleEnabled: true,
+	// 		// scheduleTemp: 0,
+	// 		// scheduleMode: "Boost"
+	// 	}
+	// }
 
 	IC.ScheduleButton {
 		id: scheduleButton
@@ -54,7 +60,11 @@ Page {
 			topMargin: 40
 		}
 
-		onClicked: Global.dialogLayer.open(dateSelectorDialog)
+		//onClicked: Global.dialogLayer.open(scheduleDialog)
+		onClicked: {
+			Global.pageManager.pushPage("qrc:/Inetbox/InetboxScheduler.qml",
+					{ "inetboxModel": root.inetboxModel })
+		}
 	}
 	IC.ScheduleButton {
 		icon.source: "qrc:/images/icon_alarm_32.svg"

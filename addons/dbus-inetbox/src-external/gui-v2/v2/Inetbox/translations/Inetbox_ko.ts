@@ -127,6 +127,7 @@
     </message>
     <message id="inetbox_energy_heating">
         <location filename="../InetboxDevicePage.qml" line="51"/>
+        <location filename="../InetboxHeatingScheduleDialog.qml" line="48"/>
         <location filename="../components/MotorhomeInetbox.qml" line="173"/>
         <source>Heating</source>
         <translation>난방</translation>
@@ -188,6 +189,46 @@
         <location filename="../components/MotorhomeInetbox.qml" line="231"/>
         <source>Energy Mix</source>
         <translation>에너지 혼합</translation>
+    </message>
+    <message id="inetbox_heating">
+        <location filename="../InetboxScheduler.qml" line="19"/>
+        <source>Heating</source>
+        <translation type="unfinished">난방</translation>
+    </message>
+    <message id="inetbox_water">
+        <location filename="../InetboxScheduler.qml" line="24"/>
+        <source>Water</source>
+        <translation type="unfinished">물</translation>
+    </message>
+    <message id="inetbox_aircon">
+        <location filename="../InetboxScheduler.qml" line="29"/>
+        <source>Aircon</source>
+        <translation type="unfinished">에어컨</translation>
+    </message>
+    <message id="inetbox_heating_mode">
+        <location filename="../InetboxScheduler.qml" line="91"/>
+        <source>Heating mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="inetbox_repeat">
+        <location filename="../InetboxScheduler.qml" line="104"/>
+        <source>Repeat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="inetbox_scheduler">
+        <location filename="../InetboxScheduler.qml" line="8"/>
+        <source>Scheduler</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="inetbox_enabled">
+        <location filename="../InetboxScheduler.qml" line="45"/>
+        <source>Enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="inetbox_temperature">
+        <location filename="../InetboxScheduler.qml" line="69"/>
+        <source>Temperature</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

@@ -85,7 +85,7 @@ SwipeViewPage {
 		id: inetbox
 		serviceUid: device?.serviceUid ?? ""
 		page: root
-		
+
 		property var seenError
 		property var device : null
 		property bool showAircon : showAirconItem.valid && showAirconItem.value == 1
@@ -114,15 +114,15 @@ SwipeViewPage {
  		property VeQuickItem errorDescriptionItem: VeQuickItem {uid: inetbox.bindPrefix("/ErrorDescription")}
 	  property bool hasError: errorCodeItem.valid && errorCodeItem.value != 0
 
-		Component.onCompleted: {
-			console.log("InetboxModel:",
-			"showAirconItem.uid =", showAirconItem.uid,
-			"showAirconItem.valid =", showAirconItem.valid,
-			"showAirconItem.value =", showAirconItem.value,
-			"errorCodeItem.valid =", errorCodeItem.valid,
-			"errorCodeItem.value =", errorCodeItem.value,
-			)
-		}
+		// Component.onCompleted: {
+		// 	console.log("InetboxModel:",
+		// 	"showAirconItem.uid =", showAirconItem.uid,
+		// 	"showAirconItem.valid =", showAirconItem.valid,
+		// 	"showAirconItem.value =", showAirconItem.value,
+		// 	"errorCodeItem.valid =", errorCodeItem.valid,
+		// 	"errorCodeItem.value =", errorCodeItem.value,
+		// 	)
+		// }
 
 		onHeatingOnChanged: exclusiveHeating(airconModeItem)
 		onAirconOnChanged: exclusiveHeating(heatingModeItem)

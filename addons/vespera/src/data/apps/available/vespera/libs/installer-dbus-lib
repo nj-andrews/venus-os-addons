@@ -24,9 +24,7 @@ installer_dbus_lib_manifest_add_raw() {
 }
 
 installer_dbus_lib_manifest_add_kv_group() {
-	local manifest_file="${1:-}"
-	local base_path="${2:-}"
-	local items="${3:-}"
+	local manifest_file="${1:-}" base_path="${2:-}" items="${3:-}"
 	local entry key value
 
 	[[ -n "$manifest_file" && -n "$base_path" ]] || return 1
@@ -41,9 +39,7 @@ installer_dbus_lib_manifest_add_kv_group() {
 }
 
 installer_dbus_lib_manifest_add_custom_service() {
-	local manifest_file="${1:-}"
-	local package_dbus_name="${2:-}"
-	local package_device="${3:-}"
+	local manifest_file="${1:-}" package_dbus_name="${2:-}" package_device="${3:-}"
 	local service_name display_name entry
 	local service_index=0
 
@@ -79,84 +75,46 @@ __installer_dbus_lib_apply_queue_set() {
 }
 
 installer_dbus_lib_nav_pages_sync() {
-	local action="${1:-}"
-	local plugin_name="${2:-}"
-	local pages="${3:-}"
-	local dbus_path="/Settings/Vespera/CustomNavPages"
-	local csv_values=""
-	local page item current qrc_path exists idx csv_out
-	local -a nav_items raw_items filtered_items
+  local action="${1:-}" plugin_name="${2:-}" pages="${3:-}"
+  local dbus_path="/Settings/Vespera/CustomNavPages"
+  local csv_values="" qrc_path item
+  local -a nav_items=()
 
-	[[ -n "$plugin_name" && -n "$pages" ]] || return 0
-	[[ "$action" == "add" || "$action" == "remove" ]] || return 1
+  [[ -n "$plugin_name" && -n "$pages" ]] || return 0
+  [[ "$action" == "add" || "$action" == "remove" ]] || return 1
 
-	dbus_lib_get_value "$dbus_path" csv_values '' || csv_values=''
+  # Get current values and parse into array (splitting by comma, trimming spaces automatically)
+  dbus_lib_get_value "$dbus_path" csv_values '' || true
+  IFS=',' read -r -a raw_items <<< "$csv_values"
+  for item in "${raw_items[@]}"; do
+    item="${item//[[:space:]]/}" # strip all spaces for clean matching
+    [[ -n "$item" ]] && nav_items+=("$item")
+  done
 
-	if [[ -n "$csv_values" ]]; then
-		IFS=',' read -r -a raw_items <<< "$csv_values"
-		for item in "${raw_items[@]}"; do
-			item="${item#"${item%%[![:space:]]*}"}"
-			item="${item%"${item##*[![:space:]]}"}"
-			[[ -n "$item" ]] || continue
+  # Process add/remove for each page
+  for page in $pages; do
+    qrc_path="qrc:/${plugin_name}/${page}.qml"
+    if [[ "$action" == "add" ]]; then
+      # Append only if it doesn't already exist
+      [[ " ${nav_items[*]} " == *" $qrc_path "* ]] || nav_items+=("$qrc_path")
+    else
+      # Filter out matching items
+			# shellcheck disable=SC2206
+      nav_items=(${nav_items[@]/$qrc_path})
+    fi
+  done
 
-			exists=0
-			for current in "${nav_items[@]}"; do
-				if [[ "$current" == "$item" ]]; then
-					exists=1
-					break
-				fi
-			done
+  # Join array back into a CSV string
+  IFS=", "; local csv_out="${nav_items[*]}"
 
-			if [[ "$exists" -eq 0 ]]; then
-				nav_items+=("$item")
-			fi
-		done
-	fi
-
-	for page in ${pages}; do
-		qrc_path="qrc:/${plugin_name}/${page}.qml"
-		if [[ "$action" == "add" ]]; then
-			exists=0
-			for current in "${nav_items[@]}"; do
-				if [[ "$current" == "$qrc_path" ]]; then
-					exists=1
-					break
-				fi
-			done
-
-			if [[ "$exists" -eq 0 ]]; then
-				nav_items+=("$qrc_path")
-			fi
-		else
-			filtered_items=()
-			for current in "${nav_items[@]}"; do
-				if [[ "$current" != "$qrc_path" ]]; then
-					filtered_items+=("$current")
-				fi
-			done
-			nav_items=("${filtered_items[@]}")
-		fi
-	done
-
-	csv_out=''
-	for idx in "${!nav_items[@]}"; do
-		if [[ -z "$csv_out" ]]; then
-			csv_out="${nav_items[$idx]}"
-		else
-			csv_out+=", ${nav_items[$idx]}"
-		fi
-	done
-
-	dbus_lib_set_string_value "$dbus_path" "$csv_out" 1>/dev/null 2>/dev/null || {
-		dbus -y com.victronenergy.settings / AddSetting "${dbus_path%/*}" "${dbus_path##*/}" "$csv_out" s 0 0
-	}
+  # Write to D-Bus with fallback
+  dbus_lib_set_string_value "$dbus_path" "$csv_out" &>/dev/null || {
+    dbus -y com.victronenergy.settings / AddSetting "${dbus_path%/*}" "${dbus_path##*/}" "$csv_out" s 0 0
+  }
 }
 
 __installer_dbus_lib_upgrade_compute_delta() {
-	local current_file="${1:-}"
-	local previous_file="${2:-}"
-	local add_file="${3:-}"
-	local remove_file="${4:-}"
+	local current_file="${1:-}" previous_file="${2:-}" add_file="${3:-}" remove_file="${4:-}"
 	local source_line path compare_line compare_path
 
 	[[ -n "$current_file" && -n "$add_file" && -n "$remove_file" ]] || return 1
@@ -212,8 +170,7 @@ __installer_dbus_lib_upgrade_compute_delta() {
 }
 
 __installer_dbus_lib_upgrade_apply_delta() {
-	local add_file="${1:-}"
-	local remove_file="${2:-}"
+	local add_file="${1:-}" remove_file="${2:-}"
 	[[ -n "$add_file" && -f "$add_file" ]] || return 0
 	[[ -n "$remove_file" && -f "$remove_file" ]] || true
 
@@ -222,11 +179,8 @@ __installer_dbus_lib_upgrade_apply_delta() {
 }
 
 installer_dbus_lib_build_manifest() {
-	local manifest_file="${1:-}"
-	local package_dbus_name="${2:-}"
-	local package_dbus_settings="${3:-}"
-	local custom_overview_pages="${4:-}"
-	local custom_menus="${5:-}"
+	local manifest_file="${1:-}" package_dbus_name="${2:-}" package_dbus_settings="${3:-}"
+	local custom_overview_pages="${4:-}" custom_menus="${5:-}"
 
 	local package_device="${6:-}"
 
@@ -256,10 +210,7 @@ installer_dbus_lib_build_manifest() {
 }
 
 installer_dbus_lib_install() {
-	local manifest_file="${1:-}"
-	local queue_file="${2:-}"
-	local is_upgrade="${3:-0}"
-	local previous_manifest="${4:-}"
+	local manifest_file="${1:-}" queue_file="${2:-}" is_upgrade="${3:-0}" previous_manifest="${4:-}"
 	local add_file remove_file
 
 	[[ -n "$manifest_file" && -f "$manifest_file" ]] || return 1

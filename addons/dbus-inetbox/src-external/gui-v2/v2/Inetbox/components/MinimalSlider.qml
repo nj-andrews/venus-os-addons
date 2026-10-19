@@ -12,6 +12,7 @@ T.Slider {
 
 	property bool hideProgress: true
 	property bool hideTicks: true
+	property bool hideReflection: false
 
 	property real tickThickness: 2
 	property real tickLength: tickThickness
@@ -113,6 +114,7 @@ T.Slider {
 			}
 			Item {
 				id: reflection
+				visible: !root.hideReflection
 				x: original.x
 				y: original.height + 3
 				width: original.width

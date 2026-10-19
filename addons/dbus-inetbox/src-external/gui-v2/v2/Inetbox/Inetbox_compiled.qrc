@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RCC>
+<qresource prefix="/Inetbox">
+<file>InetboxDevicePage.qml</file>
+<file>MotorhomePage.qml</file>
+<file>InetboxModel.qml</file>
+<file>InetboxScheduler.qml</file>
+<file>InetboxPageSettings.qml</file>
+<file>MotorhomePage_Landscape.qml</file>
+<file>InetboxHeatingScheduleDialog.qml</file>
+<file>MotorhomePage_Portrait.qml</file>
+<file>components/CycleButton.qml</file>
+<file>components/CycleButtonGroup.qml</file>
+<file>components/MinimalSlider.qml</file>
+<file>components/MotorhomeBattery.qml</file>
+<file>components/MotorhomeGaugeQuantityRow.qml</file>
+<file>components/MotorhomeTankLevels.qml</file>
+<file>components/MotorhomePower.qml</file>
+<file>components/ScheduleButton.qml</file>
+<file>components/MotorhomeInetbox.qml</file>
+<file>Inetbox_es.qm</file>
+<file>Inetbox_ja.qm</file>
+<file>Inetbox_nl.qm</file>
+<file>Inetbox_pt.qm</file>
+<file>Inetbox_de.qm</file>
+<file>Inetbox_zh.qm</file>
+<file>Inetbox_fi.qm</file>
+<file>Inetbox_sv.qm</file>
+<file>Inetbox_en.qm</file>
+<file>Inetbox_ko.qm</file>
+<file>Inetbox_pl.qm</file>
+<file>Inetbox_it.qm</file>
+<file>Inetbox_fr.qm</file>
+<file>images/freshwater.svg</file>
+<file>images/energy_mix.svg</file>
+<file>images/fan.svg</file>
+<file>images/charging_renewables.svg</file>
+<file>images/motorhome.svg</file>
+<file>images/aircon.svg</file>
+<file>images/heating.svg</file>
+</qresource>
+<qresource prefix="/qt/qml/Victron/VenusOS/pages/settings/devicelist/delegates">
+<file>DeviceListDelegate_inetbox.qml</file>
+</qresource>
+</RCC>

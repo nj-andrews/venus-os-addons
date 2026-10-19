@@ -1,0 +1,106 @@
+import QtQuick
+import QtQuick.Layouts
+import Victron.VenusOS
+import "./components" as IC
+
+Page {
+	id: root
+
+	title: key=="Water" ? "Water on Schedule" : "Heating on Schedule"
+	property var inetboxModel
+  property string key
+  property bool scheduleEnabled
+  property real scheduleTemp
+	property string scheduleMode
+
+	VisibleItemModel {
+
+	}
+	contentItem: ModalDialog.FocusableContentItem {
+		implicitHeight: timeSelector.implicitHeight + heatingCycleButton.implicitHeight +
+			targetTemperatureSlider.implicitHeight + repeatLabel.implicitHeight + enabledLabel.implicitHeight + 100
+		focus: true
+
+		Keys.onPressed: root.accept()
+		Keys.enabled: Global.keyNavigationEnabled
+
+		IC.CycleButtonGroup { id: cycleButtonGroup }
+
+		TimeSelector {
+			id: timeSelector
+
+			anchors.horizontalCenter: parent.horizontalCenter
+			//width: parent.width - (2 * Theme.geometry_modalDialog_content_horizontalMargin)
+			focus: true
+			// KeyNavigation.up: timeSelector
+			// KeyNavigation.down: root.footer
+		}
+
+		// Heating
+		IC.CycleButton {
+			id: heatingCycleButton
+			group: cycleButtonGroup
+			anchors {top: timeSelector.bottom; topMargin: 20; left: timeSelector.left}
+			icon.source: "qrc:/Inetbox/images/heating.svg"
+			binding: root.inetboxModel.heatingModeItem
+			model: root.inetboxModel.heatingModeModel
+			//% "Heating"
+			text: qsTrId("inetbox_energy_heating")
+
+		}
+		IC.MinimalSlider {
+			id: targetTemperatureSlider
+			hideTicks: false
+			hideReflection: true
+			//visible: root.inetboxModel.heatingOn || root.inetboxModel.airconOn
+			value: root.inetboxModel.targetTemperature
+			anchors {top: heatingCycleButton.bottom; topMargin: 20;
+				left: timeSelector.left;right:tempLabel.left}
+
+			onPressedChanged: {
+				if (!pressed) // only update when button is released
+					root.inetboxModel.updateTargetTemperature(value);
+			}
+			// from: root.inetboxModel.heatingOn ? 5 : 16
+			// to: root.inetboxModel.heatingOn ? 30 : 31
+			from: 5; to: 30
+			stepSize: 1
+		}
+
+		QuantityLabel {
+			id: tempLabel
+			font.pixelSize: 24
+			value: targetTemperatureSlider.pressed ? targetTemperatureSlider.value : root.inetboxModel.targetTemperature ?? NaN
+			unit: Global.systemSettings.temperatureUnit
+			unitColor: Theme.color_overviewPage_widget_battery_font_secondary
+			Layout.minimumWidth: 50
+			anchors {verticalCenter: targetTemperatureSlider.verticalCenter; right: timeSelector.right;}
+		}
+		Label {
+			id: repeatLabel
+			text: "Repeat"
+			anchors {top: tempLabel.bottom; right: repeatSwitchItem.left;
+			rightMargin:10; topMargin: 20}
+			font.pixelSize: 24
+		}
+
+		Switch {
+			id: repeatSwitchItem
+			anchors {verticalCenter: repeatLabel.verticalCenter; right: timeSelector.right}
+		}
+
+		Label {
+			id: enabledLabel
+			text: "Enabled"
+			anchors {top: repeatLabel.bottom; right: enabledSwitchItem.left;
+			rightMargin:10; topMargin: 20}
+			font.pixelSize: 24
+		}
+
+		Switch {
+			id: enabledSwitchItem
+			anchors {verticalCenter: enabledLabel.verticalCenter; right: timeSelector.right}
+		}
+
+	}
+}
