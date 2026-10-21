@@ -123,24 +123,6 @@ class VesperaService:
 				log.info("D-Bus service registered: %s", SERVICE_NAME)
 				self._loop = GLib.MainLoop()
 
-		# def _initialize_settings(self):
-		# 		try:
-		# 				self._settings = SettingsDevice(
-		# 						bus=self._system_bus,
-		# 						supportedSettings={
-		# 								"auto_scan": ["/Settings/Vespera/AutoScan", 0, 0, 1],
-		# 						},
-		# 						eventCallback=self._on_setting_changed,
-		# 						timeout=30,
-		# 				)
-		# 		except Exception:
-		# 				log.exception("Failed to initialize settings device")
-		#  				self._settings = None
-
-		# def _on_setting_changed(self, setting, oldvalue, newvalue):
-		# 		log.info("Setting changed: %s %s -> %s", setting, oldvalue, newvalue)
-		# 		return True
-
 		def run(self):
 				log.info("Main loop started")
 				self._loop.run()

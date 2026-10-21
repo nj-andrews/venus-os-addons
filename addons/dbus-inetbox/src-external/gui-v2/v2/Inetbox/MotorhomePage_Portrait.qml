@@ -38,5 +38,21 @@ Page {
 			model: root.inetboxModel
 			Layout.fillWidth: true
 		}
+
+		Rectangle {
+			Layout.fillWidth: true
+			color: Theme.color_background_secondary
+			radius: Theme.geometry_button_radius
+			Layout.preferredHeight: auxButtons.implicitHeight + Theme.geometry_page_content_verticalMargin
+			IC.InetboxAuxButtons {
+				id: auxButtons
+				inetboxModel: root.inetboxModel
+				anchors {
+					left: parent.left
+					leftMargin: Theme.geometry_page_content_horizontalMargin
+					verticalCenter: parent.verticalCenter
+				}
+			}
+		}
 	}
 }

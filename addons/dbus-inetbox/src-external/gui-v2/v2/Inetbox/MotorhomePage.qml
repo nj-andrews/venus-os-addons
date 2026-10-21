@@ -2,6 +2,7 @@ import QtQuick
 import Victron.VenusOS
 import Victron.Gauges
 import QtQuick.Controls 2.12
+import "./components" as IC
 
 SwipeViewPage {
 	id: root
@@ -108,10 +109,10 @@ SwipeViewPage {
 		property VeQuickItem airconFanSpeedItem: VeQuickItem {uid: inetbox.bindPrefix("/AirconFanSpeed")}
 		property VeQuickItem energyMixItem: VeQuickItem {uid: inetbox.bindPrefix("/EnergyMixCombined")}
 		property VeQuickItem showAirconItem: VeQuickItem {uid: inetbox.bindSettingsPrefix("/ShowAircon")}
-		property VeQuickItem errorCodeItem: VeQuickItem {
-			uid: inetbox.bindPrefix("/Error")
-			}
+		property VeQuickItem errorCodeItem: VeQuickItem {uid: inetbox.bindPrefix("/Error")}
  		property VeQuickItem errorDescriptionItem: VeQuickItem {uid: inetbox.bindPrefix("/ErrorDescription")}
+		property VeQuickItem schedulesStateItem: VeQuickItem {uid:  inetbox.bindSettingsPrefix("/Schedules/State") }
+
 	  property bool hasError: errorCodeItem.valid && errorCodeItem.value != 0
 
 		// Component.onCompleted: {

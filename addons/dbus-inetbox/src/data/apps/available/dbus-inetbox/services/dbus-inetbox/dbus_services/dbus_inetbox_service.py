@@ -25,6 +25,7 @@ class dbusInetboxService(dbus_base_service):
 				'/State': {'initial': 0x100, 'writable': False},
 				'/CustomAlarm': {'initial': 0,'writable': True},
 				'/CustomAlarmText': {'initial': "",'writable': True},
+				'/Temperature': {'initial': "",'writable': False},
 				'/Values/WaterCurrentTemp': {'initial': None,'writable': False},
 				'/Values/WaterTargetTemp': {'initial': None,'writable': True},
 				'/Values/HeatingMode': {'initial': None,'writable': True},
@@ -41,7 +42,7 @@ class dbusInetboxService(dbus_base_service):
 				'/Values/ErrorDescription': {'initial': None,'writable': True},
 				'/Values/Clock': {'initial': None,'writable': False},
 				'/Values/Alive': {'initial': None,'writable': False},
-
+				'/ScheduleState': {'initial': 0,'writable': False},
 				# '/SwitchableOutput/heating/Settings/ShowUIControl': {'initial': 0,'writable': False},
 				# '/SwitchableOutput/heating/Settings/Type': {'initial': 3,'writable': False},
 				# '/SwitchableOutput/heating/Settings/Unit': {'initial': '/Temperature','writable': False},

@@ -115,7 +115,7 @@ Rectangle {
 				visible: root.model.heatingOn | root.model.airconOn
 				unit: Global.systemSettings.temperatureUnit
 				unitColor: Theme.color_overviewPage_widget_battery_font_secondary
-				Layout.minimumWidth: 50
+				Layout.minimumWidth: 60
 			}
 
 			MinimalSlider {
@@ -150,7 +150,7 @@ Rectangle {
 				binding: root.model.waterTargetTemperatureItem
 				model: root.model.waterModeModel
 				//% "Water"
-				text: qsTrId("inetbox_energy_water")
+				text: qsTrId("inetbox_water")
 			}
 			QuantityLabel {
 				//id: waterHeaterCurrentTemperature
@@ -170,7 +170,7 @@ Rectangle {
 			binding: root.model.heatingModeItem
 			model: root.model.heatingModeModel
 			//% "Heating"
-			text: qsTrId("inetbox_energy_heating")
+			text: qsTrId("inetbox_heating")
 			Layout.leftMargin: waterRow.x + root.buttonOffsetX
 		}
 
@@ -184,7 +184,7 @@ Rectangle {
 				model: root.model.airconModeModel
 				visible: root.model.showAircon
 				//% "Aircon"
-				text: qsTrId("inetbox_energy_aircon")
+				text: qsTrId("inetbox_aircon")
 				Layout.leftMargin: heatingCycleButton.x + root.buttonOffsetX
 			}
 			Loader {
@@ -217,7 +217,7 @@ Rectangle {
 				model: root.model.airconFanSpeedModel
 
 				//% "Fan speed"
-				text: qsTrId("inetbox_energy_fan_speed")
+				text: qsTrId("inetbox_fan_speed")
 			}
 		}
 		// EnergyMix

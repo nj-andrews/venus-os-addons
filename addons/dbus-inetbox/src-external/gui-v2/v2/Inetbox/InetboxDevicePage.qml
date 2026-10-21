@@ -41,20 +41,20 @@ DevicePage {
 		}
 		ListText {
 			//% "Water"
-			text: qsTrId("inetbox_energy_water")
+			text: qsTrId("inetbox_water")
 			dataItem.uid:  root.bindPrefix + "/Values/WaterTargetTemp"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.waterModeModel, dataItem.value)
 		}
 
 		ListText {
 			//% "Heating"
-			text: qsTrId("inetbox_energy_heating")
+			text: qsTrId("inetbox_heating")
 			dataItem.uid: root.bindPrefix + "/Values/HeatingMode"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.heatingModeModel, dataItem.value)
 		}
 		ListText {
 			//% "Aircon"
-			text: qsTrId("inetbox_energy_aircon")
+			text: qsTrId("inetbox_aircon")
 			dataItem.uid: root.bindPrefix + "/Values/HeatingMode"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.airconModeModel, dataItem.value)
 			preferredVisible: dataItem.valid
@@ -62,7 +62,7 @@ DevicePage {
 
 		ListText {
 			//% "Fan speed"
-			text: qsTrId("inetbox_energy_fan_speed")
+			text: qsTrId("inetbox_fan_speed")
 			dataItem.uid: root.bindPrefix + "/Values/AirconFanSpeed"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.airconFanSpeedModel, dataItem.value)
 			preferredVisible: dataItem.valid

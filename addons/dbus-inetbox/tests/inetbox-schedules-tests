@@ -1,0 +1,224 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+this_path="$(dirname "${BASH_SOURCE[0]}")"
+. "$this_path/../../../scripts/libs/test-lib"
+
+run_scheduler_case() {
+	local scenario="$1"
+	local module_dir="$this_path/../src/data/apps/available/dbus-inetbox/services/dbus-inetbox"
+
+	PYTHONPATH="$module_dir" python3 - "$scenario" <<'PY'
+import sys
+
+from inetbox_schedules import InetboxSchedules
+
+
+class FakeSettings(dict):
+	def __getitem__(self, key):
+		return dict.get(self, key, None)
+
+
+class FakeLogger:
+	def debug(self, *_args, **_kwargs):
+		pass
+
+	def info(self, *_args, **_kwargs):
+		pass
+
+	def warning(self, *_args, **_kwargs):
+		pass
+
+
+scenario = sys.argv[1]
+applied = []
+
+
+def apply_callback(path, value):
+	applied.append((path, value))
+	return True
+
+
+scheduler = InetboxSchedules(FakeSettings(), apply_callback, FakeLogger())
+
+
+if scenario == "heating_once_disables":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 1,
+		"/Schedules/Heating/Repeat": 0,
+		"/Schedules/Heating/Time": (8 * 3600) + (15 * 60),
+		"/Schedules/Heating/HeatingMode": "eco",
+		"/Schedules/Heating/HeatingTargetTemp": 21,
+	})
+	scheduler._run_due_schedules((8 * 60) + 15)
+	assert applied == [
+		("/Values/HeatingMode", "eco"),
+		("/Values/HeatingTargetTemp", 21),
+	]
+	assert scheduler._settings["/Schedules/Heating/Enabled"] == 0
+	assert scheduler._settings["/Schedules/State"] == 0
+
+elif scenario == "disabled_no_run":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 0,
+		"/Schedules/Heating/Repeat": 1,
+		"/Schedules/Heating/Time": (8 * 3600) + (15 * 60),
+		"/Schedules/Heating/HeatingMode": "eco",
+		"/Schedules/Heating/HeatingTargetTemp": 21,
+	})
+	scheduler._run_due_schedules((8 * 60) + 15)
+	assert applied == []
+	assert scheduler._settings["/Schedules/State"] == 0
+
+elif scenario == "repeat_daily_keeps_enabled":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 1,
+		"/Schedules/Heating/Repeat": 1,
+		"/Schedules/Heating/Time": (8 * 3600) + (15 * 60),
+		"/Schedules/Heating/HeatingMode": "night",
+		"/Schedules/Heating/HeatingTargetTemp": 18,
+	})
+	scheduler._refresh_state_bitmask()
+	scheduler._run_due_schedules((8 * 60) + 15)
+	assert applied == [
+		("/Values/HeatingMode", "night"),
+		("/Values/HeatingTargetTemp", 18),
+	]
+	assert scheduler._settings["/Schedules/Heating/Enabled"] == 1
+	assert scheduler._settings["/Schedules/State"] == 1
+
+elif scenario == "water_and_aircon_mapping":
+	scheduler._settings.update({
+		"/Schedules/Water/Enabled": 1,
+		"/Schedules/Water/Repeat": 1,
+		"/Schedules/Water/Time": (9 * 3600),
+		"/Schedules/Water/WaterTargetTemp": 60,
+		"/Schedules/Aircon/Enabled": 1,
+		"/Schedules/Aircon/Repeat": 1,
+		"/Schedules/Aircon/Time": (9 * 3600),
+		"/Schedules/Aircon/AirconMode": "cool",
+		"/Schedules/Aircon/AirconTargetTemp": 20,
+	})
+	scheduler._refresh_state_bitmask()
+	scheduler._run_due_schedules(9 * 60)
+	assert applied == [
+		("/Values/WaterTargetTemp", 60),
+		("/Values/AirconMode", "cool"),
+		("/Values/AirconTargetTemp", 20),
+	]
+	assert scheduler._settings["/Schedules/State"] == 6
+
+elif scenario == "invalid_time_skips":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 1,
+		"/Schedules/Heating/Repeat": 0,
+		"/Schedules/Heating/Time": 999999,
+		"/Schedules/Heating/HeatingMode": "eco",
+		"/Schedules/Heating/HeatingTargetTemp": 21,
+	})
+	scheduler._refresh_state_bitmask()
+	scheduler._run_due_schedules((8 * 60) + 15)
+	assert applied == []
+	assert scheduler._settings["/Schedules/Heating/Enabled"] == 1
+	assert scheduler._settings["/Schedules/State"] == 1
+
+elif scenario == "seconds_ignored_minute_match":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 1,
+		"/Schedules/Heating/Repeat": 1,
+		"/Schedules/Heating/Time": (7 * 3600) + 59,
+		"/Schedules/Heating/HeatingMode": "eco",
+		"/Schedules/Heating/HeatingTargetTemp": 19,
+	})
+	scheduler._refresh_state_bitmask()
+	scheduler._run_due_schedules(7 * 60)
+	assert applied == [
+		("/Values/HeatingMode", "eco"),
+		("/Values/HeatingTargetTemp", 19),
+	]
+
+elif scenario == "state_updates_on_enabled_change":
+	scheduler._settings.update({
+		"/Schedules/Heating/Enabled": 0,
+		"/Schedules/Water/Enabled": 0,
+		"/Schedules/Aircon/Enabled": 0,
+	})
+	scheduler._refresh_state_bitmask()
+	assert scheduler._settings["/Schedules/State"] == 0
+
+	scheduler.on_setting_changed("/Schedules/Heating/Enabled", 0, 1)
+	scheduler._settings["/Schedules/Heating/Enabled"] = 1
+	scheduler._refresh_state_bitmask()
+	assert scheduler._settings["/Schedules/State"] == 1
+
+	scheduler.on_setting_changed("/Schedules/Water/Enabled", 0, 1)
+	scheduler._settings["/Schedules/Water/Enabled"] = 1
+	scheduler._refresh_state_bitmask()
+	assert scheduler._settings["/Schedules/State"] == 3
+
+	scheduler.on_setting_changed("/Schedules/Aircon/Enabled", 0, 1)
+	scheduler._settings["/Schedules/Aircon/Enabled"] = 1
+	scheduler._refresh_state_bitmask()
+	assert scheduler._settings["/Schedules/State"] == 7
+
+	scheduler.on_setting_changed("/Schedules/Water/Enabled", 1, 0)
+	scheduler._settings["/Schedules/Water/Enabled"] = 0
+	scheduler._refresh_state_bitmask()
+	assert scheduler._settings["/Schedules/State"] == 5
+
+else:
+	raise ValueError(f"Unknown scenario: {scenario}")
+
+print("ok")
+PY
+}
+
+test_scheduler_heating_once_disables_enabled() {
+	local stdout
+	stdout="$(run_scheduler_case heating_once_disables 2>&1)"
+	assert_exitcode 0 "heating schedule should execute and disable when repeat=0"
+	assert_eq "ok" "$stdout" "heating one-shot scenario returns ok"
+}
+
+test_scheduler_disabled_entry_does_not_run() {
+	local stdout
+	stdout="$(run_scheduler_case disabled_no_run 2>&1)"
+	assert_exitcode 0 "disabled schedule should not run"
+	assert_eq "ok" "$stdout" "disabled scenario returns ok"
+}
+
+test_scheduler_repeat_entry_stays_enabled() {
+	local stdout
+	stdout="$(run_scheduler_case repeat_daily_keeps_enabled 2>&1)"
+	assert_exitcode 0 "repeat schedule should run and stay enabled"
+	assert_eq "ok" "$stdout" "repeat scenario returns ok"
+}
+
+test_scheduler_water_and_aircon_values_map_to_values_paths() {
+	local stdout
+	stdout="$(run_scheduler_case water_and_aircon_mapping 2>&1)"
+	assert_exitcode 0 "water and aircon schedule should map to values paths"
+	assert_eq "ok" "$stdout" "water and aircon scenario returns ok"
+}
+
+test_scheduler_invalid_time_is_skipped() {
+	local stdout
+	stdout="$(run_scheduler_case invalid_time_skips 2>&1)"
+	assert_exitcode 0 "invalid time should be skipped"
+	assert_eq "ok" "$stdout" "invalid time scenario returns ok"
+}
+
+test_scheduler_processing_is_minute_based() {
+	local stdout
+	stdout="$(run_scheduler_case seconds_ignored_minute_match 2>&1)"
+	assert_exitcode 0 "seconds in stored time should be ignored for matching"
+	assert_eq "ok" "$stdout" "minute-based scenario returns ok"
+}
+
+test_scheduler_state_bitmask_tracks_enabled_flags() {
+	local stdout
+	stdout="$(run_scheduler_case state_updates_on_enabled_change 2>&1)"
+	assert_exitcode 0 "schedule state bitmask should track enabled flags"
+	assert_eq "ok" "$stdout" "state bitmask scenario returns ok"
+}

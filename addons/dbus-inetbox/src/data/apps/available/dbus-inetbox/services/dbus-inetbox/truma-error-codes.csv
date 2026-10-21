@@ -50,3 +50,6 @@ Truma Combi D Comfort Plus,170,,Charge battery
 Truma Combi D Comfort Plus,255,Furnace has no 12 V power supply,Ensure that the 12 V power supply is available
 Truma Combi D Comfort Plus,255,No connection between furnace and control panel,Make connection between furnace and control panel
 Truma Aventa Eco / Comfort,34|47,AC has unstable 120 V power supply in connection with generator or inverter operation,Ensure shore power supply 120 V AC at the unit input
+Truma Combi,632,Empty boiler or internal water temperature sensor error	Ensure the water heater tank is full, Bleed the air taps and reset the panel
+Truma Combi, 507|516|517, gas supply interrupted,Restore the gas supply, for example by connecting a full gas cylinder.
+Then confirm or delete the fault code by tapping the rotary push button.

@@ -9,7 +9,7 @@
         <translation>Väntar på data...</translation>
     </message>
     <message id="inetbox_motorhome">
-        <location filename="../MotorhomePage.qml" line="10"/>
+        <location filename="../MotorhomePage.qml" line="11"/>
         <source>Motorhome</source>
         <translation>Husbil</translation>
     </message>
@@ -119,26 +119,28 @@
         <source>Current Water Temperature</source>
         <translation>Aktuell vattentemperatur</translation>
     </message>
-    <message id="inetbox_energy_water">
+    <message id="inetbox_water">
         <location filename="../InetboxDevicePage.qml" line="44"/>
+        <location filename="../InetboxSchedules.qml" line="28"/>
         <location filename="../components/MotorhomeInetbox.qml" line="153"/>
         <source>Water</source>
         <translation>Vatten</translation>
     </message>
-    <message id="inetbox_energy_heating">
+    <message id="inetbox_heating">
         <location filename="../InetboxDevicePage.qml" line="51"/>
-        <location filename="../InetboxHeatingScheduleDialog.qml" line="48"/>
+        <location filename="../InetboxSchedules.qml" line="22"/>
         <location filename="../components/MotorhomeInetbox.qml" line="173"/>
         <source>Heating</source>
         <translation>Uppvärmning</translation>
     </message>
-    <message id="inetbox_energy_aircon">
+    <message id="inetbox_aircon">
         <location filename="../InetboxDevicePage.qml" line="57"/>
+        <location filename="../InetboxSchedules.qml" line="34"/>
         <location filename="../components/MotorhomeInetbox.qml" line="187"/>
         <source>Aircon</source>
         <translation>Kyl/AC</translation>
     </message>
-    <message id="inetbox_energy_fan_speed">
+    <message id="inetbox_fan_speed">
         <location filename="../InetboxDevicePage.qml" line="65"/>
         <location filename="../components/MotorhomeInetbox.qml" line="220"/>
         <source>Fan speed</source>
@@ -162,7 +164,7 @@
     <message id="vespera_version">
         <location filename="../InetboxPageSettings.qml" line="46"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message id="pagecontrollableloads_documentation">
         <location filename="../InetboxPageSettings.qml" line="54"/>
@@ -190,45 +192,45 @@
         <source>Energy Mix</source>
         <translation>Energimix</translation>
     </message>
-    <message id="inetbox_heating">
-        <location filename="../InetboxScheduler.qml" line="19"/>
-        <source>Heating</source>
-        <translation type="unfinished">Uppvärmning</translation>
-    </message>
-    <message id="inetbox_water">
-        <location filename="../InetboxScheduler.qml" line="24"/>
-        <source>Water</source>
-        <translation type="unfinished">Vatten</translation>
-    </message>
-    <message id="inetbox_aircon">
-        <location filename="../InetboxScheduler.qml" line="29"/>
-        <source>Aircon</source>
-        <translation type="unfinished">Kyl/AC</translation>
-    </message>
     <message id="inetbox_heating_mode">
-        <location filename="../InetboxScheduler.qml" line="91"/>
+        <location filename="../InetboxSchedules.qml" line="116"/>
         <source>Heating mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Värmeläge</translation>
     </message>
     <message id="inetbox_repeat">
-        <location filename="../InetboxScheduler.qml" line="104"/>
+        <location filename="../InetboxSchedules.qml" line="69"/>
         <source>Repeat</source>
-        <translation type="unfinished"></translation>
+        <translation>Upprepa</translation>
     </message>
-    <message id="inetbox_scheduler">
-        <location filename="../InetboxScheduler.qml" line="8"/>
-        <source>Scheduler</source>
-        <translation type="unfinished"></translation>
+    <message id="inetbox_Schedules">
+        <location filename="../InetboxSchedules.qml" line="10"/>
+        <source>Schedules</source>
+        <translation>Scheman</translation>
     </message>
     <message id="inetbox_enabled">
-        <location filename="../InetboxScheduler.qml" line="45"/>
+        <location filename="../InetboxSchedules.qml" line="57"/>
         <source>Enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktiverat</translation>
+    </message>
+    <message id="inetbox_time">
+        <location filename="../InetboxSchedules.qml" line="63"/>
+        <source>Time</source>
+        <translation>Tid</translation>
     </message>
     <message id="inetbox_temperature">
-        <location filename="../InetboxScheduler.qml" line="69"/>
+        <location filename="../InetboxSchedules.qml" line="95"/>
         <source>Temperature</source>
-        <translation type="unfinished"></translation>
+        <translation>Temperatur</translation>
+    </message>
+    <message id="inetbox_water_mode">
+        <location filename="../InetboxSchedules.qml" line="126"/>
+        <source>Water mode</source>
+        <translation type="unfinished">Vattenläge</translation>
+    </message>
+    <message id="inetbox_aircon_mode">
+        <location filename="../InetboxSchedules.qml" line="135"/>
+        <source>Aircon mode</source>
+        <translation type="unfinished">Klimatläge</translation>
     </message>
 </context>
 </TS>

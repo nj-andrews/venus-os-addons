@@ -48,45 +48,14 @@ Page {
 	// 	}
 	// }
 
-	IC.ScheduleButton {
-		id: scheduleButton
-		icon.source: "qrc:/images/icon_manualstart_timer_24.svg"
-		mainColor: '#387dc5'
-		visible: root.inetboxModel.device
+	IC.InetboxAuxButtons {
+		inetboxModel: root.inetboxModel
+		buttonOffset: 30
 		anchors {
-			right: bg_image2.right
-			rightMargin: 200
 			top: bg_image2.top
 			topMargin: 40
-		}
-
-		//onClicked: Global.dialogLayer.open(scheduleDialog)
-		onClicked: {
-			Global.pageManager.pushPage("qrc:/Inetbox/InetboxScheduler.qml",
-					{ "inetboxModel": root.inetboxModel })
-		}
-	}
-	IC.ScheduleButton {
-		icon.source: "qrc:/images/icon_alarm_32.svg"
-		//icon.color: "red"
-		mainColor: Theme.color_warning // '#387dc5'
-		secondaryColor: Theme.color_darkWarning
-		visible: root.inetboxModel.hasError
-		anchors {
-			right: bg_image2.right
-			rightMargin: 200 - 20
-			top: scheduleButton.bottom
-			topMargin: 20
-		}
-
-		onClicked: {
-			if (root.inetboxModel.seenError === undefined) {
-				root.inetboxModel.seenError = root.inetboxModel.errorCodeItem.value
-				secondaryColor  = mainColor
-			} else {
-				root.inetboxModel.seenError = undefined
-				secondaryColor  = Theme.color_darkWarning
-			}
+			right: bg_image2.right;
+			rightMargin: 200
 		}
 	}
 
@@ -112,7 +81,7 @@ Page {
 	// version
 	Label {
 		color: Theme.color_gray4
-		font.pixelSize: Theme.font_size_tiny
+		font.pixelSize: Theme.font_size_caption
 		anchors {
 			right: parent.right
 			rightMargin: 70

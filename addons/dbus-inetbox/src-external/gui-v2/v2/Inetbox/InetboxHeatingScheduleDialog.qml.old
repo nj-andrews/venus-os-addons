@@ -45,7 +45,7 @@ Page {
 			binding: root.inetboxModel.heatingModeItem
 			model: root.inetboxModel.heatingModeModel
 			//% "Heating"
-			text: qsTrId("inetbox_energy_heating")
+			text: qsTrId("inetbox_heating")
 
 		}
 		IC.MinimalSlider {

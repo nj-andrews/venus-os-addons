@@ -58,6 +58,30 @@ sequenceDiagram
     Dbus->>UI: value updates
 ```
 
+## 4) Scheduler execution flow
+
+```mermaid
+sequenceDiagram
+    participant Clock as System Clock
+    participant Sched as InetboxScheduler
+    participant Ctrl as InetboxController
+    participant App as InetboxApp
+    participant Lin as Lin
+
+    Clock->>Sched: minute tick
+    Sched->>Sched: match Enabled/Repeat/Time
+    Sched->>Ctrl: dbus_value_to_inetbox(/Values/..., value)
+    Ctrl->>App: set_status(name, value)
+    App->>Lin: write LIN frame
+    Sched->>Sched: disable Enabled when Repeat=0
+```
+
+## Scheduler notes
+
+- Scheduler time values are stored as seconds since midnight (from ListTimeSelector).
+- Matching is minute-based: seconds are ignored by converting `seconds // 60`.
+- Scheduler uses local system time in 24-hour format.
+
 ## Source anchors
 
 - [src/opt/victronenergy/dbus-inetbox/__main__.py](../src/opt/victronenergy/dbus-inetbox/__main__.py)

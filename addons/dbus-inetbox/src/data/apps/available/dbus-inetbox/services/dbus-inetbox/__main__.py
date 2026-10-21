@@ -98,8 +98,8 @@ def main():
 	# 	#handlers=[logging.StreamHandler(sys.stdout)],
 	# )
 
-	args.debug_lin = True
-	args.debug_inet = True
+	#args.debug_lin = True
+	#args.debug_inet = True
 
 	log.info('Using serial port: ' + args.serial)
 	log.info('Serial device ID: ' + args.sid)

@@ -12,9 +12,32 @@ __list_overlays_for_app() {
 	"$VESPERA_DATA_DIR/info/vespera.overlay-lib" overlay-list-mounts "$VESPERA_DATA_DIR/info/$app.$VESPERA_OVERLAYS_FILE"
 }
 
+__show_service_log_errors() {
+	local service=${1##*/}
+	local service_path="/var/log/${service}/current"
+	local logErrors
+
+	if [[ -f "$service_path" ]]; then
+
+		# find lines with error: (case insensitive) strip timestamp. only show unique
+		logErrors="$(grep -i "error:" "$service_path" | awk '{
+				msg = $0
+				sub(/^@[0-9a-f]+ /, "", msg)
+				if (!seen[msg]++) print
+			}' | tai64nlocal)"
+
+		if [[ -n "$logErrors" ]]; then
+				echo "  Log Errors: /var/log/${service}/current"
+				# shellcheck disable=SC2001
+				echo "$logErrors" | sed "s/^/  /"
+		fi
+	fi
+}
+
 __list_service_status() {
 	# shellcheck disable=SC2034
 	local -n __template_services="${1}"
+
 
 	shift 1
 	shopt -s globstar nullglob
@@ -26,6 +49,7 @@ __list_service_status() {
 		for service in $(cat "$file"); do
 			[[ ! -e "/service/$service" ]] && echo "/service/$service not available"
 			svstat "/service/$service"
+			__show_service_log_errors "$service"
 		done
 
 		local file="$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_TEMPLATE_SERVICES_FILE}"
@@ -36,6 +60,7 @@ __list_service_status() {
 				[[ ! -e $tty_service ]] && continue
 				svstat "$tty_service"
 				__template_services+=$tty_service
+				__show_service_log_errors "$tty_service"
 				found=1
 			done
 			[[ "$found" == 0 ]] && echo ": service template not in use - $service"
@@ -53,7 +78,7 @@ __get_gui_v2_addon() {
 	fi
 }
 __print_header() {
-	printf "\033[1;97m$1\033[0m\n"
+	printf "\033[1;97m%s\033[0m\n" "$1"
 }
 
 __print_section() {
@@ -61,6 +86,7 @@ __print_section() {
 	local tail="${1:2}"
 	extra_indent="${tail%%[! ]*}"
 	__print_header "$1"
+	# shellcheck disable=SC2001
 	echo "$info" | sed "s/^/      $extra_indent/"
 }
 

@@ -21,6 +21,8 @@ __start_template_services() {
 
 	# shellcheck source="../libs/service-lib"
 	source "$__vespera_path/libs/service-lib"
+	# shellcheck source="../libs/service-lib"
+	source "$__vespera_path/libs/serial-device-installer-lib"
 
 	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do
 		DEVICE_SID="${sid}"

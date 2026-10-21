@@ -164,9 +164,9 @@ __vespera_lib_post_install() {
 				venus_services_to_restart+=("$VESPERA_WORKING_DIR/$app.installer-services")
 				;;
 			disabled)
-				__do_enable_disable "disable" "$(echo_lang "$LANG_INSTALLED_ARG1_DISABLED")";;
+				__do_enable_disable "disable" "$(echo_lang "$LANG_INSTALLED_ARG1_DISABLED")${app}";;
 			enabled)
-				__do_enable_disable "enable" "$(echo_lang "$LANG_INSTALLED_ARG1_ENABLING")"
+				__do_enable_disable "enable" "$(echo_lang "$LANG_INSTALLED_ARG1_ENABLING")${app}"
 				;;
 		esac
 

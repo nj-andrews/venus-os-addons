@@ -14,9 +14,11 @@ from dbus_services.dbus_connection import dbusconnection
 from ext.settingsdevice import SettingsDevice  # available in the velib_python repository
 from lin import Lin
 from inetboxapp import InetboxApp
+from inetbox_schedules import InetboxSchedules
 from taskmanager import TaskManager
 from error_parser import get_error_description
 from dbus_services.dbus_inetbox_service import dbusInetboxService
+from datetime import datetime, timezone
 
 class InetboxController:
 	DBUS_PATH="/Values/"
@@ -62,6 +64,7 @@ class InetboxController:
 	_lin : Lin
 	_settings : SettingsDevice
 	_dbusInetboxService : dbusInetboxService
+	_Schedules : InetboxSchedules
 
 	def __init__(self, tasks: TaskManager, serialPort, sid, debug_lin, debug_inet, record_file=None):
 
@@ -83,6 +86,9 @@ class InetboxController:
 		deviceInstance = int(classAndVrmInstanceParts[1])
 		customName = self._settings['/CustomName']
 
+		errdec = get_error_description(631)
+		self.log.debug(f'AAA:ErrorDescription={errdec}')
+
 		self._dbusInetboxService = dbusInetboxService(
 				serialPort,
 				serviceName,
@@ -90,6 +96,12 @@ class InetboxController:
 				deviceInstance,
 				"sid_" + sid,
 				self.dbus_value_to_inetbox)
+
+		self._Schedules = InetboxSchedules(
+			settings=self._settings,
+			apply_callback=self.dbus_value_to_inetbox,
+			logger=self.log)
+		tasks.add_task("inetbox_schedules", self._Schedules.run_loop)
 
 	# serial port -> dbus com.victronenergy.inetbox_sid_[xxxx]
 	def inetbox_value_to_dbus(self, name: str, value):
@@ -103,15 +115,17 @@ class InetboxController:
 				return
 
 			if (name == "error_code"):
-				error_description=get_error_description(value)
+				error_description = get_error_description(value)
 				self._dbusInetboxService.set_value(self.DBUS_PATH + "ErrorDescription", error_description)
+				self._settings["/LastErrorCode"] = value
+				self._settings["/LastErrorTimeStamp"] = datetime.now(timezone.utc).isoformat()
 				self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
 
-			if (name == "target_temp_room"): # coerse using LastHeatingTemp
+			elif (name == "target_temp_room"): # coerse using LastHeatingTemp
 				if (value == "0"):
 					value = self._settings["/LastHeatingTemp"]
 
-			if (name == "target_temp_aircon"):
+			elif (name == "target_temp_aircon"):
 				value = self._coerce_aircon_target_temp(value)
 
 			self._dbusInetboxService.set_value(self.DBUS_PATH + dbusName, value)
@@ -124,7 +138,12 @@ class InetboxController:
 				self._toEnergyMixCombined(dbusName, value)
 
 		except Exception as e:
-			self.log.error(f"Exception in: inetbox_value_to_dbus: name={name}, value={value}: {e}")
+			self.log.exception(
+				"Exception in inetbox_value_to_dbus: name=%r, value=%r, error=%r",
+				name,
+				value,
+				e,
+			)
 
 	# dbus service com.victronenergy.inetbox_sid_[xxxx] ->
 	# serial port or
@@ -138,7 +157,8 @@ class InetboxController:
 				return True
 
 			if (path == "/Values/Error"):
-				error_description=get_error_description(value)
+				# for testing
+				error_description = get_error_description(value)
 				self._dbusInetboxService.set_value("/Values/ErrorDescription", error_description)
 				self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
 				return True
@@ -172,7 +192,10 @@ class InetboxController:
 
 			elif (name == "HeatingMode"):
 				if (value == "off"):
-					self._settings["/LastHeatingTemp"] = self._dbusInetboxService.get_value("/Values/HeatingTargetTemp")
+					lastvalue =  self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp"))
+					if (lastvalue < 4  or value > 30): value = 4
+					self._settings["/LastHeatingTemp"] = lastvalue
+
 					self.dbus_value_to_inetbox("/Values/HeatingTargetTemp", 0)
 				else:
 					heating_temp = self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp"))
@@ -184,7 +207,12 @@ class InetboxController:
 
 			return True
 		except Exception as e:
-			self.log.error(f"Exception in: dbus_value_to_inetbox: path={path}, value={value}: {e}")
+			self.log.exception(
+				"Exception in dbus_value_to_inetbox: path=%r, value=%r, error=%r",
+				path,
+				value,
+				e,
+			)
 			return False
 
 	# dbus com.victronenergy.settings changed
@@ -195,9 +223,18 @@ class InetboxController:
 				self._dbusInetboxService.set_value(path, newvalue)
 				return True
 
+			if path.startswith("/Schedules/") and hasattr(self, "_Schedules"):
+				self._Schedules.on_setting_changed(path, oldvalue, newvalue)
+				return True
+
 			return False
 		except Exception as e:
-			self.log.error(f"Exception in: _handle_dbus_setting_changed: path={path}, value={newvalue}: {e}")
+			self.log.exception(
+				"Exception in _handle_dbus_setting_changed: path=%r, value=%r, error=%r",
+				path,
+				newvalue,
+				e,
+			)
 			return False
 
 	def _fromEnergyMixCombined(self, value: str):
@@ -296,27 +333,32 @@ class InetboxController:
 				'/ServiceName' : [f'{self._settingsPath}/ServiceName', service_name, "", ""],
 				'/CustomName' : [f'{self._settingsPath}/CustomName', "", "", ""],
 				'/DeviceKey' : [f'{self._settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY_NAME, "", ""],
-				'/LastHeatingTemp' : [f'{self._settingsPath}/LastHeatingTemp', 16, 4, 30],
+				'/LastHeatingTemp' : [f'{self._settingsPath}/LastHeatingTemp', 16, 4, 31],
 				'/OverviewPage': [f'{self._settingsPath}/OverviewPage', dbus_constants.OVERVIEW_PAGE, "", ""],
 				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1],
+				'/LastErrorCode': [f'{self._settingsPath}/LastErrorCode', "", 0, 0],
+				'/LastErrorTimeStamp': [f'{self._settingsPath}/LastErrorTimeStamp', "", 0, 0],
 
-				'/Scheduler/Heating/Enabled': [f'{self._settingsPath}/Scheduler/Heating/Enabled', 0, 0, 1],
-				'/Scheduler/Heating/Repeat': [f'{self._settingsPath}/Scheduler/Heating/Repeat', 0, 0, 1],
-				'/Scheduler/Heating/Time': [f'{self._settingsPath}/Scheduler/Heating/Time', "", 0, 0],
-				'/Scheduler/Heating/HeatingMode': [f'{self._settingsPath}/Scheduler/Heating/HeatingMode', "", 0, 0],
-				'/Scheduler/Heating/HeatingTargetTemp': [f'{self._settingsPath}/Scheduler/Heating/HeatingTargetTemp', "", 0, 0],
+				# 1=Heating enabled;2=Water enabled|4=Aircon enabled;
+				'/Schedules/State': [f'{self._settingsPath}/Schedules/State', 0, 0, 7],
 
-				'/Scheduler/Water/Enabled': [f'{self._settingsPath}/Scheduler/Water/Enabled', 0, 0, 1],
-				'/Scheduler/Water/Repeat': [f'{self._settingsPath}/Scheduler/Water/Repeat', 0, 0, 1],
-				'/Scheduler/Water/Time': [f'{self._settingsPath}/Scheduler/Water/Time', "", 0, 0],
-				'/Scheduler/Water/WaterTargetTemp': [f'{self._settingsPath}/Scheduler/Water/WaterTargetTemp', "", 0, 0],
+				'/Schedules/Heating/Enabled': [f'{self._settingsPath}/Schedules/Heating/Enabled', 0, 0, 1],
+				'/Schedules/Heating/Repeat': [f'{self._settingsPath}/Schedules/Heating/Repeat', 0, 0, 1],
+				'/Schedules/Heating/Time': [f'{self._settingsPath}/Schedules/Heating/Time', "", 0, 0],
+				'/Schedules/Heating/HeatingMode': [f'{self._settingsPath}/Schedules/Heating/HeatingMode', "", 0, 0],
+				'/Schedules/Heating/HeatingTargetTemp': [f'{self._settingsPath}/Schedules/Heating/HeatingTargetTemp', "", 0, 0],
 
-				'/Scheduler/Aircon/Enabled': [f'{self._settingsPath}/Scheduler/Aircon/Enabled', 0, 0, 1],
-				'/Scheduler/Aircon/Repeat': [f'{self._settingsPath}/Scheduler/Aircon/Repeat', 0, 0, 1],
-				'/Scheduler/Aircon/Time': [f'{self._settingsPath}/Scheduler/Aircon/Time', "", 0, 0],
-				'/Scheduler/Aircon/AirconMode': [f'{self._settingsPath}/Scheduler/Aircon/AirconMode', "", 0, 0],
-				'/Scheduler/Aircon/AirconTargetTemp': [f'{self._settingsPath}/Scheduler/Aircon/AirconTargetTemp', "", 0, 0],
-				'/Scheduler/Aircon/AirconFanSpeed': [f'{self._settingsPath}/Scheduler/Aircon/AirconFanSpeed', "", 0, 0]
+				'/Schedules/Water/Enabled': [f'{self._settingsPath}/Schedules/Water/Enabled', 0, 0, 1],
+				'/Schedules/Water/Repeat': [f'{self._settingsPath}/Schedules/Water/Repeat', 0, 0, 1],
+				'/Schedules/Water/Time': [f'{self._settingsPath}/Schedules/Water/Time', "", 0, 0],
+				'/Schedules/Water/WaterTargetTemp': [f'{self._settingsPath}/Schedules/Water/WaterTargetTemp', "", 0, 0],
+
+				'/Schedules/Aircon/Enabled': [f'{self._settingsPath}/Schedules/Aircon/Enabled', 0, 0, 1],
+				'/Schedules/Aircon/Repeat': [f'{self._settingsPath}/Schedules/Aircon/Repeat', 0, 0, 1],
+				'/Schedules/Aircon/Time': [f'{self._settingsPath}/Schedules/Aircon/Time', "", 0, 0],
+				'/Schedules/Aircon/AirconMode': [f'{self._settingsPath}/Schedules/Aircon/AirconMode', "", 0, 0],
+				'/Schedules/Aircon/AirconTargetTemp': [f'{self._settingsPath}/Schedules/Aircon/AirconTargetTemp', "", 0, 0],
+				'/Schedules/Aircon/AirconFanSpeed': [f'{self._settingsPath}/Schedules/Aircon/AirconFanSpeed', "", 0, 0]
 				},
 			eventCallback = self._handle_dbus_setting_changed)
 
