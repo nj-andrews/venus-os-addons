@@ -3,59 +3,54 @@ import Victron.VenusOS
 
 DevicePage {
 	id: root
-	serviceUid: bindPrefix
 
-	property string bindPrefix
-
-	InetboxModel {id: inetboxModel; serviceUid: root.bindPrefix}
-
+	InetboxModel {id: inetboxModel; serviceUid: root.serviceUid}
 
 	settingsModel: VisibleItemModel {
 
 		ListText {
-			//% "Connected"
-			text: qsTrId("inetbox_connected")
-			dataItem.uid: root.bindPrefix + "/Connected"
+			text: CommonWords.connected
+			dataItem.uid: root.serviceUid + "/Connected"
 			secondaryText: dataItem.valid && dataItem.value == 1 ? CommonWords.ok : "--"
 		}
 
 		ListTemperature {
 			//% "Current Room Temperature"
 			text: qsTrId("inetbox_room_current_temperature")
-			dataItem.uid: root.bindPrefix + "/Values/CurrentRoomTemp"
+			dataItem.uid: root.serviceUid + "/Values/CurrentRoomTemp"
 			decimals: 0
 		}
 
 		ListTemperature {
 			//% "Target Room Temperature"
 			text: qsTrId("inetbox_room_target_temperature")
-			dataItem.uid: root.bindPrefix + "/Values/HeatingTargetTemp"
+			dataItem.uid: root.serviceUid + "/Values/HeatingTargetTemp"
 			decimals: 0
 		}
 
 		ListTemperature {
 			//% "Current Water Temperature"
 			text: qsTrId("inetbox_water_current_temperature")
-			dataItem.uid: root.bindPrefix + "/Values/WaterCurrentTemp"
+			dataItem.uid: root.serviceUid + "/Values/WaterCurrentTemp"
 			decimals: 0
 		}
 		ListText {
 			//% "Water"
 			text: qsTrId("inetbox_water")
-			dataItem.uid:  root.bindPrefix + "/Values/WaterTargetTemp"
+			dataItem.uid:  root.serviceUid + "/Values/WaterTargetTemp"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.waterModeModel, dataItem.value)
 		}
 
 		ListText {
-			//% "Heating"
-			text: qsTrId("inetbox_heating")
-			dataItem.uid: root.bindPrefix + "/Values/HeatingMode"
+			//% "Heating mode"
+			text: qsTrId("inetbox_heating_mode")
+			dataItem.uid: root.serviceUid + "/Values/HeatingMode"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.heatingModeModel, dataItem.value)
 		}
 		ListText {
-			//% "Aircon"
-			text: qsTrId("inetbox_aircon")
-			dataItem.uid: root.bindPrefix + "/Values/HeatingMode"
+			//% "Aircon mode"
+			text: qsTrId("inetbox_aircon_mode")
+			dataItem.uid: root.serviceUid + "/Values/HeatingMode"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.airconModeModel, dataItem.value)
 			preferredVisible: dataItem.valid
 		}
@@ -63,7 +58,7 @@ DevicePage {
 		ListText {
 			//% "Fan speed"
 			text: qsTrId("inetbox_fan_speed")
-			dataItem.uid: root.bindPrefix + "/Values/AirconFanSpeed"
+			dataItem.uid: root.serviceUid + "/Values/AirconFanSpeed"
 			secondaryText: inetboxModel.displayTextFromModelValue(inetboxModel.airconFanSpeedModel, dataItem.value)
 			preferredVisible: dataItem.valid
 		}
@@ -71,7 +66,7 @@ DevicePage {
 		ListNavigation {
 			text: CommonWords.setup
 			onClicked: {
-				Global.pageManager.pushPage(inetboxSetupPage)
+				Global.pageManager.pushPage(inetboxSetupPage, {title: text, settingsPrefix: inetboxModel.settingsPrefix})
 			}
 		}
 	}
@@ -80,14 +75,14 @@ DevicePage {
 		id: inetboxSetupPage
 		Page {
 			id: root
-
+			property string settingsPrefix
 			GradientListView {
 				model: VisibleItemModel {
 					ListSwitch {
 						id: showAircon
 						//% "Show aircon"
 						text: qsTrId("inetbox_show_aircon")
-						dataItem.uid: inetboxModel.settingsPrefix + "/ShowAircon"
+						dataItem.uid: root.settingsPrefix + "/ShowAircon"
 					}
 				}
 			}

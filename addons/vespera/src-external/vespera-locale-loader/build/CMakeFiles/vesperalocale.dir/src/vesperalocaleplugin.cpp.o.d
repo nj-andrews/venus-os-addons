@@ -1,7 +1,7 @@
 CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: \
- /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp \
+ /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/stdc-predef.h \
- /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
+ /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/QObject \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qobject.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qobjectdefs.h \
@@ -454,5 +454,5 @@ CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qtyperevision.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtQml/qqmlregistration.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtQmlIntegration/qqmlintegration.h \
- /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/include/vesperalocaleplugin.moc \
+ /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/include/vesperalocaleplugin.moc \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qtmochelpers.h

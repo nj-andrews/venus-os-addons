@@ -7,7 +7,7 @@ Page {
 	title: qsTrId("inetbox_settings")
 
 	property var pageUri:"qrc:/Inetbox/MotorhomePage.qml"
-	property var customPagesArray: customPagesItem.valid ? JSON.parse(customPagesItem.value): []
+	property var customPages: customPagesItem.valid ? customPagesItem.value.split(',') : []
 
 	VeQuickItem {
 		id: customPagesItem
@@ -22,23 +22,23 @@ Page {
 			ListSwitch {
 				id: show_mh_page_switch
 				checkable: true
-				checked: root.customPagesArray.includes(root.pageUri)
+				checked: root.customPages.includes(root.pageUri)
 
 				//% "Show Motorhome Page"
 				text: qsTrId("inetbox_show_motorhome_page")
 				writeAccessLevel: VenusOS.User_AccessType_User
 
 				onCheckedChanged: {
-					const idx = root.customPagesArray.indexOf(root.pageUri)
+					const idx = root.customPages.indexOf(root.pageUri)
 					if (checked) {
 						if (idx !== -1) return
-						root.customPagesArray.push(root.pageUri)
+						root.customPages.push(root.pageUri)
 					} else {
 						if (idx === -1) return
-						root.customPagesArray.splice(idx, 1)
+						root.customPages.splice(idx, 1)
 					}
 
-					customPagesItem.setValue(JSON.stringify(root.customPagesArray))
+					customPagesItem.setValue(root.customPages)
 				}
 			}
 

@@ -39,13 +39,18 @@
         <source>Device Options</source>
         <translation>장치 옵션</translation>
     </message>
+    <message id="vespera_no_service_templates">
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
+        <source>No service templates installed</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message id="vespera_serial_device_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="113"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
         <source>Serial Device Service</source>
         <translation>직렬 장치 서비스</translation>
     </message>
     <message id="vespera_press_to_select_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="115"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="116"/>
         <source>Press to select service</source>
         <translation>서비스를 선택하려면 누르세요</translation>
     </message>
@@ -62,12 +67,12 @@
         <translation>포트</translation>
     </message>
     <message id="vespera_adding_device">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="170"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="168"/>
         <source>Adding Device</source>
         <translation>장치 추가 중</translation>
     </message>
     <message id="vespera_added_device_success">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="185"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="182"/>
         <source>Device Added Successfully
 The service will start shortly...</source>
         <translation>장치가 추가되었습니다
@@ -162,7 +167,6 @@ The service will start shortly...</source>
         <translation>불러오는 중...</translation>
     </message>
     <message id="listItem_no_access">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="161"/>
         <location filename="../PageSettingsSavedDevice.qml" line="66"/>
         <location filename="../PageSettingsSavedDevice.qml" line="77"/>
         <location filename="../PageSettingsPackages.qml" line="62"/>

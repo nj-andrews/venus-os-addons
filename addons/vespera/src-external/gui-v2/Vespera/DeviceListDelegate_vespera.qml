@@ -7,39 +7,31 @@ DeviceListDelegate {
 	height: 0
 
 	onDeviceChanged: {
-		var isReload = VesperaSingleton.getIsReload()
-
-		console.debug("Vespera: DeviceListDelegate::onDeviceChanged: isRelead=", isReload)
 
 		// Using callLater fixes intermitten lock ups
 		Qt.callLater(function () {
+			var isReload = VesperaSingleton.getIsReload()
+
 			parent.height=0
 			parent.active = false
-		})
 
-		if (isReload) {
-			Global.mainView.swipeView.animationEnabled = false
-			Global.mainView.navBar.setCurrentIndex(-1)
-		}
+			if (isReload) {
+				Global.mainView.swipeView.animationEnabled = false
+				Global.mainView.navBar.setCurrentIndex(-1)
+			}
 
-		if (!VesperaSingleton.customPageModelExists()) {
-			VesperaSingleton.createCustomPageModel(Global.main)
-		} else {
-			console.debug("Vespera: Singleton exists")
-		}
+			VesperaSingleton.initCustomPageModel(Global.main, isReload)
 
-		if (isReload) {
-			VesperaSingleton.setIsReload(false)
+			if (isReload) {
+				Global.pageManager.popAllPages(StackView.Immediate)
+				// sometimes IOS renders a blank page on startup
+				// accessing any property of the page fixes the issue.
+				var _ = Global.mainView.navBar.pages[0].url
 
-			Global.pageManager.popAllPages(1)
-
-			Qt.callLater(function () {
 				Global.mainView.navBar.setCurrentIndex(0)
 				Global.mainView.swipeView.animationEnabled = true
-			})
-
-		}
-
+			}
+		})
 	}
 	// Component.onDestruction: {
 	// 	console.debug("Vespera device delegate:DESTROYED")

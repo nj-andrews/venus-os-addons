@@ -15,7 +15,7 @@ DeviceListDelegate {
 
 	onClicked: {
 		Global.pageManager.pushPage("qrc:/Inetbox/InetboxDevicePage.qml",
-				{ bindPrefix : root.device.serviceUid })
+				{ serviceUid : root.device.serviceUid })
 	}
 
 	VeQuickItem {

@@ -7,7 +7,7 @@ import Victron.VenusOS
 Page {
 	id: root
 	//% "Schedules"
-	title:qsTrId("inetbox_Schedules")
+	title:qsTrId("inetbox_schedules")
 
 	property var inetboxModel
 	property var indicatorColor
@@ -34,6 +34,7 @@ Page {
 				text: qsTrId("inetbox_aircon")
 				onClicked: Global.pageManager.pushPage(scheduleSettingsComponent, {"title": text, type:"Aircon"})
 				indicatorColor:  (root.inetboxModel.schedulesStateItem.value & 4) !== 0 ? root.indicatorColor : 'transparent'
+				preferredVisible: root.inetboxModel.showAircon
 			}
 		}
 	}
@@ -47,6 +48,18 @@ Page {
 			property string bindPrefix: root.inetboxModel.settingsPrefix + "/Schedules/" + type
 			function buildUid(forType, endPath) {
 				return type == forType ? bindPrefix + endPath : ""
+			}
+
+			Component.onCompleted: {
+				if (type == "Heating") {
+					temperatureSlider.from = 5
+					temperatureSlider.to = 30
+					temperatureSlider.dataItem.uid = buildUid(type, "/HeatingTargetTemp")
+				} else if (type == "Aircon") {
+					temperatureSlider.from = 16
+					temperatureSlider.to = 31
+					temperatureSlider.dataItem.uid = buildUid(type, "/AirconTargetTemp")
+				}
 			}
 
 			GradientListView {
@@ -82,10 +95,10 @@ Page {
 							Item {
 								Layout.fillWidth: true
 								Layout.alignment: Theme.screenSize === Theme.Portrait ? Qt.AlignBottom : Qt.AlignVCenter
-								implicitHeight: heatingTempSlider.implicitHeight
+								implicitHeight: temperatureSlider.implicitHeight
 
 								ListSlider {
-									id: heatingTempSlider
+									id: temperatureSlider
 									topInset: -topInset
 									bottomInset: -bottomInset
 									leftInset: -horizontalContentPadding // remove double inset
@@ -93,15 +106,13 @@ Page {
 									anchors.fill: parent
 									//% "Temperature"
 									text: qsTrId("inetbox_temperature")
-									dataItem.uid: scheduleSettings.buildUid("Heating", "/" + scheduleSettings.type + "TargetTemp")
-									from: 5; to: 30
 									stepSize: 1
 								}
 							}
 
 							QuantityLabel {
 								font.pixelSize: 24
-								value: heatingTempSlider.value
+								value: temperatureSlider.value
 								unit: Global.systemSettings.temperatureUnit
 								Layout.minimumWidth: 60
 								Layout.alignment: Theme.screenSize === Theme.Portrait ? Qt.AlignBottom : Qt.AlignVCenter
@@ -141,14 +152,12 @@ Page {
 
 					ListRadioButtonGroup {
 						preferredVisible: scheduleSettings.type == "Aircon"
-						//% "Aircon fan speed"
+						//% "Fan speed"
 						text: qsTrId("inetbox_fan_speed")
 						defaultIndex: 0
 						optionModel: root.inetboxModel.airconFanSpeedModel
 						dataItem.uid: scheduleSettings.buildUid("Aircon", "/AirconFanSpeed")
-
 					}
-
 				}
 			}
 		}

@@ -13,7 +13,7 @@ fi
 OUTPUT_PATH=./output
 PLUGIN_NAME=Vespera
 PLUGIN_FOLDER_NAME=vespera
-#MINIFY="--minify"
+MINIFY="--minify"
 #PRE_COMPILE="--pre-compile"
 PLUGIN_VERSION=$(cat version 2>/dev/null || echo v1.0.0);
 PLUGIN_VERSION=$(echo "${PLUGIN_VERSION%.*}.$((${PLUGIN_VERSION##*.}+1))" | tee version)

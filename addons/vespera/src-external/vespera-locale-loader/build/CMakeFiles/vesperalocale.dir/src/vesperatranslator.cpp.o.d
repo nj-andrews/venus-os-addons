@@ -1,7 +1,7 @@
 CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o: \
- /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp \
+ /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/stdc-predef.h \
- /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
+ /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/QObject \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qobject.h \
  /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/qobjectdefs.h \

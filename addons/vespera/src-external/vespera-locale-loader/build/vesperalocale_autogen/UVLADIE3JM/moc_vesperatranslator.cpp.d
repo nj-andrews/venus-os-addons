@@ -1,5 +1,5 @@
-/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/UVLADIE3JM/moc_vesperatranslator.cpp: /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
-  /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/moc_predefs.h \
+/data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/UVLADIE3JM/moc_vesperatranslator.cpp: /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.h \
+  /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/moc_predefs.h \
   /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/QList \
   /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/QObject \
   /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/include/QtCore/QTranslator \

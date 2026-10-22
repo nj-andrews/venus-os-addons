@@ -55,13 +55,18 @@
         <source>Device Options</source>
         <translation>设备选项</translation>
     </message>
+    <message id="vespera_no_service_templates">
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
+        <source>No service templates installed</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message id="vespera_serial_device_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="113"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
         <source>Serial Device Service</source>
         <translation>串口设备服务</translation>
     </message>
     <message id="vespera_press_to_select_service">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="115"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="116"/>
         <source>Press to select service</source>
         <translation>按下以选择服务</translation>
     </message>
@@ -78,12 +83,12 @@
         <translation>端口</translation>
     </message>
     <message id="vespera_adding_device">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="170"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="168"/>
         <source>Adding Device</source>
         <translation>正在添加设备</translation>
     </message>
     <message id="vespera_added_device_success">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="185"/>
+        <location filename="../PageSettingsDiscoveredDevice.qml" line="182"/>
         <source>Device Added Successfully
 The service will start shortly...</source>
         <translation>设备已成功添加
@@ -178,7 +183,6 @@ The service will start shortly...</source>
         <translation>正在加载...</translation>
     </message>
     <message id="listItem_no_access">
-        <location filename="../PageSettingsDiscoveredDevice.qml" line="161"/>
         <location filename="../PageSettingsSavedDevice.qml" line="66"/>
         <location filename="../PageSettingsSavedDevice.qml" line="77"/>
         <location filename="../PageSettingsPackages.qml" line="62"/>

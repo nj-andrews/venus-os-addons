@@ -8,6 +8,17 @@ function getIsReload() { return _isReload }
 function setIsReload(value) { _isReload = value }
 function clearCache() { _cache = [] }
 
+function initCustomPageModel(parent, isReload) {
+	console.log("VesperaSingleton:initCustomPageModel: in")
+	if (!customPageModelExists()) {
+		createCustomPageModel(parent)
+		if (isReload) setIsReload(false)
+	} else {
+		console.debug("Vespera: Singleton exists")
+	}
+
+}
+
 //We *must* create the VesperaCustomPageModel page in here and
 // *not* in a qml file to ensure the obj lifetime outlives the qml page
 function createCustomPageModel(parent) {

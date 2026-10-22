@@ -11,22 +11,18 @@ SwipeViewPage {
 	title: qsTrId("inetbox_motorhome")
 	iconSource: "qrc:/Inetbox/images/motorhome.svg"
 	url: "qrc:/Inetbox/MotorhomePage.qml"
-
+	backgroundColor: Theme.color_boatPage_background
 	fullScreenWhenIdle: true
 	topLeftButton: VenusOS.StatusBar_LeftButton_ControlsInactive
 
 	Component.onCompleted: {
-
 		inetbox.device = devices.firstObject
+		console.log("Inetbox: onCompleted:", "page=", url, "version=", inetbox.version)
 
-		console.log("Inetbox: onCompleted:",
-			"page=", url,
-			"version=", inetbox.version,
-			"device.firstObject=", devices.firstObject)
 	}
-	Component.onDestruction: {
-		console.log("Inetbox: onDestruction:", "page=", url, "version=", inetbox.version)
-	}
+// 	Component.onDestruction: {
+// 		console.log("Inetbox: onDestruction:", "page=", url, "version=", inetbox.version)
+// 	}
 
 	FilteredDeviceModel {
 		id: devices
@@ -38,6 +34,7 @@ SwipeViewPage {
 	}
 
 	GaugeModel { id: tankGauges } // aka storage tanks
+
 
 	Loader {
 		id: pageLoader

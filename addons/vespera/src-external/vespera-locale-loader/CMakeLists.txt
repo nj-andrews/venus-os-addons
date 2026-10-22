@@ -15,6 +15,7 @@ get_filename_component(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(QML_OUTPUT_DIR "${REPO_ROOT}/src/opt/victronenergy/gui/qml/Vespera")
 set(TRANSLATION_SOURCE_DIR "${REPO_ROOT}/src-external/gui-v2/Vespera/translations")
 set(TRANSLATION_OUTPUT_DIR "${QML_OUTPUT_DIR}/lang")
+file(GLOB TRANSLATION_QM_FILES "${TRANSLATION_SOURCE_DIR}/*.qm")
 
 add_library(vesperalocale SHARED
     src/vesperatranslator.cpp
@@ -36,11 +37,17 @@ add_custom_command(
     TARGET vesperalocale POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${TRANSLATION_OUTPUT_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${TRANSLATION_SOURCE_DIR}/*.qm
-        "${TRANSLATION_OUTPUT_DIR}/"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_CURRENT_SOURCE_DIR}/qmldir"
         "${QML_OUTPUT_DIR}/qmldir"
 )
+
+if(TRANSLATION_QM_FILES)
+    add_custom_command(
+        TARGET vesperalocale POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${TRANSLATION_QM_FILES}
+            "${TRANSLATION_OUTPUT_DIR}/"
+    )
+endif()
 
 file(WRITE "${QML_OUTPUT_DIR}/qmldir" "module Vespera\nplugin vesperalocale\nsingleton VesperaDeviceModel 1.0 VesperaDeviceModel.qml\n")

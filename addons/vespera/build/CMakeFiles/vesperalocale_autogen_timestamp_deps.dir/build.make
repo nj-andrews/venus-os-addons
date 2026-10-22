@@ -66,8 +66,8 @@ include CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/progress.make
 
-CMakeFiles/vesperalocale_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2
 CMakeFiles/vesperalocale_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.4.2
+CMakeFiles/vesperalocale_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2
 CMakeFiles/vesperalocale_autogen_timestamp_deps: /usr/lib/qt6/libexec/moc
 CMakeFiles/vesperalocale_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Qml.so.6.4.2
 

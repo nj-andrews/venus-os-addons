@@ -1,4 +1,4 @@
-set(CMAKE_CXX_COMPILER "/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++")
+set(CMAKE_CXX_COMPILER "/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++")
 set(CMAKE_CXX_COMPILER_ARG1 "")
 set(CMAKE_CXX_COMPILER_ID "GNU")
 set(CMAKE_CXX_COMPILER_VERSION "13.4.0")

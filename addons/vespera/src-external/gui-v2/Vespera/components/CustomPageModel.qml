@@ -61,14 +61,14 @@ QtObject {
 	}
 
 	function toggleCustomPage(pageName, checked) {
-		console.log("CustomPageModel: toggleCustomPage: in:", pageName, checked)
+		console.debug("CustomPageModel: toggleCustomPage: in:", pageName, checked)
 		var customPages = _customPages.slice()
 		var removed = false
 		for (var i = 0; i< customPages.length; i++) {
 			var itemName = customPages[i]
 			if (pageName = itemName) {
 				if (checked) {
-					console.log("CustomPageModel: toggleCustomPage: exit already checked")
+					console.debug("CustomPageModel: toggleCustomPage: exit already checked")
 					return // already exists
 				}
 				removed = true
@@ -79,11 +79,10 @@ QtObject {
 		if (checked)
 			customPages.push(pageName)
 		else if (!removed) {
-			console.log("CustomPageModel: toggleCustomPage: exit already unchecked")
+			console.debug("CustomPageModel: toggleCustomPage: exit already unchecked")
 			return // already exists
 		}
 
-		console.log("CustomPageModel: setting value")
 		var pages = customPages.join(", ")
 		_customPagesItem.setValue(pages)
 
@@ -152,7 +151,7 @@ QtObject {
 				if (!page) continue
 				_customPageItems[url] = page
 			}
-			//console.debug("CustomPageModel: syncPages insertItem:", page )
+
 			Global.mainView.swipeView.insertItem(0, page)
 		}
 
@@ -166,6 +165,7 @@ QtObject {
 
 		_customPages = customPages
 		_inSyncPages = false
+
 	}
 
 	function removePage(page) {

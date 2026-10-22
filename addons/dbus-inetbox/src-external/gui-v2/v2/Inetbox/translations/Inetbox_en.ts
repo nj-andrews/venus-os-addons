@@ -99,55 +99,49 @@
         <source>El2</source>
         <translation>El2</translation>
     </message>
-    <message id="inetbox_connected">
-        <location filename="../InetboxDevicePage.qml" line="17"/>
-        <source>Connected</source>
-        <translation>Connected</translation>
-    </message>
     <message id="inetbox_room_current_temperature">
-        <location filename="../InetboxDevicePage.qml" line="24"/>
+        <location filename="../InetboxDevicePage.qml" line="19"/>
         <source>Current Room Temperature</source>
         <translation>Current Room Temperature</translation>
     </message>
     <message id="inetbox_room_target_temperature">
-        <location filename="../InetboxDevicePage.qml" line="31"/>
+        <location filename="../InetboxDevicePage.qml" line="26"/>
         <source>Target Room Temperature</source>
         <translation>Target Room Temperature</translation>
     </message>
     <message id="inetbox_water_current_temperature">
-        <location filename="../InetboxDevicePage.qml" line="38"/>
+        <location filename="../InetboxDevicePage.qml" line="33"/>
         <source>Current Water Temperature</source>
         <translation>Current Water Temperature</translation>
     </message>
     <message id="inetbox_water">
-        <location filename="../InetboxDevicePage.qml" line="44"/>
+        <location filename="../InetboxDevicePage.qml" line="39"/>
         <location filename="../InetboxSchedules.qml" line="28"/>
         <location filename="../components/MotorhomeInetbox.qml" line="153"/>
         <source>Water</source>
         <translation>Water</translation>
     </message>
     <message id="inetbox_heating">
-        <location filename="../InetboxDevicePage.qml" line="51"/>
         <location filename="../InetboxSchedules.qml" line="22"/>
         <location filename="../components/MotorhomeInetbox.qml" line="173"/>
         <source>Heating</source>
         <translation>Heating</translation>
     </message>
     <message id="inetbox_aircon">
-        <location filename="../InetboxDevicePage.qml" line="57"/>
         <location filename="../InetboxSchedules.qml" line="34"/>
         <location filename="../components/MotorhomeInetbox.qml" line="187"/>
         <source>Aircon</source>
         <translation>Aircon</translation>
     </message>
     <message id="inetbox_fan_speed">
-        <location filename="../InetboxDevicePage.qml" line="65"/>
+        <location filename="../InetboxDevicePage.qml" line="60"/>
+        <location filename="../InetboxSchedules.qml" line="156"/>
         <location filename="../components/MotorhomeInetbox.qml" line="220"/>
         <source>Fan speed</source>
         <translation>Fan speed</translation>
     </message>
     <message id="inetbox_show_aircon">
-        <location filename="../InetboxDevicePage.qml" line="89"/>
+        <location filename="../InetboxDevicePage.qml" line="84"/>
         <source>Show aircon</source>
         <translation>Show aircon</translation>
     </message>
@@ -193,42 +187,44 @@
         <translation>Documentation</translation>
     </message>
     <message id="inetbox_heating_mode">
-        <location filename="../InetboxSchedules.qml" line="116"/>
+        <location filename="../InetboxDevicePage.qml" line="46"/>
+        <location filename="../InetboxSchedules.qml" line="127"/>
         <source>Heating mode</source>
         <translation>Heating mode</translation>
     </message>
     <message id="inetbox_repeat">
-        <location filename="../InetboxSchedules.qml" line="69"/>
+        <location filename="../InetboxSchedules.qml" line="82"/>
         <source>Repeat</source>
         <translation>Repeat</translation>
     </message>
-    <message id="inetbox_Schedules">
+    <message id="inetbox_schedules">
         <location filename="../InetboxSchedules.qml" line="10"/>
         <source>Schedules</source>
         <translation>Schedules</translation>
     </message>
     <message id="inetbox_time">
-        <location filename="../InetboxSchedules.qml" line="63"/>
+        <location filename="../InetboxSchedules.qml" line="76"/>
         <source>Time</source>
         <translation>Time</translation>
     </message>
     <message id="inetbox_water_mode">
-        <location filename="../InetboxSchedules.qml" line="126"/>
+        <location filename="../InetboxSchedules.qml" line="137"/>
         <source>Water mode</source>
         <translation type="unfinished">Water mode</translation>
     </message>
     <message id="inetbox_aircon_mode">
-        <location filename="../InetboxSchedules.qml" line="135"/>
+        <location filename="../InetboxDevicePage.qml" line="52"/>
+        <location filename="../InetboxSchedules.qml" line="146"/>
         <source>Aircon mode</source>
         <translation type="unfinished">Aircon mode</translation>
     </message>
     <message id="inetbox_enabled">
-        <location filename="../InetboxSchedules.qml" line="57"/>
+        <location filename="../InetboxSchedules.qml" line="70"/>
         <source>Enabled</source>
         <translation>Enabled</translation>
     </message>
     <message id="inetbox_temperature">
-        <location filename="../InetboxSchedules.qml" line="95"/>
+        <location filename="../InetboxSchedules.qml" line="108"/>
         <source>Temperature</source>
         <translation>Temperature</translation>
     </message>

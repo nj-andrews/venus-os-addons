@@ -53,10 +53,10 @@ RM = /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/c
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader
+CMAKE_SOURCE_DIR = /data/dev/addons/vespera/src-external/vespera-locale-loader
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build
+CMAKE_BINARY_DIR = /data/dev/addons/vespera/src-external/vespera-locale-loader/build
 
 # Utility rule file for vesperalocale_autogen_timestamp_deps.
 
@@ -66,10 +66,10 @@ include CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/progress.make
 
-CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Gui.so.6.8.3
 CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Qml.so.6.8.3
-CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/moc
 CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Core.so.6.8.3
+CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/moc
+CMakeFiles/vesperalocale_autogen_timestamp_deps: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Gui.so.6.8.3
 
 vesperalocale_autogen_timestamp_deps: CMakeFiles/vesperalocale_autogen_timestamp_deps
 vesperalocale_autogen_timestamp_deps: CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/build.make
@@ -84,6 +84,6 @@ CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/clean:
 .PHONY : CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/clean
 
 CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/depend:
-	cd /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /data/dev/addons/vespera/src-external/vespera-locale-loader/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /data/dev/addons/vespera/src-external/vespera-locale-loader /data/dev/addons/vespera/src-external/vespera-locale-loader /data/dev/addons/vespera/src-external/vespera-locale-loader/build /data/dev/addons/vespera/src-external/vespera-locale-loader/build /data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/depend
 

@@ -41,6 +41,7 @@ Page {
 
 		Rectangle {
 			Layout.fillWidth: true
+			visible: root.inetboxModel.device
 			color: Theme.color_background_secondary
 			radius: Theme.geometry_button_radius
 			Layout.preferredHeight: auxButtons.implicitHeight + Theme.geometry_page_content_verticalMargin

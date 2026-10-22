@@ -53,10 +53,10 @@ RM = /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/c
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader
+CMAKE_SOURCE_DIR = /data/dev/addons/vespera/src-external/vespera-locale-loader
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build
+CMAKE_BINARY_DIR = /data/dev/addons/vespera/src-external/vespera-locale-loader/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/vesperalocale.dir/depend.make
@@ -71,51 +71,51 @@ include CMakeFiles/vesperalocale.dir/flags.make
 
 vesperalocale_autogen/timestamp: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/libexec/moc
 vesperalocale_autogen/timestamp: CMakeFiles/vesperalocale.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC for target vesperalocale"
-	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_autogen /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale_autogen.dir/AutogenInfo.json ""
-	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E touch /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/timestamp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC for target vesperalocale"
+	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E cmake_autogen /data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale_autogen.dir/AutogenInfo.json ""
+	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E touch /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/timestamp
 
 CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o: CMakeFiles/vesperalocale.dir/flags.make
 CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o: vesperalocale_autogen/mocs_compilation.cpp
 CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o: CMakeFiles/vesperalocale.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o -MF CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o.d -o CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o"
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o -MF CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o.d -o CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o -c /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp
 
 CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.i"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp > CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.i
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp > CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.i
 
 CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.s"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp -o CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.s
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/dev/addons/vespera/src-external/vespera-locale-loader/build/vesperalocale_autogen/mocs_compilation.cpp -o CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.s
 
 CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o: CMakeFiles/vesperalocale.dir/flags.make
-CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o: /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp
+CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o: /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp
 CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o: CMakeFiles/vesperalocale.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o -MF CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o.d -o CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o"
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o -MF CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o.d -o CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o -c /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp
 
 CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.i"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp > CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.i
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp > CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.i
 
 CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.s"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp -o CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.s
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperatranslator.cpp -o CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.s
 
 CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: CMakeFiles/vesperalocale.dir/flags.make
-CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp
+CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp
 CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o: CMakeFiles/vesperalocale.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o -MF CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o.d -o CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o -c /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o"
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o -MF CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o.d -o CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o -c /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp
 
 CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.i"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp > CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.i
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp > CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.i
 
 CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.s"
-	/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp -o CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.s
+	/data/dev/addons/vespera/src-external/vespera-locale-loader/build/toolchain-wrapper/arm-ve-linux-gnueabi-g++ --sysroot=/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/dev/addons/vespera/src-external/vespera-locale-loader/src/vesperalocaleplugin.cpp -o CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.s
 
 # Object files for target vesperalocale
 vesperalocale_OBJECTS = \
@@ -126,25 +126,24 @@ vesperalocale_OBJECTS = \
 # External object files for target vesperalocale
 vesperalocale_EXTERNAL_OBJECTS =
 
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/build.make
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Gui.so.6.8.3
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Qml.so.6.8.3
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libGLESv2.so
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libEGL.so
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Network.so.6.8.3
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Core.so.6.8.3
-/mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library /mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so"
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/vesperalocale_autogen/mocs_compilation.cpp.o
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/src/vesperatranslator.cpp.o
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/src/vesperalocaleplugin.cpp.o
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/build.make
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Gui.so.6.8.3
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Qml.so.6.8.3
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libGLESv2.so
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libEGL.so
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Network.so.6.8.3
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: /opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/cortexa8hf-neon-ve-linux-gnueabi/usr/lib/libQt6Core.so.6.8.3
+/data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so: CMakeFiles/vesperalocale.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library /data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vesperalocale.dir/link.txt --verbose=$(VERBOSE)
-	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E make_directory /mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/lang
-	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E copy_if_different /mnt/dev/repos/venus-os/addons/vespera/src-external/gui-v2/Vespera/translations/*.qm /mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/lang/
-	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E copy_if_different /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/qmldir /mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/qmldir
+	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E make_directory /data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/lang
+	/opt/venus/scarthgap-arm-cortexa8hf-neon/sysroots/x86_64-ve-linux/usr/bin/cmake -E copy_if_different /data/dev/addons/vespera/src-external/vespera-locale-loader/qmldir /data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/qmldir
 
 # Rule to build all files generated by this target.
-CMakeFiles/vesperalocale.dir/build: /mnt/dev/repos/venus-os/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so
+CMakeFiles/vesperalocale.dir/build: /data/dev/addons/vespera/src/opt/victronenergy/gui/qml/Vespera/libvesperalocale.so
 .PHONY : CMakeFiles/vesperalocale.dir/build
 
 CMakeFiles/vesperalocale.dir/clean:
@@ -152,6 +151,6 @@ CMakeFiles/vesperalocale.dir/clean:
 .PHONY : CMakeFiles/vesperalocale.dir/clean
 
 CMakeFiles/vesperalocale.dir/depend: vesperalocale_autogen/timestamp
-	cd /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build /mnt/dev/repos/venus-os/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /data/dev/addons/vespera/src-external/vespera-locale-loader/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /data/dev/addons/vespera/src-external/vespera-locale-loader /data/dev/addons/vespera/src-external/vespera-locale-loader /data/dev/addons/vespera/src-external/vespera-locale-loader/build /data/dev/addons/vespera/src-external/vespera-locale-loader/build /data/dev/addons/vespera/src-external/vespera-locale-loader/build/CMakeFiles/vesperalocale.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/vesperalocale.dir/depend
 
