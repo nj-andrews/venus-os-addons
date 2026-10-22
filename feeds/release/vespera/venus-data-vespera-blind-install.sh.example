@@ -1,7 +1,0 @@
-#!/bin/sh
-
-vespera feed-conf add develop
-vespera feed-source add vespera http://192.168.10.32:8808/develop/vespera
-vespera feed-source add addons http://192.168.10.32:8808/develop/addons
-vespera update
-vespera install dbus-inetbox

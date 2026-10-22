@@ -1,12 +1,12 @@
 Package: dbus-inetbox
-Version: 1.1.0+d260530.0947
+Version: 1.1.0~d261022.1601
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: thespinmaster@github.com
-MD5Sum: 07a9054d33f58c4a9b2efc7190994a04
-Size: 119686
-Filename: dbus-inetbox_1.1.0+d260530.0947_all.ipk
+MD5Sum: 64cbf6ea1a8ac2d4c705a488648cb41d
+Size: 82404
+Filename: dbus-inetbox_1.1.0~d261022.1601_all.ipk
 Source: https://thespinmaster.github.io/venus-os-addons-addons
 Description:  Adds support for Truma inetbox to Venus-OS
 OE: dbus-inetbox
@@ -14,45 +14,28 @@ License: MIT
 Priority: optional
 
 Package: dbus-ne-shunt
-Version: 1.1.0+d260530.0947
+Version: 1.1.0~d260926.1436
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: thespinmaster@github.com
-MD5Sum: 43d0c8941cc1f28f9af930a984135051
-Size: 69102
-Filename: dbus-ne-shunt_1.1.0+d260530.0947_all.ipk
+MD5Sum: 194675eb3c6174c3f3db902cbf72f8f6
+Size: 27954
+Filename: dbus-ne-shunt_1.1.0~d260926.1436_all.ipk
 Source: https://thespinmaster.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
 License: MIT
 Priority: optional
 
-Package: dbus-relay-board
-Version: 1.0.0+dev.20260518.100344
-Depends: vespera
-Section: utilities
-Architecture: all
-Maintainer: Lucien Denisey <ldenisey@gmail.com>
-MD5Sum: bd233e5d16a0ad584ecb1775464ddc7c
-Size: 16260
-Filename: dbus-relay-board_1.0.0+dev.20260518.100344_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
-Description:  Add support to RS485, RS232 and TTL232 relay boards  Add support to
- RS485, RS232 and TTL232 relay boards
-OE: dbus-relay-board
-License: MIT
-Priority: optional
-
 Package: mount-shares
-Version: 1.1.0+d260530.0947
-Depends: vespera
+Version: 1.1.0~d260909.1204
 Section: utilities
 Architecture: all
 Maintainer: thespinmaster@github.com
-MD5Sum: 01d15edff3a45fc5ed484f18de1bbf61
-Size: 66868
-Filename: mount-shares_1.1.0+d260530.0947_all.ipk
+MD5Sum: 140dc7e00a5ef66c5310c5c16849efce
+Size: 3008
+Filename: mount-shares_1.1.0~d260909.1204_all.ipk
 Source: https://thespinmaster.github.io/venus-os-addons
 Description:  Adds support for nfs and cifs shares to Venus OS
 OE: mount-shares
@@ -60,14 +43,14 @@ License: MIT
 Priority: optional
 
 Package: network-gps
-Version: 1.1.0+d260530.0947
+Version: 1.1.0~d260906.2023
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: thespinmaster@github.com
-MD5Sum: 82e48fac1e2c3fa32342e1dcc81b58eb
-Size: 2102
-Filename: network-gps_1.1.0+d260530.0947_all.ipk
+MD5Sum: eb3e840e2f92f7fb0e966063d40b1a74
+Size: 2174
+Filename: network-gps_1.1.0~d260906.2023_all.ipk
 Source: https://thespinmaster.github.io/venus-os-addons
 Description:  Network GPS using NMEA
 OE: network-gps
@@ -75,14 +58,14 @@ License: MIT
 Priority: optional
 
 Package: themer
-Version: 1.1.0+d260530.0947
+Version: 1.1.0~d260906.2023
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: thespinmaster@github.com
-MD5Sum: 46fe96c37548308c327d66cdb33291f2
-Size: 4192
-Filename: themer_1.1.0+d260530.0947_all.ipk
+MD5Sum: 41acf37b8a86abebc00a2cf2fc54d4e0
+Size: 4384
+Filename: themer_1.1.0~d260906.2023_all.ipk
 Source: https://thespinmaster.github.io/venus-os-addons/tree/main/feeds/main/themer
 Description:  Adds basic theming support to the Venus OS
 OE: einstine
