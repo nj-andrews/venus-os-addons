@@ -140,7 +140,8 @@ __vespera_lib_post_install() {
 	__do_enable_disable() {
 		local action="${1}"
 		echo "$2"
-		local output_vars; output_vars="$("$__vespera_path/scripts/$action" "${app}")"
+		local output_vars;
+		output_vars="$("$__vespera_path/scripts/$action" "${app}")"
 		eval "$output_vars"
 		# shellcheck disable=SC2154 # vars are set by eval call
 		venus_services_to_restart+=("${_venus_services_to_restart[@]}")

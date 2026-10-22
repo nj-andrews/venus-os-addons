@@ -8,5 +8,8 @@
 /bin
 #serial starter rules folder
 /etc/udev/rules.d
-#conatins serial-starter.conf
+# contins serial-starter.conf
 /etc/venus
+# needed to store /opt/victronenergy/gui-v2/Victron/VenusOS/pages/settings/devicelist/delegates/DeviceListDelegate_vespera.qml
+# use /opt/victronenergy/gui-v2 and not full dir incase other apps need to patch files
+/opt/victronenergy/gui-v2

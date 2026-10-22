@@ -11,7 +11,7 @@ DeviceListDelegate {
 		// Using callLater fixes intermitten lock ups
 		Qt.callLater(function () {
 			var isReload = VesperaSingleton.getIsReload()
-
+			console.log("AAA:", isReload)
 			parent.height=0
 			parent.active = false
 
@@ -23,13 +23,14 @@ DeviceListDelegate {
 			VesperaSingleton.initCustomPageModel(Global.main, isReload)
 
 			if (isReload) {
-				Global.pageManager.popAllPages(StackView.Immediate)
-				// sometimes IOS renders a blank page on startup
-				// accessing any property of the page fixes the issue.
-				var _ = Global.mainView.navBar.pages[0].url
-
-				Global.mainView.navBar.setCurrentIndex(0)
-				Global.mainView.swipeView.animationEnabled = true
+				// sometimes the UI renders a blank page on startup
+				// using callLater fixes this
+				Qt.callLater(function () {
+					// accessing any property of the page fixes the issue.
+					Global.pageManager.popAllPages(StackView.Immediate)
+					Global.mainView.navBar.setCurrentIndex(0)
+					Global.mainView.swipeView.animationEnabled = true
+				})
 			}
 		})
 	}

@@ -12,7 +12,7 @@ function initCustomPageModel(parent, isReload) {
 	console.log("VesperaSingleton:initCustomPageModel: in")
 	if (!customPageModelExists()) {
 		createCustomPageModel(parent)
-		if (isReload) setIsReload(false)
+		_isReload = false
 	} else {
 		console.debug("Vespera: Singleton exists")
 	}
