@@ -21,38 +21,39 @@ Commands:
 	status                        Show Vespera status via opkg
 	inspect, i [app ...]          Show app, service, addon, and dbus details
 	list-enabled, le [app ...]    List enabled apps/packages
-	feed-conf <subcommand> ...    Manage active feed configurations
-	feed-sources <subcommand> ... Manage active feed sources for the active configuration
+	feed <subcommand> ...         Manage active feed configurations
 	device <subcommand> ...       Device discovery and binding actions
-	fs-ro                         Remount the fs as read-only
-	overlays [mount|unmount]
+	fs-ro|fs-rw                   Remount the fs as read-only|read-write
+	overlays [mount|unmount]      Mount/Unmount overlays. (or lists overlays when no args)
 	enable [app ...]              Enable matching installed apps (or all when no args)
 	disable [app ...]             Disable matching enabled apps (or all when no args)
 	update                        Update package metadata and regenerate indexes
 
 Feed family:
-	feed-conf                     Print active feed config name
-	feed-conf list                Prints a list of available feed configs
-	feed-conf set                 Sets the active feed, if feed does not exist then prompts to add a new config
-	feed-conf remove              Removes a feed config
+	feed                          Print active feed config name
+	feed list                     Prints a list of available feed configs
+	feed set                      Sets the active feed
+	feed add                      Adds a new feed config
+	feed remove                   Removes a feed config
 
-	feed-source add <name> <url>         Add a feed entry to the active feed file
-	feed-source edit <name> <url> [old]  Edit feed URL, optionally rename from [old]
-	feed-source remove <name>            Remove a feed entry from the active feed file
+  feed sources                         Show a list of the feed sources feom the active feed.
+	feed add-source <name> <url>         Add a feed entry to the active feed
+	feed edit-source <name> <url> [old]  Edit feed URL, optionally rename from [old]
+	feed remove-source <name>            Remove a feed entry from the active feed
 
 Device family:
 	device scan                   Discover available serial devices
-	device bind <sid|tty> <svc>   Bind a serial device to service template <svc>
-	device remove <sid>           Remove one binding by device sid
-	device unbind <sid>           Alias of device remove
-	device remove-all <dbus-name> Remove all bindings for a dbus service
-	device unbind-all <dbus-name> Alias of device remove-all
+	device bind <tty> <svc>       Bind a serial device to service template <svc>
+	device unbind <tty|sid>       Remove one binding by tty port or device sid
+	device remove <sid>           Alias of device unbind
+	device unbind-all <dbus-name> Remove all bindings for a dbus service
+	device remove-all <dbus-name> Alias of device unbind-all
 
 Examples:
 	vespera feed set develop
-	vespera feed add myfeed https://example.invalid/feed
+	vespera feed add-source myfeed https://example.invalid/feed
 	vespera device bind ttyUSB0 dbus-serialbattery
-	vespera device remove 8f9a3c12
+	vespera device unbind 8f9a3c12
 
 Notes:
 	Any arguments not handled above are passed directly to opkg.
@@ -67,7 +68,7 @@ declare command=
 function getOptions() {
 	local -n __options="${1}"
 	shift
-	options=()
+	__options=()
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
 			-*) __options+=("$1") ;;
@@ -97,6 +98,7 @@ function processArgs() {
 			  # shellcheck disable=SC2034 # used upstream
 				VESPERA_IN_GUI=true;;
 			-V[0-4])
+				 # shellcheck disable=SC2034 # used upstream
 				VESPERA_VERBOSITY="${1#-V}"
 				args+=("$1");;
 			--help)
@@ -118,15 +120,13 @@ function processArgs() {
 processArgs "$@"
 set -- "${args[@]}"
 
-echo "VESPERA ARGS:$command, $*" > /data/vargs
-
-# [[ $VESPERA_IN_GUI == true ]] && {
-# 	for ((i=1; i<=10; i++)); do
-# 		echo "$command, $1: step $i"
-# 		sleep 1
-# 	done
-# 	exit 0
-# }
+[[ $VESPERA_IN_GUI == true ]] && {
+	for ((i=1; i<=10; i++)); do
+		echo "$command, $1: step $i"
+		sleep 1
+	done
+	exit 0
+}
 
 opkg_ensure_combined_conf_file
 
@@ -139,20 +139,22 @@ case "$command" in
 		exec awk '/Version:/ {print $2}' "${VESPERA_DATA_DIR}/info/vespera.control" 2>/dev/null;;
 	fs-ro|fs-rw)
 		mount -o remount,"${command:(-2)}" /; exit;;
-	feed-conf)
+	feed)
 		case "${1:-}" in
-			"") opkg_lib_show_feed_name;;
 			set|add) opkg_lib_feed_conf_set_add "${1:-}" "${2:-}";;
 			list) opkg_lib_feed_conf_available;;
 			remove) opkg_lib_feed_conf_remove "${2:-}";;
-			*) opkg_lib_show_feed_sources "${1:-}";;
+			sources)
+				opkg_lib_show_feed_sources "${2:-}";;
+			*-source)
+				sub_command="${1%%-source}"
+				shift
+				opkg_lib_feed_crud "$sub_command" "$@" && vespera_lib_index;;
+			*) opkg_lib_show_feed_name "${1:-}";;
 		esac
 		exit
 		;;
-	feed-source)
-		[[ "$#" -eq 0 ]] && { opkg_lib_show_feed_sources; exit; }
-		opkg_lib_feed_crud "$@" && vespera_lib_index; exit
-		;;
+
 	overlays)
 		if [[ "$#" -eq 0 ]]; then
 			cat "$VESPERA_DATA_DIR/overlays/overlays.conf"

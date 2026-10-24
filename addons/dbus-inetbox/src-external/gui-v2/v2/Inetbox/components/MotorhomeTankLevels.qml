@@ -7,7 +7,6 @@ Rectangle {
 	id: tanks
 
 	implicitHeight: col.implicitHeight + col.anchors.margins * 2
-
 	color: Theme.color_background_secondary
 	radius: Theme.geometry_button_radius
 
@@ -20,11 +19,10 @@ ColumnLayout {
 	anchors.fill: parent
 	anchors.margins: 8
 
-
 	Repeater {
 		id: repeater
 
-	property real maxLabelWidth: 0
+		property real maxLabelWidth: 0
 
 		Loader {
 			id: tankLoader
@@ -49,10 +47,9 @@ ColumnLayout {
 				Label {
 					id: valueLabel
 					text: model.name
-
 					horizontalAlignment: Text.AlignRight
 					anchors.verticalCenter: parent.verticalCenter
-
+					font.pixelSize: Theme.font_size_body2
 					property int unit
 					property quantityInfo quantity
 
@@ -60,11 +57,10 @@ ColumnLayout {
 						when: Global.systemSettings.briefView.unit.value !== VenusOS.BriefView_Unit_None
 						PropertyChanges {
 							target: valueLabel
-
 							text: model.name + " " + quantity.number + quantity.unit
 							quantity: Units.getDisplayText(unit, value)
-							//width: updateMaxLabelWidth()
-							unit: Global.systemSettings.briefView.unit.value === VenusOS.BriefView_Unit_Percentage ? VenusOS.Units_Percentage : Global.systemSettings.volumeUnit
+							unit: Global.systemSettings.briefView.unit.value === VenusOS.BriefView_Unit_Percentage
+									? VenusOS.Units_Percentage : Global.systemSettings.volumeUnit
 						}
 					}
 
@@ -94,7 +90,6 @@ ColumnLayout {
 					color: row.levelColor
 					radius: height / 2
 					Rectangle {
-
 						anchors.left: parent.left
 						height: parent.height
 						width: levelBack.width * model.level / 100

@@ -11,7 +11,7 @@ DeviceListDelegate {
 		// Using callLater fixes intermitten lock ups
 		Qt.callLater(function () {
 			var isReload = VesperaSingleton.getIsReload()
-			console.log("AAA:", isReload)
+
 			parent.height=0
 			parent.active = false
 

@@ -266,7 +266,6 @@ OverviewWidget {
 				// Voltage
 				QuantityLabel {
 					id: batteryVoltageDisplay
-
 					value: Global.system.battery.voltage
 					unit: VenusOS.Units_Volt_DC
 					unitColor: Theme.color_overviewPage_widget_battery_font_secondary
@@ -278,7 +277,6 @@ OverviewWidget {
 				// Amps
 				QuantityLabel {
 					id: batteryCurrentDisplay
-
 					value: Global.system.battery.current
 					unit: VenusOS.Units_Amp
 					unitColor: Theme.color_overviewPage_widget_battery_font_secondary
@@ -290,7 +288,6 @@ OverviewWidget {
 				// Watts
 				QuantityLabel {
 					id: batteryPowerDisplay
-
 					value: Global.system.battery.power
 					unit: VenusOS.Units_Watt
 					unitColor: Theme.color_overviewPage_widget_battery_font_secondary

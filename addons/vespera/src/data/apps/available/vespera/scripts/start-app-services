@@ -49,9 +49,11 @@ for service in $(cat "${services_file}" 2>/dev/null); do
 done
 
 for service in $(cat "${service_templates_file}" 2>/dev/null); do
+	[[ -z $service ]] && continue
 	echo "creating template service symlink for: $service"
-	ln -fs "$available_app_path/service-templates/$service" \
-				"${service_templates_root}/$service"
+	# ln -fs "$available_app_path/service-templates/$service" \
+	#  			"${service_templates_root}/$service"
+	# cp -a "$available_app_path/service-templates/$service" "${service_templates_root}/$service"
 	has_templated_devices=true
 done
 

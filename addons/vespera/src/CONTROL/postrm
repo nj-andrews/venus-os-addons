@@ -8,7 +8,7 @@ PKG_NAME="${PKG_SOURCE##*/}"; PKG_NAME="${PKG_NAME%%.*}"
 PKG_OVERLAY_LIB="${VESPERA_ROOT:-}/data/var/vespera/info/vespera.overlay-lib"
 
 export VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
-
+STD_OUT=/dev/null
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"
 	echo "postrm"
@@ -17,10 +17,11 @@ if ((VESPERA_VERBOSITY>1)); then
 	echo "PKG_NAME=$PKG_NAME"
 	echo "PKG_ACTION=$PKG_ACTION"
 	echo "PKG_OVERLAY_LIB=$PKG_OVERLAY_LIB"
+	STD_OUT=1
 fi
 
 if [[ $PKG_ACTION != "upgrade" ]]; then
-	"${PKG_OVERLAY_LIB}" overlay-unregister "${PKG_NAME}"
+	"${PKG_OVERLAY_LIB}" overlay-unregister "${PKG_NAME}" 1>&"$STD_OUT"
 fi
 
 if ((VESPERA_VERBOSITY>1)); then

@@ -61,13 +61,11 @@ Page {
 			// 	onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {title: text,vesperaManager: vesperaManager})
 			// }
 			ListLink {
-				// "Documentation"
 				text: qsTrId("pagesettingsgeneral_documentation")
 				url: "https://thespinmaster.github.io/venus-os-addons/"
 			}
 			ListText {
-				//% "Version"
-				text: qsTrId("vespera_version")
+				text: qsTrId("settings_page_debug_application_version")
 				secondaryText: GuiPluginLoader.plugin("Vespera").version
 			}
 		}

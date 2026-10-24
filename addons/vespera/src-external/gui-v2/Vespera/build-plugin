@@ -13,7 +13,7 @@ fi
 OUTPUT_PATH=./output
 PLUGIN_NAME=Vespera
 PLUGIN_FOLDER_NAME=vespera
-MINIFY="--minify"
+#MINIFY="--minify"
 #PRE_COMPILE="--pre-compile"
 PLUGIN_VERSION=$(cat version 2>/dev/null || echo v1.0.0);
 PLUGIN_VERSION=$(echo "${PLUGIN_VERSION%.*}.$((${PLUGIN_VERSION##*.}+1))" | tee version)
@@ -28,10 +28,10 @@ export PATH="/usr/lib/qt6/bin:/usr/lib/qt6/libexec:${PATH}"
 
 # force delete so file size reporting is not using cache (when mounting/zfs etc)
 rm -f $OUTPUT_PATH/${PLUGIN_NAME}.json
-
+#--min-required-version v1.2.13 \
 python3 "$compiler_script" \
     --name ${PLUGIN_NAME} \
-    --min-required-version v1.2.13 \
+    --min-required-version v1.0.0 \
     --settings PageHome.qml \
 		--version ${PLUGIN_VERSION} \
 		${MINIFY:-} \

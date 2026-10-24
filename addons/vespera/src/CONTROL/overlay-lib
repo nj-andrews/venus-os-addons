@@ -137,13 +137,13 @@ __overlay_lib_target_supported() {
 	local target_fs_type
 
 	[[ ! -d "$target_path" ]] && {
-		echo "ERROR: overlay_lib_target_supported: target does not exist: $target_path"
+		echo "WARNING: overlay_lib_target_supported: target does not exist: $target_path" >&1
 		return 1
 	}
 
 	target_fs_type="$(stat -f -c %T "$target_path" 2>/dev/null)"
 	[[ "$target_fs_type" == "tmpfs" ]] && {
-		echo "ERROR: overlay_lib_target_supported: tmpfs targets are not supported: $target_path"
+		echo "ERROR: overlay_lib_target_supported: tmpfs targets are not supported: $target_path" >&2
 		return 1
 	}
 
@@ -241,7 +241,7 @@ overlay_lib_register() {
 
 	__overlay_lib_init
 
-	[[ ! -f "$OVERLAY_CONF_FILE" ]] && { echo "ERROR: conf file not found:$OVERLAY_CONF_FILE"; return 1; }
+	[[ ! -f "$OVERLAY_CONF_FILE" ]] && { echo "ERROR: conf file not found:$OVERLAY_CONF_FILE" >&2; return 1; }
 
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		[[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue

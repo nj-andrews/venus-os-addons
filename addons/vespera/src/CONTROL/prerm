@@ -12,6 +12,7 @@ PKG_OVERLAY_CONF_FILE="${PKG_SCRIPT_DIR}/vespera.installer-overlays"
 PKG_OVERLAY_LIB="${PKG_SCRIPT_DIR}/vespera.overlay-lib"
 
 VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
+STD_OUT=/dev/null
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"
@@ -25,11 +26,12 @@ if ((VESPERA_VERBOSITY>1)); then
 	echo "PKG_REMOVE_SCRIPT=$PKG_REMOVE_SCRIPT"
 	echo "PKG_OVERLAY_CONF_FILE=$PKG_OVERLAY_CONF_FILE"
 	echo "PKG_OVERLAY_LIB=$PKG_OVERLAY_LIB"
+	STD_OUT=1
 fi
 
 "$PKG_REMOVE_SCRIPT" "$PKG_ACTION" "$PKG_INSTALLER_FILE" "$PKG_WORKING_DIR" "$VESPERA_VERBOSITY"
 
-"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}"
+"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"

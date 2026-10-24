@@ -1,15 +1,10 @@
 # list of paths to overlay
-#gui-v1 qml files
-/opt/victronenergy/gui/qml
-#service-templates (for serial sevices etc)
-/opt/victronenergy/service-templates
-# vespera bin location
-# use /bin not /usr/bin as /usr/bin/svscanboot causes issues unmounting
-/bin
+#gui-v1 qml files, service-templates, gui-v2
+/opt/victronenergy
 #serial starter rules folder
 /etc/udev/rules.d
 # contins serial-starter.conf
 /etc/venus
-# needed to store /opt/victronenergy/gui-v2/Victron/VenusOS/pages/settings/devicelist/delegates/DeviceListDelegate_vespera.qml
-# use /opt/victronenergy/gui-v2 and not full dir incase other apps need to patch files
-/opt/victronenergy/gui-v2
+# vespera bin location
+# use /bin not /usr/bin as /usr/bin/svscanboot locks files, causing issues unmounting
+/bin

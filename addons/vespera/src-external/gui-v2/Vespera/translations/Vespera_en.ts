@@ -195,13 +195,13 @@ The service will start shortly...</source>
         <translation type="unfinished"></translation>
     </message>
     <message id="pagesettingsgeneral_documentation">
-        <location filename="../PageHome.qml" line="65"/>
+        <location filename="../PageHome.qml" line="64"/>
         <source></source>
         <translation></translation>
     </message>
-    <message id="vespera_version">
-        <location filename="../PageHome.qml" line="70"/>
-        <source>Version</source>
+    <message id="settings_page_debug_application_version">
+        <location filename="../PageHome.qml" line="68"/>
+        <source></source>
         <translation type="unfinished"></translation>
     </message>
     <message id="vespera_edit_feed">

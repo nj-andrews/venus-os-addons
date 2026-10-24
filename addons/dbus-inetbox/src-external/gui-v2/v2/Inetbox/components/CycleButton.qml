@@ -4,9 +4,9 @@ import Victron.VenusOS
 Item {
 		id: root
 
-    property VeQuickItem binding
-    property int currentIndex
-    readonly property var currentValue: binding?.value
+		property VeQuickItem binding
+		property int currentIndex
+		readonly property var currentValue: binding?.value
 
 		property alias icon: button.icon
 		property var model: []
@@ -15,7 +15,7 @@ Item {
 		property alias display: valueLabel.text
 
 		property alias valueColor: valueLabel.color
-		property real fontPixelSize: 24
+		property real fontPixelSize: Theme.font_size_body3
 		property alias cycleDelay: timer.interval
 		property CycleButtonGroup group
 
@@ -26,9 +26,6 @@ Item {
 				: model[currentIndex].color
 					? model[currentIndex].color
 					: Theme.color_font_primary
-
-		icon.height: 24
-		icon.width: 24
 
 		onCurrentIndexChanged: {
 			if (!model || currentIndex < 0 || currentIndex >= model.length)
@@ -46,11 +43,6 @@ Item {
 				}
 			}
 		}
-		// function setCurrentIndex(index) {
-		// 	if (currentIndex < 0 || currentIndex >= model.length)
-		// 		return
-		// 	currentIndex = index
-		// }
 
 		function updateBindingValue() {
 			if (!binding || !model || currentIndex < 0 || currentIndex >= model.length)

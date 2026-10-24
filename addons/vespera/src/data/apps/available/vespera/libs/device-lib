@@ -40,25 +40,17 @@ device_remove() {
 	else
 		sid="${tty_or_sid}"
 		DEVICE_SID="${sid}"
-		#sdi_TTY_from_SID || { echo "Error: sid (${sid}) does not map to an available tty" >&2; return 1; }
+		sdi_TTY_from_SID || { echo "Error: sid (${sid}) does not map to an available tty" >&2; return 1; }
 		tty="${DEVICE_TTY:-}"
 	fi
 
-	if sdi_service_name_from_tty "${tty:-}" service_name; then
-		local tty_service=/service/$service_name.$tty
-		if [[ -d "$tty_service" ]]; then
-			svc -dx "$tty_service"
-			svc -dx "$tty_service/log" 2>/dev/null
-		fi
-		rm -f "$tty_service"
-	fi
-
-	sdi_remove_service
-
-	echo "${DEVICE_SID}"
+	sdi_service_name_from_tty "${tty:-}" service_name 2>/dev/null &&
+		service_lib_remove_service "$service_name.$tty"
+ 
+	sdi_remove_rule
 
 	[[ -n ${DEVICE_SID} ]] &&
-		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null
+		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null 2>&1
 
 	return 0
 }
@@ -83,23 +75,14 @@ device_scan_usb() {
 }
 
 device_bind() {
-	local sid_or_tty="${1:-}"
+	local tty="${1:-}"
 	local service_name="${2:-}"
-	local tty_or_sid="${sid_or_tty#/dev/}"
-	local sid= tty= usbProps=
+	local sid= usbProps=
 
-	[[ -n "${sid_or_tty}" && -n "${service_name}" ]] \
-		|| { echo "Invalid arguments: bind expects <sid|tty> <service-name>" >&2; return 1; }
+	[[ -n "${tty}" && -n "${service_name}" ]] \
+		|| { echo "Invalid arguments: bind expects <tty> <service-name>" >&2; return 1; }
 
-	if [[ -e "/dev/${tty_or_sid}" ]]; then
-		tty="${tty_or_sid}"
-		DEVICE_TTY=$tty
-	else
-		sid="${tty_or_sid}"
-		DEVICE_SID="${sid}"
-		sdi_TTY_from_SID || { echo "Error: sid (${sid}) does not map to an available tty" >&2; return 1; }
-		tty="${DEVICE_TTY}"
-	fi
+	[[ ! -e "/dev/${tty}" ]] && { echo "Error: Invalid tty" >&2; return 1; }
 
 	[[ $(sdi_get_available_devices "/dev/${tty}") != "${tty}" ]] \
 		&& { echo "Error: tty ($tty) is not available" >&2; return 1; }
@@ -120,12 +103,9 @@ device_bind() {
 
 	dbus_lib_set_string_value "/Settings/Devices/sid_${sid}/UsbProps" "${usbProps}" 1>/dev/null
 
-	find /var/volatile/services -type d -name "*.${DEVICE_TTY}" \
-			! -name "${service_name}.${DEVICE_TTY}" -exec rm -rf {} + 2>/dev/null
-
 	# Remove stale service symlinks
 	#rm -f /service/*.${DEVICE_TTY} 2>/dev/null
-	find -L /service/ -maxdepth 1 -type l -delete
+	#find -L /service/ -maxdepth 1 -type l -delete
 
 	# The vespera service is responsible for adding the dbus settings
 	# so just pass that we have claimed the device.

@@ -20,19 +20,21 @@ vespera_lib_log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
 vespera_lib_log_verbose3() { [[ "${VESPERA_VERBOSITY}" -gt 2 ]]; }
 
 vespera_lib_index() {
-	opkg_ensure_combined_conf_file
-	[[ -f "$VESPERA_INDEXER" ]] && "$VESPERA_INDEXER" "$VESPERA_VERBOSITY";
+	[[ -f "$VESPERA_INDEXER" ]] && {
+		opkg_ensure_combined_conf_file
+		"$VESPERA_INDEXER" "$VESPERA_VERBOSITY"
+	}
 }
 vespera_lib_app_enabled() {
 	test -e "/data/apps/enabled/${1}"
 }
 
-vespera_lib_set_conf_value() {
-  local name="$1"
-  local value="$2"
-  sed -i "s|^${name}=.*|${name}=${value}|" "$VESPERA_ROOT/conf/vespera.conf"
-	printf -v "$name" '%s' "$value"
-}
+# vespera_lib_set_conf_value() {
+#   local name="$1"
+#   local value="$2"
+#   sed -i "s|^${name}=.*|${name}=${value}|" "$VESPERA_ROOT/conf/vespera.conf"
+# 	printf -v "$name" '%s' "$value"
+# }
 
 vespera_lib_bootstrap() {
 	cp /opt/victronenergy/version "${VESPERA_DATA_DIR}/venus-version"
@@ -70,7 +72,8 @@ __vespera_lib_cleanup() {
 	___remove_file_if_empty "$VESPERA_DATA_DIR/status"
 	rmdir "$VESPERA_DATA_DIR/info" 2>/dev/null
 	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/indexer.md5" \
-					"$VESPERA_DATA_DIR/opkg.conf" "$VESPERA_DATA_DIR/venus-version"
+					"$VESPERA_DATA_DIR/opkg.conf" "$VESPERA_DATA_DIR/venus-version" \
+					"${VESPERA_DATA_DIR}/feeds.conf"
 
 	find "$VESPERA_DATA_DIR" -type d -empty -exec rmdir -p {} \; 2>/dev/null
 
@@ -140,9 +143,14 @@ __vespera_lib_post_install() {
 	__do_enable_disable() {
 		local action="${1}"
 		echo "$2"
-		local output_vars;
-		output_vars="$("$__vespera_path/scripts/$action" "${app}")"
-		eval "$output_vars"
+		local output_vars; output_vars="$("$__vespera_path/scripts/$action" "${app}")"
+		if [[ "$output_vars" != "declare "* ]]; then
+			echo "${output_vars%%declare*}" # print everything before the declare
+			output_vars="declare${output_vars#*declare}" #return only the declare part
+		fi
+		[[ -n "$output_vars" ]] &&
+			eval "$output_vars"
+
 		# shellcheck disable=SC2154 # vars are set by eval call
 		venus_services_to_restart+=("${_venus_services_to_restart[@]}")
 		# shellcheck disable=SC2154
@@ -155,6 +163,7 @@ __vespera_lib_post_install() {
 	# Now the gui interrupt signal is sent; remove the gui-v2 json files.
 	local file="$VESPERA_WORKING_DIR/$VESPERA_INSTALL_STATE_FILE"
 	vespera_lib_log_verbose3 && __show_file_contents "$file" "__vespera_lib_post_install: processing file" >&2
+
 	while read -r app status; do
 		case "${status}" in
 			removed)
@@ -165,9 +174,9 @@ __vespera_lib_post_install() {
 				venus_services_to_restart+=("$VESPERA_WORKING_DIR/$app.installer-services")
 				;;
 			disabled)
-				__do_enable_disable "disable" "$(echo_lang "$LANG_INSTALLED_ARG1_DISABLED")${app}";;
+				__do_enable_disable "disable" "$(echo_lang "$LANG_INSTALLED_ARG1_DISABLED") ${app}";;
 			enabled)
-				__do_enable_disable "enable" "$(echo_lang "$LANG_INSTALLED_ARG1_ENABLING")${app}"
+				__do_enable_disable "enable" "$(echo_lang "$LANG_INSTALLED_ARG1_ENABLING") ${app}"
 				;;
 		esac
 

@@ -196,15 +196,16 @@ Tjenesten starter snart...</translation>
         <translation>Pakker</translation>
     </message>
     <message id="pagesettingsgeneral_documentation">
-        <location filename="../PageHome.qml" line="65"/>
+        <location filename="../PageHome.qml" line="64"/>
         <source></source>
         <translation></translation>
     </message>
-    <message id="vespera_version">
-        <location filename="../PageHome.qml" line="70"/>
-        <source>Version</source>
-        <translation>Version</translation>
+    <message id="settings_page_debug_application_version">
+        <location filename="../PageHome.qml" line="68"/>
+        <source></source>
+        <translation type="unfinished">Ingen</translation>
     </message>
+
     <message id="vespera_edit_feed">
         <location filename="../PageSettingsFeedEdit.qml" line="8"/>
         <source></source>

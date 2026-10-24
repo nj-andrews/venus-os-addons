@@ -10,7 +10,7 @@ PKG_OVERLAY_CONF_FILE="${PKG_SCRIPT_DIR}/installer-overlays"
 PKG_OVERLAY_LIB="${PKG_SCRIPT_DIR}/overlay-lib"
 
 VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
-
+STD_OUT=/dev/null
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"
 	echo "preinst"
@@ -21,9 +21,10 @@ if ((VESPERA_VERBOSITY>1)); then
 	echo "PKG_OVERLAY_LIB=$PKG_OVERLAY_LIB"
 	echo "PKG_SCRIPT_DIR=$PKG_SCRIPT_DIR"
 	echo "PKG_OVERLAY_CONF_FILE=$PKG_OVERLAY_CONF_FILE"
+	STD_OUT=1
 fi
 
-"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}"
+"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"

@@ -94,7 +94,7 @@ installer_lib_update_install_list() {
 
 	if installer_lib_is_remove; then
 		installer_lib_is_upgrade && return
-		flag="remove"
+		flag="removed"
 	elif installer_lib_is_upgrade; then
 		[[ -L "/data/apps/enabled/$PACKAGE_NAME" ]] && flag="enabled" || flag="disabled"
 	else
@@ -109,7 +109,6 @@ installer_lib_initialize() {
 
 	addsource "conf/vespera.conf" 2>/dev/null ||
 	addsource "conf-default/vespera.conf"
-
 	addsource "libs/lang-lib" "$PACKAGE_INSTALL_DIR/vespera"
 	addsource "libs/installer-dbus-lib"
 
@@ -127,8 +126,6 @@ installer_lib_initialize() {
 
 	elif [[ "$PACKAGE_ACTION" == "upgrade" ]]; then
 		PACKAGE_ACTION="upgrade-remove"
-	#elif [[ $PACKAGE_ACTION == "firmware-changed" ]]; then
-
 	fi
 
 	if ! installer_lib_is_remove && installer_lib_is_upgrade; then

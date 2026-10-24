@@ -15,14 +15,14 @@ __enable_app() {
 	local enabled_apps_dir="${VESPERA_ROOT:-}/data/apps/enabled"
 	local available_app_path="${VESPERA_ROOT:-}/data/apps/available/${app}"
 	local retVal
-	
+
 	[[ ! -d "$available_app_path" ]] && return
 
 	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}" 2>/dev/null)
 	local overlay_targets_conf="$VESPERA_DATA_DIR/info/${app}.installer-overlays"
 
 	[[ -f "$overlay_targets_conf" ]] &&
-		"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-register "${app}" <"$overlay_targets_conf"
+		"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-register "${app}" <"$overlay_targets_conf" 1>/dev/null
 
 	retVal=$("$__vespera_path/scripts/start-app-services" "${app}" "${dbus_name}")
 	[[ $retVal == 2 ]] && __refresh_devices=true

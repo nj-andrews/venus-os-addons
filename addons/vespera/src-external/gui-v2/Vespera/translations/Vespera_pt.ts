@@ -10,9 +10,14 @@
         <translation>Pacotes</translation>
     </message>
     <message id="pagesettingsgeneral_documentation">
-        <location filename="../PageHome.qml" line="65"/>
+        <location filename="../PageHome.qml" line="64"/>
         <source></source>
         <translation></translation>
+    </message>
+    <message id="settings_page_debug_application_version">
+        <location filename="../PageHome.qml" line="68"/>
+        <source></source>
+        <translation type="unfinished">Nenhum</translation>
     </message>
     <message id="vespera_feeds">
         <location filename="../PageHome.qml" line="35"/>
@@ -39,11 +44,6 @@
         <location filename="../PageSettingsDevicesList.qml" line="67"/>
         <source></source>
         <translation></translation>
-    </message>
-    <message id="vespera_version">
-        <location filename="../PageHome.qml" line="70"/>
-        <source>Version</source>
-        <translation>Versão</translation>
     </message>
     <message id="vespera_add_usb_serial_device">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="10"/>

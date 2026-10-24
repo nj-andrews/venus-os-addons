@@ -183,34 +183,6 @@ _find() {
 	# echo "__file_start:$__file_start,__file_end:$__file_end,patch_start:$patch_start,patch_end:$patch_end"
 }
 
-
-_openfile_command() {
-	local -n __filename=$1
-	local -n __index=$2
-	local -n __fileopen=$3
-
-	if ((__fileopen)); then
-		_write_file_lines "$__filename"
-		FILE_LINES=()
-		__fileopen=0
-	fi
-
-	__index=$((__index+2))
-	__filename="${PATCH_LINES[$__index]}"
-
-	if [[ ! -f "$__filename" ]]; then
-		echo "WARNING: File not found: $__filename" >&2
-		__filename=""
-		__index=$((__index+2))
-		return
-	fi
-
-	# Read file into array FILE_LINES
-	mapfile -t FILE_LINES < "$__filename"
-	__fileopen=1
-	__index=$((__index+2))
-}
-
 __file_patcher_queue_file_job() {
 	local filename="${1}"
 	local range_start="${2}"

@@ -1,9 +1,5 @@
-/opt/victronenergy/gui/qml
-# service-templates (for serial sevices etc)
-/opt/victronenergy/service-templates
+/opt/victronenergy
 # serial starter rules folder
 /etc/udev/rules.d
 # contains serial-starter.conf
 /etc/venus
-# for devices delegate
-/opt/victronenergy/gui-v2

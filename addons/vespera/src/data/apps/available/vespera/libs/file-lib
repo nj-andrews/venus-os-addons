@@ -70,7 +70,3 @@ file_lib_remove_content_from_file() {
 	[[ -n "$file_contents" ]] && printf '%s\n' "$file_contents" > "$file" || : > "$file"
 }
 
-file_lib_remove_file_if_empty() {
-	local file="${1}"
-	[[ -f "$file" ]] && [[ -z "$(sed 's/[[:space:]]//g' "$file")" ]] && rm -f "$file"
-}

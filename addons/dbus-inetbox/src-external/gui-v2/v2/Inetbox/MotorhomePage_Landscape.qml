@@ -52,10 +52,8 @@ Page {
 		inetboxModel: root.inetboxModel
 		buttonOffset: 30
 		anchors {
-			top: bg_image2.top
-			topMargin: 40
-			right: bg_image2.right;
-			rightMargin: 200
+			top: bg_image2.top; topMargin: 40
+			right: bg_image2.right; rightMargin: 180
 		}
 	}
 
@@ -71,10 +69,10 @@ Page {
 			model: root.inetboxModel
 			color: "transparent"
 			targetTemperatureSlider.hideTicks: Theme.screenSize !== Theme.Portrait
-			buttonOffsetX: 30
+			buttonOffsetX: 20
 			Layout.fillHeight: true
 			Layout.fillWidth: true
-			Layout.leftMargin: 80
+			Layout.leftMargin: 60
 		}
 	}
 

@@ -27,7 +27,12 @@ T.Slider {
 	implicitHeight: Math.max(implicitBackgroundHeight + topPadding + bottomPadding, implicitHandleHeight + topPadding + bottomPadding)
 
 	// Reserve horizontal padding so the circle handle doesn't clip at min/max edges
+	// Extra invisible touch area above/below the slider; does not change visuals
+	property real touchMargin: 16
+
 	padding: 0
+	topPadding: touchMargin
+	bottomPadding: touchMargin
 	leftPadding: handleDiameter / 2
 	rightPadding: handleDiameter / 2
 
@@ -116,7 +121,7 @@ T.Slider {
 				id: reflection
 				visible: !root.hideReflection
 				x: original.x
-				y: original.height + 3
+				y: original.height + root.touchMargin + 3
 				width: original.width
 				height: original.height
 				opacity: .5

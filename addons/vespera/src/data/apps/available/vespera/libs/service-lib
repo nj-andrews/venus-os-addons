@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 
-service_lib_service_up() { svstat "/service/${1}" | grep -q "^/service/${1}: up "; }
+# service_lib_service_up() { svstat "/service/${1}" | grep -q "^/service/${1}: up "; }
 
 service_lib_remove_service() {
 local service="${1:-}" || return
 service="${service#/service/}"
 
-	[[ ! -e "/service/${service}" ]] &&
-		return
+	if [[ -e "/service/${service}" ]]; then
+		svc -dx "/service/$service"
 
-	svc -dx "/service/$service"
+		[[ -d "/service/${service}/log" ]] &&
+			svc -dx "/service/${service}/log" 2>/dev/null
 
-	[[ -d "/service/${service}/log" ]] &&
-		svc -dx "/service/${service}/log" 2>/dev/null
+		rm -rf "/service/${service}"
 
-	rm -rf "/service/${service}"
+		pkill -f "^supervise ${service//./\\.}$"
+	fi
 
+	[[ -d "/var/volatile/services/${service}" ]] &&
+	 	rm -r "/var/volatile/services/${service}"
 }
 
 __create_templated_service() {

@@ -26,19 +26,6 @@ __sdi_require_non_empty() {
 	return 1
 }
 
-__sdi_ensure_parent_dir() {
-	local path="${1:-}"
-	[[ -n "$path" ]] || return 1
-	mkdir -p "$(dirname "$path")"
-}
-
-__sdi_ensure_file() {
-	local path="${1:-}"
-	[[ -n "$path" ]] || return 1
-	__sdi_ensure_parent_dir "$path" || return 1
-	[[ -f "$path" ]] || : > "$path"
-}
-
 sdi_resolve_tty_path() {
 	local tty="${1:-}"
 	[[ -n "$tty" ]] || return 1
@@ -79,7 +66,8 @@ __sdi_ensure_rules_file() {
 	fi
 
 	local current_target=""
-	__sdi_ensure_file "$SERIAL_STARTER_RULES_FILE" || return 2
+	mkdir -p "$(dirname "$SERIAL_STARTER_RULES_FILE")" || return 1
+	[[ -f "$SERIAL_STARTER_RULES_FILE" ]] || : > "$SERIAL_STARTER_RULES_FILE"
 
 	[[ -L "${SERIAL_STARTER_RULES_FILE_SYMLINK}" ]] && current_target="$(readlink "${SERIAL_STARTER_RULES_FILE_SYMLINK}")"
 	[[ "${current_target}" == "${SERIAL_STARTER_RULES_FILE}" ]] && return 0
@@ -99,7 +87,8 @@ __sdi_ensure_include_config() {
 	[[ -f "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" ]] &&
 		grep -qxF "${include_line}" "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" && return 0
 
-	__sdi_ensure_parent_dir "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}" || return 1
+	mkdir -p "$(dirname "$VENUS_OS_SERIAL_STARTER_CONFIG_FILE")" || return 1
+
 	echo "${include_line}" >> "${VENUS_OS_SERIAL_STARTER_CONFIG_FILE}"
 	return 0
 }
@@ -112,6 +101,7 @@ __sdi_get_lookup_tty_paths() {
 		if [[ "$tty" == /* ]]; then
 			tty_paths_ref=("$tty")
 		else
+			# shellcheck disable=SC2034
 			tty_paths_ref=("$(sdi_resolve_tty_path "$tty")")
 		fi
 	else
@@ -204,13 +194,11 @@ sdi_get_available_devices() {
 			# Check no other process is using the port
 			local tty_node
 			tty_node="$(sdi_resolve_tty_path "$tty")" || continue
-			! fuser "$tty_node" >/dev/null && echo "$tty";
-			continue;
+			fuser "$tty_node" >/dev/null || echo "$tty";
+		else
+			__sdi_is_port_claimed "${tty}" ||	echo "$tty"
 		fi
 
-		if ! __sdi_is_port_claimed "${tty}"; then
-			echo "$tty"
-		fi
 	done
 
 }
@@ -256,7 +244,7 @@ __create_serial_starter_rule() {
 	serial_starter_rule="ACTION==\"add\", ${rules}"
 
 	# make sure we don't add rules with duplicate DEVICE_SID's
-	sdi_remove_rule
+	__sdi_remove_rule
 
 	local rule_with_comment="${serial_starter_rule_comment}"$'\n'"${serial_starter_rule}"$'\n'
 	echo "${rule_with_comment}" >> "${SERIAL_STARTER_RULES_FILE}"
@@ -326,35 +314,31 @@ sdi_remove_service_mapping() {
 __sdi_refresh_udevadm() {
 	local action="${1}"
 
-	[[ -z "${action}" ]] && { __log_error "action arg not not supplied"; return 1; }
-	[[ "${action}" != "add" && "${action}" != "remove" ]] && {
-		 __log_error "invalid action. should be 'add' or 'remove'"; return 1; }
+	[[ "${action}" != "add" && "${action}" != "remove" ]] && return 1
 
-	udevadm control --reload
+	udevadm control --reload >/dev/null
 
 	if [[ -n "${DEVICE_TTY:-}" ]]; then
-		udevadm trigger --action="$action" "/sys/class/tty/${DEVICE_TTY}"
+		udevadm trigger --action="$action" "/sys/class/tty/${DEVICE_TTY}" >/dev/null
 		# when manualy removing we re-add so udevadm rules get re-run & thus refreshed
-		[[ $action == "remove" ]] && {
-			udevadm trigger --action="add" "/sys/class/tty/${DEVICE_TTY}"
-		}
+		[[ $action == "remove" ]] &&
+			udevadm trigger --action="add" "/sys/class/tty/${DEVICE_TTY}" >/dev/null
 	else
-		udevadm trigger --action="add" "/sys/class/tty"
+		udevadm trigger --action="add" "/sys/class/tty" >/dev/null
 	fi
-
-}
-
-# convenience wrapper for callers that also want the udev refresh step
-sdi_remove_device_rule() {
-	__ensure_TTY_from_TTY_or_SID 2>/dev/null || true
-	sdi_remove_rule || return 1
-	__sdi_refresh_udevadm "remove" || true
-	return 0
+	udevadm settle >/dev/null
 }
 
 # removes a serial starter rule from the serial-starter.rules file (/etc/udev/rules.d/serial-starter.rules)
 # required vars: SERIAL_STARTER_RULES_FILE, either DEVICE_SID or DEVICE_TTY must be set
 sdi_remove_rule() {
+	__sdi_remove_rule
+	__ensure_TTY_from_TTY_or_SID 2>/dev/null || true
+	__sdi_refresh_udevadm "remove" || true
+}
+
+
+__sdi_remove_rule() {
 
 	[[ ! -f "${SERIAL_STARTER_RULES_FILE:-}" ]] && return 0
 
@@ -384,9 +368,6 @@ sdi_remove_rule() {
 	else
 		rm -f "$tmp"
 	fi
-
-	__ensure_TTY_from_TTY_or_SID 2>/dev/null || true
-	__sdi_refresh_udevadm "remove" || true
 
 	return 0
 }
@@ -505,17 +486,5 @@ sdi_service_name_from_tty() {
 		__service_name=""
 		return 1
 	}
-	return 0
-}
-
-# used by service-commands to un-install
-# required: DEVICE_TTY or DEVICE_SID
-#           DEVICE_SERVICE_NAME, SERIAL_STARTER_CONFIG_FILE
-sdi_remove_service() {
-	# ignore error code (tty may not exist and we check DEVICE_TTY below)
-	__ensure_TTY_from_TTY_or_SID 2>/dev/null || true
-
-	sdi_remove_rule || true
-
 	return 0
 }

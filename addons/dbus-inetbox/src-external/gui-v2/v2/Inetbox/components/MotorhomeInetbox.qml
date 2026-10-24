@@ -12,7 +12,7 @@ Rectangle {
 	property alias targetTemperatureSlider: targetTemperatureSlider
 	property var model
 	property real buttonOffsetX: 0
-
+	property real buttonSpacing: 5
 
 	//No device detected loader
 	Loader {
@@ -166,6 +166,7 @@ Rectangle {
 		CycleButton {
 			id: heatingCycleButton
 			group: cycleButtonGroup
+			Layout.topMargin: buttonSpacing
 			icon.source: "qrc:/Inetbox/images/heating.svg"
 			binding: root.model.heatingModeItem
 			model: root.model.heatingModeModel
@@ -179,6 +180,7 @@ Rectangle {
 			CycleButton {
 				id: airconModeCycleButton
 				group: cycleButtonGroup
+				Layout.topMargin: buttonSpacing
 				icon.source: "qrc:/Inetbox/images/aircon.svg"
 				binding: root.model.airconModeItem
 				model: root.model.airconModeModel
@@ -210,6 +212,7 @@ Rectangle {
 			CycleButton {
 				id: airconFanSpeedCycleButton
 				group: cycleButtonGroup
+
 				visible: root.model.airconFanSpeedItem.valid
 				icon.source: "qrc:/Inetbox/images/fan.svg"
 				icon.color: airconModeCycleButton.icon.color
@@ -224,6 +227,7 @@ Rectangle {
 		CycleButton {
 			id: energyMixButton
 			group: cycleButtonGroup
+			Layout.topMargin: buttonSpacing
 			icon.source: "qrc:/Inetbox/images/energy_mix.svg"
 			binding: root.model.energyMixItem
 			model: root.model.energyMixModel

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+declare i
+echo "Call stack (most recent first):"
+
+for ((i = 0; i < ${#FUNCNAME[@]}; i++)); do
+	printf '  #%d %s() at %s:%s\n' \
+			"$i" \
+			"${FUNCNAME[$i]:-MAIN}" \
+			"${BASH_SOURCE[$i]:-unknown}" \
+			"${BASH_LINENO[$((i-1))]:-0}"
+done

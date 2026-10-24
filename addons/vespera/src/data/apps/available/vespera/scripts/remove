@@ -148,7 +148,7 @@ __run_remove() {
 	__try_call "pre_remove" || true
 
 	(
-		
+
 		echo_lang "$LANG_UPDATING_DATABASE"
 		"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" _
 		! installer_lib_is_upgrade &&

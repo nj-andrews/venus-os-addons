@@ -17,7 +17,7 @@ for app in $(opkg_lib_list_enabled_packages "all"); do
 	[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 	app="${app##*/}"
 
-	"${__vespera_path}/scripts/remove-services" "${app}" ___refresh_devices
+	"${__vespera_path}/scripts/remove-services" "${app}" _refresh_devices
 	"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-unregister "${app}";
 
 	declare dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}")
