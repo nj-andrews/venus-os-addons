@@ -16,7 +16,7 @@
         <translation>Dispositivi personalizzati</translation>
     </message>
     <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="68"/>
+        <location filename="../PageHome.qml" line="64"/>
         <source></source>
         <translation type="unfinished">Nessuno</translation>
     </message>
@@ -39,11 +39,6 @@
         <location filename="../PageSettingsPackages.qml" line="8"/>
         <source>Packages</source>
         <translation>Pacchetti</translation>
-    </message>
-    <message id="pagesettingsgeneral_documentation">
-        <location filename="../PageHome.qml" line="64"/>
-        <source></source>
-        <translation></translation>
     </message>
     <message id="vespera_add_usb_serial_device">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="10"/>
@@ -140,34 +135,27 @@ Il servizio partirà a breve...</translation>
         <translation>Installa</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="62"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="61"/>
         <source>Installed</source>
         <translation>Installato</translation>
     </message>
-    <message id="vespera_none">
-        <location filename="../PageSettingsPackageInstall.qml" line="69"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="87"/>
-        <source></source>
-        <oldsource>None</oldsource>
-        <translation type="unfinished">Nessuno</translation>
-    </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="79"/>
         <source>Available</source>
         <translation>Disponibile</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="102"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="101"/>
         <source>Feed</source>
         <translation>Feed</translation>
     </message>
     <message id="vespera_disable">
-        <location filename="../PageSettingsPackageInstall.qml" line="170"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="169"/>
         <source>Disable</source>
         <translation>Disabilita</translation>
     </message>
     <message id="vespera_enable">
-        <location filename="../PageSettingsPackageInstall.qml" line="172"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="171"/>
         <source>Enable</source>
         <translation>Abilita</translation>
     </message>
@@ -191,7 +179,7 @@ Il servizio partirà a breve...</translation>
         <location filename="../PageSettingsFeedEdit.qml" line="158"/>
         <location filename="../PageSettingsFeedEdit.qml" line="179"/>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
-        <location filename="../components/VesperaManager.qml" line="29"/>
+        <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
         <translation type="unfinished"></translation>
     </message>
@@ -252,7 +240,7 @@ Il servizio partirà a breve...</translation>
         <translation>Sposta le impostazioni in alto</translation>
     </message>
     <message id="vespera_wait_for_operation_to_finish">
-        <location filename="../components/VesperaManager.qml" line="21"/>
+        <location filename="../components/VesperaManager.qml" line="20"/>
         <source>Please wait for the operation to finish</source>
         <translation>Attendi il completamento dell’operazione</translation>
     </message>
@@ -263,7 +251,7 @@ Il servizio partirà a breve...</translation>
         <translation>Completamento dell’installazione. L’interfaccia si riavvierà a breve</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="110"/>
+        <location filename="../components/VesperaManager.qml" line="111"/>
         <source>Operation failed</source>
         <translation>Operazione fallita</translation>
     </message>

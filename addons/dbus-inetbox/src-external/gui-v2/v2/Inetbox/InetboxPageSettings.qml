@@ -42,17 +42,17 @@ Page {
 				}
 			}
 
-			ListText {
-				text: qsTrId("settings_page_debug_application_version")
-				secondaryText: GuiPluginLoader.plugin("Inetbox").version
-			}
+			// ListText {
+			// 	text: qsTrId("settings_page_debug_application_version")
+			// 	secondaryText: GuiPluginLoader.plugin("Inetbox").version
+			// }
 
-			ListLink {
-				id: documentation
+			// ListLink {
+			// 	id: documentation
 
-				text: qsTrId("pagecontrollableloads_documentation")
-				url: "https://thespinmaster.github.io/venus-os-addons/"
-			}
+			// 	text: qsTrId("pagesettingsgeneral_documentation")
+			// 	url: "https://thespinmaster.github.io/venus-os-addons/"
+			// }
 		}
 	}
 

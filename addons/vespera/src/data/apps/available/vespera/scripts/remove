@@ -46,13 +46,28 @@ __remove_patch_files() {
 		}
 
 		file_patcher_revert_patch "$patchfile"
-		__remove_patch_files_from_patch_list "$patchfile"
+		__update_patch_list "$patchfile"
 	done
 }
 
-__remove_patch_files_from_patch_list() {
+# __update_patch_list <patchfile>
+#
+# Called after a patch has been reverted. For every file the patch touched:
+#   1. Removes one matching entry from the shared patch list
+#      ($VESPERA_PATCH_LIST_FILE). The list holds one line per patch applied
+#      to a file, so a file may appear several times.
+#   2. If no entries remain (no other package still patches the file), the file
+#      is deleted, but only when it lives under an overlay target registered by
+#      this package. Files outside an overlay are left alone.
+#
+# Overlay handling: the package's overlay targets are mapped to their upper
+# directories (via overlay-lib). The patched file's directory is matched
+# against the targets by prefix (longest match wins) and the matched prefix is
+# replaced with the upper directory, so the copy in the upper layer is removed
+# and the underlying original is exposed again.
+__update_patch_list() {
 	local patchfile="${1}"
-	local tmp_file path overlay_path
+	local tmp_file path overlay_path target matched_target
 
 	[[ ! -f "$VESPERA_PATCH_LIST_FILE" ]] && return
 
@@ -62,7 +77,7 @@ __remove_patch_files_from_patch_list() {
 		while IFS='=' read -r target upper_dir; do
     	overlay_path_mappings["$target"]="$upper_dir"
 		done < <("$VESPERA_DATA_DIR/info/vespera.overlay-lib" get-upper-overlay-path-mappings "$overlay_file")
-	installer_lib_log_verbose2 && echo "  overlay_path_mappings count=${#overlay_path_mappings[@]}"
+		installer_lib_log_verbose2 && echo "  overlay_path_mappings count=${#overlay_path_mappings[@]}"
 	fi
 
 	tmp_file="$(mktemp)" || return 1
@@ -76,11 +91,20 @@ __remove_patch_files_from_patch_list() {
 
 		if ! grep -qxF "$file" "$VESPERA_PATCH_LIST_FILE"; then
 			path="${file%/*}"
-			overlay_path="${overlay_path_mappings[$path]-}"
-			[[ -n $overlay_path ]] && file=$overlay_path/${file##*/}
+			matched_target=
+			for target in "${!overlay_path_mappings[@]}"; do
+				if [[ "$path" == "$target" || "$path" == "$target/"* ]] &&
+					(( ${#target} > ${#matched_target} )); then
+					matched_target="$target"
+				fi
+			done
+			if [[ -n $matched_target ]]; then
+				overlay_path="${overlay_path_mappings[$matched_target]}"
+				file="$overlay_path${file#"$matched_target"}"
+				installer_lib_log_verbose2 && echo "  No longer patched; removing file: $file"
 
-			installer_lib_log_verbose2 && echo "  No longer patched; removing file: $file"
-			rm -f "$file"
+				rm -f "$file"
+			fi
 		fi
 	done
 
@@ -90,8 +114,11 @@ __remove_patch_files_from_patch_list() {
 __unregister_services() {
 	local template_services_file="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE"
 
+	[[ -f "$template_services_file" ]] || return 0
+
 	for service_path in $(< "$template_services_file"); do
 		[[ ! -f "$service_path/run" ]] && continue
+		# shellcheck disable=SC2034
 		DEVICE_SERVICE_NAME="${service_path##*/}"
 		addsource "libs/serial-device-installer-lib"
 		sdi_remove_service_mapping
@@ -99,7 +126,7 @@ __unregister_services() {
 }
 
 __phase_remove_runtime() {
-	if ! installer_lib_is_upgrade; then
+	if ! installer_lib_is_upgrade && [[ -f "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" ]]; then
 		cp "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" "$VESPERA_WORKING_DIR"
 	fi
 
@@ -114,7 +141,7 @@ __phase_remove_runtime() {
 	[[ -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE" ]] &&
 		mv "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE" "$VESPERA_WORKING_DIR"
 
-	rm -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_NAME"
+	rm -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_FILE"
 }
 
 __remove_cleanup() {

@@ -4,7 +4,7 @@
 <context>
     <name></name>
     <message id="inetbox_loading">
-        <location filename="../components/CycleButton.qml" line="55"/>
+        <location filename="../components/CycleButton.qml" line="65"/>
         <source>Waiting for data...</source>
         <translation>Waiting for data...</translation>
     </message>
@@ -117,26 +117,26 @@
     <message id="inetbox_water">
         <location filename="../InetboxDevicePage.qml" line="39"/>
         <location filename="../InetboxSchedules.qml" line="28"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="153"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="155"/>
         <source>Water</source>
         <translation>Water</translation>
     </message>
     <message id="inetbox_heating">
         <location filename="../InetboxSchedules.qml" line="22"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="174"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="176"/>
         <source>Heating</source>
         <translation>Heating</translation>
     </message>
     <message id="inetbox_aircon">
         <location filename="../InetboxSchedules.qml" line="34"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="189"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="191"/>
         <source>Aircon</source>
         <translation>Aircon</translation>
     </message>
     <message id="inetbox_fan_speed">
         <location filename="../InetboxDevicePage.qml" line="60"/>
         <location filename="../InetboxSchedules.qml" line="156"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="223"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="225"/>
         <source>Fan speed</source>
         <translation>Fan speed</translation>
     </message>
@@ -162,7 +162,7 @@
         <translation>Error Code: %1</translation>
     </message>
     <message id="inetbox_energy_mix">
-        <location filename="../components/MotorhomeInetbox.qml" line="235"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="237"/>
         <source>Energy Mix</source>
         <translation>Energy Mix</translation>
     </message>
@@ -176,16 +176,18 @@
         <source>Show Motorhome Page</source>
         <translation>Show Motorhome Page</translation>
     </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../InetboxPageSettings.qml" line="46"/>
+    <message id="pagesettingsgeneral_documentation">
         <source></source>
-        <translation type="unfinished">Documentation</translation>
+        <translation type="obsolete">Documentation</translation>
+    </message>
+    <message id="settings_page_debug_application_version">
+        <source></source>
+        <translation type="obsolete">Documentation</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../InetboxPageSettings.qml" line="53"/>
         <source></source>
         <oldsource>Documentation</oldsource>
-        <translation type="unfinished">Documentation</translation>
+        <translation type="obsolete">Documentation</translation>
     </message>
     <message id="inetbox_heating_mode">
         <location filename="../InetboxDevicePage.qml" line="46"/>

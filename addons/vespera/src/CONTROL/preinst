@@ -24,7 +24,8 @@ if ((VESPERA_VERBOSITY>1)); then
 	STD_OUT=1
 fi
 
-"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
+[[ -f "${PKG_OVERLAY_CONF_FILE}" ]] &&
+	"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"

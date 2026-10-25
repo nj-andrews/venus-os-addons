@@ -31,7 +31,8 @@ fi
 
 "$PKG_REMOVE_SCRIPT" "$PKG_ACTION" "$PKG_INSTALLER_FILE" "$PKG_WORKING_DIR" "$VESPERA_VERBOSITY"
 
-"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
+[[ -f "${PKG_OVERLAY_CONF_FILE}" ]] &&
+	"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"

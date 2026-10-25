@@ -57,6 +57,22 @@ test_control_preinst_registers_overlay_for_package() {
   cleanup_preinst_runtime
 }
 
+test_control_preinst_skips_registration_when_overlays_file_missing() {
+  stage_preinst_runtime
+  rm -f "$TEST_ROOT/pkg/installer-overlays"
+
+  local output
+  output="$(TEST_LOG="$TEST_ROOT/preinst.log" VESPERA_ROOT="$TEST_ROOT" \
+    bash "$SCRIPT_PATH" configure 2>&1)"
+
+  assert_exitcode 0
+  assert_not_contain 'No such file' "$output"
+  assert_file_not_exist "$TEST_ROOT/preinst.log"
+
+  cleanup_preinst_runtime
+}
+
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
   test_control_preinst_registers_overlay_for_package
+  test_control_preinst_skips_registration_when_overlays_file_missing
 fi

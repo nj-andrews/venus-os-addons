@@ -87,7 +87,8 @@ __firmware_changed() {
 
 	for app in $(opkg_lib_get_configure_order); do
 		echo "  configuring package ${app}"
-		__vespera_overlay overlay-register "${app}" < "$VESPERA_DATA_DIR/info/${app}.installer-overlays"
+		[[ -f "$VESPERA_DATA_DIR/info/${app}.installer-overlays" ]] &&
+			__vespera_overlay overlay-register "${app}" < "$VESPERA_DATA_DIR/info/${app}.installer-overlays"
 		"$VESPERA_DATA_DIR/info/$app.postinst" "firmware-changed"
 		! vespera_lib_app_enabled "$app" && {
 			__vespera_overlay overlay-unregister "${app}"

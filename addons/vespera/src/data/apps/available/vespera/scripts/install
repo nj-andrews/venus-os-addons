@@ -108,7 +108,7 @@ __install() {
 	__add_dbus_settings_from_dbus_list_file
 
 	# Phase 3: runtime enablement
-	echo "$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_NAME"
+	echo "$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_FILE"
 
 	installer_lib_update_install_list
 	__register_services

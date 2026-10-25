@@ -20,12 +20,13 @@ for app in $(opkg_lib_list_enabled_packages "all"); do
 	"${__vespera_path}/scripts/remove-services" "${app}" _refresh_devices
 	"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-unregister "${app}";
 
-	declare dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}")
+	declare dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}")
 	[[ -n $dbus_name ]] &&
 		dbus -y com.victronenergy.settings "/Settings/Vespera/Packages/$dbus_name/Enabled" SetValue "0" 1>/dev/null 2>&1
 
 	rm -f "${VESPERA_ROOT:-}/data/apps/enabled/$app"
-	_venus_services_to_restart+=("$VESPERA_DATA_DIR/info/$app.installer-services")
+	[[ -f "$VESPERA_WORKING_DIR/$app.installer-services" ]] &&
+		_venus_services_to_restart+=("$VESPERA_DATA_DIR/info/$app.installer-services")
 done
 
 declare -p _refresh_devices _venus_services_to_restart

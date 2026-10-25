@@ -9,21 +9,16 @@
         <source>Packages</source>
         <translation>패키지</translation>
     </message>
-    <message id="pagesettingsgeneral_documentation">
-        <location filename="../PageHome.qml" line="64"/>
-        <source></source>
-        <translation></translation>
-    </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="68"/>
-        <source></source>
-        <translation type="unfinished">없음</translation>
-    </message>
     <message id="vespera_feeds">
         <location filename="../PageHome.qml" line="35"/>
         <location filename="../PageSettingsFeeds.qml" line="8"/>
         <source>Feeds</source>
         <translation>피드</translation>
+    </message>
+    <message id="settings_page_debug_application_version">
+        <location filename="../PageHome.qml" line="64"/>
+        <source></source>
+        <translation type="unfinished">없음</translation>
     </message>
     <message id="vespera_settings_to_top">
         <source>Move settings to top</source>
@@ -124,34 +119,27 @@ The service will start shortly...</source>
         <translation>설치</translation>
     </message>
     <message id="vespera_installed">
-        <location filename="../PageSettingsPackageInstall.qml" line="62"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="61"/>
         <source>Installed</source>
         <translation>설치됨</translation>
     </message>
-    <message id="vespera_none">
-        <location filename="../PageSettingsPackageInstall.qml" line="69"/>
-        <location filename="../PageSettingsPackageInstall.qml" line="87"/>
-        <source></source>
-        <oldsource>None</oldsource>
-        <translation type="unfinished">없음</translation>
-    </message>
     <message id="vespera_available">
-        <location filename="../PageSettingsPackageInstall.qml" line="80"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="79"/>
         <source>Available</source>
         <translation>사용 가능</translation>
     </message>
     <message id="vespera_feed">
-        <location filename="../PageSettingsPackageInstall.qml" line="102"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="101"/>
         <source>Feed</source>
         <translation>피드</translation>
     </message>
     <message id="vespera_disable">
-        <location filename="../PageSettingsPackageInstall.qml" line="170"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="169"/>
         <source>Disable</source>
         <translation>비활성화</translation>
     </message>
     <message id="vespera_enable">
-        <location filename="../PageSettingsPackageInstall.qml" line="172"/>
+        <location filename="../PageSettingsPackageInstall.qml" line="171"/>
         <source>Enable</source>
         <translation>활성화</translation>
     </message>
@@ -175,7 +163,7 @@ The service will start shortly...</source>
         <location filename="../PageSettingsFeedEdit.qml" line="158"/>
         <location filename="../PageSettingsFeedEdit.qml" line="179"/>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
-        <location filename="../components/VesperaManager.qml" line="29"/>
+        <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
         <translation type="unfinished"></translation>
     </message>
@@ -236,7 +224,7 @@ The service will start shortly...</source>
         <translation>설정을 맨 위로 이동</translation>
     </message>
     <message id="vespera_wait_for_operation_to_finish">
-        <location filename="../components/VesperaManager.qml" line="21"/>
+        <location filename="../components/VesperaManager.qml" line="20"/>
         <source>Please wait for the operation to finish</source>
         <translation>작업이 끝날 때까지 기다려 주세요</translation>
     </message>
@@ -247,7 +235,7 @@ The service will start shortly...</source>
         <translation>설치 완료 중입니다. 인터페이스가 곧 다시 시작됩니다</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="110"/>
+        <location filename="../components/VesperaManager.qml" line="111"/>
         <source>Operation failed</source>
         <translation>작업이 실패했습니다</translation>
     </message>

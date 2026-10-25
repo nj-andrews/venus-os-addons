@@ -4,8 +4,6 @@ import Victron.VenusOS
 QtObject {
 	id: root
 
-	signal log(string str)
-
 	property alias traceEnabled: bridge.traceEnabled
 	readonly property bool running: _running
 	property bool _running
@@ -14,6 +12,7 @@ QtObject {
 	property var _completionCallback: undefined
 	property var _connected: _connectedItem.value == 1
 	readonly property string serviceUid: BackendConnection.serviceUidFromName("com.victronenergy.vespera", 0)
+	property string logLine
 
 	function tryPop(toPage) {
 		if (!running) return true
@@ -73,6 +72,7 @@ QtObject {
 
 			notifyCalled = true
 			root._notifyCompletion(result)
+			logLine = ""
 
 		} catch (e) {
 			var errorText = e && e.stack ? (e.name + ": " + e.message + " @ " + e.stack.split("\n")[0]) : String(e)
@@ -94,7 +94,8 @@ QtObject {
 
 		if (traceEnabled) console.log(line)
 
-		log(line)
+		logLine = line
+
 	}
 
 	function _notifyCompletion(result) {

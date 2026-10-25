@@ -55,15 +55,11 @@ Page {
 						title: text, vesperaManager: vesperaManager })
 				}
 			}
-			// ListNavigation {
-			// 	//% "Settings"
-			// 	text: qsTrId("vespera_settings")
-			// 	onClicked: Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {title: text,vesperaManager: vesperaManager})
+
+			// ListLink {
+			// 	text: qsTrId("pagesettingsgeneral_documentation")
+			// 	url: "https://thespinmaster.github.io/venus-os-addons/"
 			// }
-			ListLink {
-				text: qsTrId("pagesettingsgeneral_documentation")
-				url: "https://thespinmaster.github.io/venus-os-addons/"
-			}
 			ListText {
 				text: qsTrId("settings_page_debug_application_version")
 				secondaryText: GuiPluginLoader.plugin("Vespera").version

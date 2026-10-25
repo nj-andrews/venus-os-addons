@@ -27,7 +27,7 @@ for app in $(opkg_lib_list_packages "all"); do
 	[[ -L "${VESPERA_ROOT:-}/data/apps/enabled/$app" ]] || {
 		echo "cannot start services for $app; not enabled"; continue; }
 
-	dbus_name="$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_NAME}" 2>/dev/null)"
+	dbus_name="$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}" 2>/dev/null)"
 	[[ -z "$dbus_name" ]] && {
 		echo "cannot start services for $app; $dbus_name is empty."; continue; }
 

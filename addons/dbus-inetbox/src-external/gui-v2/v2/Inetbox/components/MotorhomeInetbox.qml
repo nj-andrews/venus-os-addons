@@ -136,7 +136,9 @@ Rectangle {
 			}
 		}
 
-		CycleButtonGroup { id: cycleButtonGroup }
+		CycleButtonGroup {
+			id: cycleButtonGroup;
+			fontPixelSize: Theme.screenSize === Theme.Portrait ? Theme.font_size_body2 : Theme.font_size_body3 }
 
 		// Water
 		RowLayout {
@@ -154,7 +156,7 @@ Rectangle {
 			}
 			QuantityLabel {
 				//id: waterHeaterCurrentTemperature
-				font.pixelSize: 24
+				font.pixelSize: cycleButtonGroup.fontPixelSize
 				visible: root.model.waterCurrentTemperatureItem.valid
 				unit: Global.systemSettings.temperatureUnit
 				value: root.model.waterCurrentTemperatureItem.value ?? NaN
@@ -180,7 +182,7 @@ Rectangle {
 			CycleButton {
 				id: airconModeCycleButton
 				group: cycleButtonGroup
-				Layout.topMargin: buttonSpacing
+				Layout.topMargin: root.buttonSpacing
 				icon.source: "qrc:/Inetbox/images/aircon.svg"
 				binding: root.model.airconModeItem
 				model: root.model.airconModeModel

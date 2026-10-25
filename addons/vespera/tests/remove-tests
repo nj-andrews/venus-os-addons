@@ -41,12 +41,14 @@ VESPERA_INSTALL_STATE_FILE="install-state"
 VESPERA_APP_SERVICES_FILE="app-services"
 VESPERA_APP_TEMPLATE_SERVICES_FILE="app-template-services"
 VESPERA_DBUS_NAME="dbus-name"
+VESPERA_DBUS_FILE="dbus-name"
 PACKAGE_DBUS_NAME="com.example.${PACKAGE_NAME}"
 PACKAGE_DBUS_LIST_FILE="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.dbus-list"
 PACKAGE_CUSTOM_NAV_PAGES=
 RCS_LOCAL_SCRIPT=
 RC_LOCAL_SCRIPT=
 LANG_INSTALL_ACTION_ARG1=install_action
+LANG_UPDATING_DATABASE=updating_database
 LANG_REVERTING_PATCHED_FILES=reverting
 
 source "$PACKAGE_INSTALLER_FILE"
@@ -66,7 +68,7 @@ installer_lib_phase_sync_custom_nav_pages() {
 installer_dbus_lib_remove() {
   printf 'remove-dbus:%s\n' "$1" >> "$VESPERA_ROOT/remove.log"
 }
-installer_lib_get_patch_file_list() { :; }
+installer_lib_get_patch_file_list() { cat "$1"; }
 file_patcher_revert_patch() { :; }
 sdi_remove_service_mapping() {
   printf 'serial-map-remove:%s\n' "$DEVICE_SERVICE_NAME" >> "$VESPERA_ROOT/remove.log"
@@ -175,6 +177,37 @@ test_remove_script_upgrade_remove_skips_non_upgrade_cleanup_steps() {
   assert_file_contains "$TEST_ROOT/remove.log" 'remove-services:demo _' "upgrade-remove still stops/removes runtime services"
   assert_file_not_contain "$TEST_ROOT/remove.log" 'device-lib:remove-all' "upgrade-remove does not remove device bindings"
   assert_file_not_contain "$TEST_ROOT/remove.log" 'remove-dbus:' "upgrade-remove does not remove dbus settings file"
+
+  cleanup_remove_runtime
+}
+
+test_remove_script_removes_nested_overlay_file_using_prefix_mapping() {
+  stage_remove_runtime
+
+  local target_path="$TEST_ROOT/overlay-target"
+  local upper_path="$TEST_ROOT/overlay-upper"
+  local patch_path="$target_path/nested/file.txt"
+  mkdir -p "$upper_path/nested" "$TEST_ROOT/data/var/vespera/info"
+  printf '%s\n' "$patch_path" > "$TEST_ROOT/data/var/vespera/patch.list"
+  printf '%s\n' "$patch_path" > "$TEST_ROOT/data/apps/available/demo/demo.installer-test-patch"
+  touch "$upper_path/nested/file.txt"
+  printf '%s\n' "$target_path" > "$TEST_ROOT/data/var/vespera/info/demo.installer-overlays"
+
+  cat > "$TEST_ROOT/data/var/vespera/info/vespera.overlay-lib" <<'EOF'
+#!/usr/bin/env bash
+printf '%s=%s\n' "$TEST_OVERLAY_TARGET" "$TEST_OVERLAY_UPPER"
+EOF
+  chmod +x "$TEST_ROOT/data/var/vespera/info/vespera.overlay-lib"
+
+  TEST_OVERLAY_TARGET="$target_path" \
+  TEST_OVERLAY_UPPER="$upper_path" \
+  VESPERA_ROOT="$TEST_ROOT" \
+    bash "$TEST_ROOT/data/apps/available/vespera/scripts/remove" \
+    remove "$TEST_ROOT/data/apps/available/demo/demo.installer" "$TEST_ROOT/work" 0
+
+  assert_exitcode 0 "remove action exits successfully"
+  assert_file_not_exist "$upper_path/nested/file.txt" "remove maps nested overlay paths into the upper directory"
+  assert_file_not_exist "$TEST_ROOT/data/var/vespera/patch.list" "remove cleans the empty patch.list"
 
   cleanup_remove_runtime
 }

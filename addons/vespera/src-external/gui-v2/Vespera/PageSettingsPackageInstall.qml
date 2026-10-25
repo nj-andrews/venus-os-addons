@@ -32,7 +32,6 @@ Page {
 		Label {
 			width: parent.width
 			leftPadding: root.hMargin; rightPadding: root.hMargin; topPadding: root.vMargin
-			//bottomPadding: vMargin
 			text: root.formatNameCallback(root.model)
 			font.pixelSize: Theme.font_size_body3
 			color: Theme.color_font_primary
@@ -66,7 +65,7 @@ Page {
 				Label {
 					text: (root.installed)
 							? root.model.installedVersion + (root.model.installedVersionSuffix ? "." + root.model.installedVersionSuffix : "")
-							: qsTrId("vespera_none")
+							: CommonWords.None
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary
 				}
@@ -84,7 +83,7 @@ Page {
 				Label {
 					text: (root.available)
 							? root.model.availableVersion + (root.model.availableVersionSuffix ? "." + root.model.availableVersionSuffix : "")
-							: qsTrId("vespera_none")
+							: CommonWords.None
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary
 				}

@@ -11,11 +11,11 @@ source "$__vespera_path/libs/service-lib"
 declare app="${1}"
 declare -n __refresh_devices="${2}"
 
-for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_SERVICES_FILE}" 2>/dev/null; ); do
+for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_SERVICES_FILE}" 2>/dev/null); do
 	service_lib_remove_service "$service"
 done
 
-for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_TEMPLATE_SERVICES_FILE}"); do
+for service in $(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_APP_TEMPLATE_SERVICES_FILE}" 2>/dev/null); do
 	for tty_service in "/service/$service.tty"*; do
 		service_lib_remove_service "$tty_service"
 		__refresh_devices=true

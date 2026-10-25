@@ -345,6 +345,8 @@ __no_args_or_has_matched_arg() {
 overlay_list_mounts() {
 	local overlay_file="${1}"
 	local runtime_dir
+	# installer-overlays is optional
+	[[ -f "$overlay_file" ]] || return 0
 	while IFS='|' read -r target; do
 		[[ "$target" =~ ^[[:space:]]*(#|$) ]] && continue # skip comments and whitespace
 		runtime_dir="$(__overlay_lib_get_runtime_dir "$target")/${OVERLAY_MERGED_DIRNAME}"
@@ -356,7 +358,8 @@ overlay_list_mounts() {
 
 case "${1:-}" in
 	overlay-unregister)
-		overlay_lib_unregister "${2-}";;
+		overlay_lib_unregister "${2-}"
+		;;
 	overlay-register)
 		overlay_lib_register "${2}";;
 	overlay-list-mounts)

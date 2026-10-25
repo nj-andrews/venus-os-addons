@@ -26,7 +26,7 @@ __sdi_require_non_empty() {
 	return 1
 }
 
-sdi_resolve_tty_path() {
+__sdi_resolve_tty_path() {
 	local tty="${1:-}"
 	[[ -n "$tty" ]] || return 1
 	[[ "$tty" == /* ]] && { printf '%s\n' "$tty"; return 0; }
@@ -36,10 +36,9 @@ sdi_resolve_tty_path() {
 # arguments: tty, <property name>
 sdi_get_usb_prop() {
 	local tty_path
-	tty_path="$(sdi_resolve_tty_path "${1}")" || return 1
+	tty_path="$(__sdi_resolve_tty_path "${1}")" || return 1
 	udevadm info --query=property --name="$tty_path" | sed -n "s/^$2=//p"
 }
-sdi_get_sid_from_tty() { sdi_get_usb_prop "${1}" "SERIAL_DEVICE_ID"; }
 
 # required arg1: usb properties string (for example ID_MODEL=..,ID_VENDOR=..)
 # sets global DEVICE_SID
@@ -72,10 +71,10 @@ __sdi_ensure_rules_file() {
 	[[ -L "${SERIAL_STARTER_RULES_FILE_SYMLINK}" ]] && current_target="$(readlink "${SERIAL_STARTER_RULES_FILE_SYMLINK}")"
 	[[ "${current_target}" == "${SERIAL_STARTER_RULES_FILE}" ]] && return 0
 
-	ln -sfn "${SERIAL_STARTER_RULES_FILE}" "${SERIAL_STARTER_RULES_FILE_SYMLINK}" || {
+	if ! ln -sfn "${SERIAL_STARTER_RULES_FILE}" "${SERIAL_STARTER_RULES_FILE_SYMLINK}"; then
 		__log_error "failed to update SERIAL_STARTER_RULES_FILE_SYMLINK:${SERIAL_STARTER_RULES_FILE_SYMLINK} -> ${SERIAL_STARTER_RULES_FILE}"
 		return 2
-	}
+	fi
 	return 0
 }
 
@@ -102,7 +101,7 @@ __sdi_get_lookup_tty_paths() {
 			tty_paths_ref=("$tty")
 		else
 			# shellcheck disable=SC2034
-			tty_paths_ref=("$(sdi_resolve_tty_path "$tty")")
+			tty_paths_ref=("$(__sdi_resolve_tty_path "$tty")")
 		fi
 	else
 		__sdi_get_tty_paths tty_paths_ref
@@ -128,7 +127,9 @@ __sdi_get_tty_paths() {
 
 __sdi_is_port_claimed() {
 	local tty="${1}"
-	local prog= first_prog= previous_prog=
+	local prog=
+	local first_prog=
+	local previous_prog=
 	local -i i=0
 
 	while (( i++ < 100 )); do
@@ -167,7 +168,9 @@ __sdi_is_port_claimed() {
 # returns the port(s) if deemed available
 sdi_get_available_devices() {
 	local tty=${1:-}
-	local tty_path= pid_tty_lock= serial_starter_pid=0
+	local tty_path=
+	local pid_tty_lock=
+	local serial_starter_pid=0
 	local -a tty_paths=()
 	local lock_dir="/var/lock/serial-starter"
 
@@ -193,7 +196,7 @@ sdi_get_available_devices() {
 		if ((!serial_starter_pid)); then
 			# Check no other process is using the port
 			local tty_node
-			tty_node="$(sdi_resolve_tty_path "$tty")" || continue
+			tty_node="$(__sdi_resolve_tty_path "$tty")" || continue
 			fuser "$tty_node" >/dev/null || echo "$tty";
 		else
 			__sdi_is_port_claimed "${tty}" ||	echo "$tty"
@@ -207,7 +210,8 @@ sdi_get_available_devices() {
 # optional vars: DEVICE_SERVICE_MAPPING_NAME, DEVICE_SID
 # required arg1 (byref in) array of usb props
 __create_serial_starter_rule() {
-	local serial_starter_rule= serial_starter_rule_comment=
+	local serial_starter_rule=
+	local serial_starter_rule_comment=
 	local service_mapping_name kv prop_entry prop_value
 	local -a props
 	local rules=""
@@ -410,7 +414,7 @@ __ensure_TTY_from_TTY_or_SID() {
 	[[ -z "${DEVICE_TTY:-}" ]] &&
 		sdi_TTY_from_SID && return 0
 
-	tty_path="$(sdi_resolve_tty_path "${DEVICE_TTY:-}")" || {
+	tty_path="$(__sdi_resolve_tty_path "${DEVICE_TTY:-}")" || {
 		__log_error "DEVICE_TTY device does not exist"; return 1;
 	}
 
@@ -443,9 +447,10 @@ sdi_TTY_from_SID() {
 
 			[[ -e "$dev" ]] || continue
 			tty="${dev##*/}"
-			tty="$(sdi_resolve_tty_path "$tty")"
+			tty="$(__sdi_resolve_tty_path "$tty")"
 
-			value=$(sdi_get_sid_from_tty "$tty")
+			value=$(sdi_get_usb_prop "${tty}" "SERIAL_DEVICE_ID")
+
 			if [[ -z "$value" ]] && [[ "$use_usb_props" == "use-usb-props" ]]; then
 				local usbProps=
 				local prev_device_sid="${DEVICE_SID}"
@@ -482,9 +487,7 @@ sdi_service_name_from_tty() {
 	read -ra fields <<< "$(grep -F "service ${ve_service}" "${SERIAL_STARTER_CONFIG_FILE}")"
 	__service_name="${fields[-1]}"
 
-	[[ -z "${__service_name}" ]] && {
-		__service_name=""
-		return 1
-	}
+	[[ -z "${__service_name}" ]] && { __service_name=""; return 1; }
+
 	return 0
 }

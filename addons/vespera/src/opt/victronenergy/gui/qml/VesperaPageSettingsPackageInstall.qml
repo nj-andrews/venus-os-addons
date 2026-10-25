@@ -79,7 +79,7 @@ MbPage {
 				Label {
 					text: (root.hasInstalled)
 							? root.model?.installedVersion + (root.model.installedVersionSuffix ? "." + root.model.installedVersionSuffix : "")
-							: qsTrId("vespera_none")
+							: qsTranslate("MbItemSmartLithiumError", "None")
 					font.pixelSize: root.secondaryFontSize
 					color: root.primaryFontColor
 				}
@@ -97,7 +97,7 @@ MbPage {
 				Label {
 					text: (root.hasAvailable)
 							? root.model?.availableVersion + (root.model.availableVersionSuffix ? "." + root.model.availableVersionSuffix : "")
-							: qsTrId("vespera_none")
+							: qsTranslate("MbItemSmartLithiumError", "None")
 					font.pixelSize: root.secondaryFontSize
 					color: root.primaryFontColor
 				}

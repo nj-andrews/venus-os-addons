@@ -145,7 +145,7 @@ MbPage {
 
 		// var sid = root.serviceUid.split('/').pop()
 		// sid = sid.replace(/^sid_/, "");
-		// console.log("BBB:",root.selectedDeviceServiceName)
+
 		root.vesperaManager.bindDeviceToService(
 			root.port, root.selectedDeviceServiceName,
 			function(result) {
