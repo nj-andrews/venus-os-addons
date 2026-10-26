@@ -24,8 +24,14 @@ if ((VESPERA_VERBOSITY>1)); then
 	STD_OUT=1
 fi
 
-[[ -f "${PKG_OVERLAY_CONF_FILE}" ]] &&
-	"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT"
+# Fail the install early when the overlays conflict with the master overlays
+# or with those of another installed app (nothing is registered in that case).
+if [[ -f "${PKG_OVERLAY_CONF_FILE}" ]]; then
+	"${PKG_OVERLAY_LIB}" overlay-register "${PKG_NAME}" < "${PKG_OVERLAY_CONF_FILE}" 1>&"$STD_OUT" || {
+		echo "ERROR: ${PKG_NAME}: overlays conflict with installed overlays; aborting install" >&2
+		exit 1
+	}
+fi
 
 if ((VESPERA_VERBOSITY>1)); then
 	echo "*****************************************************"

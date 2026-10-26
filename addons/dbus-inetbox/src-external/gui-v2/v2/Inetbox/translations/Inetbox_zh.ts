@@ -151,7 +151,7 @@
         <translation>Inetbox 设置</translation>
     </message>
     <message id="inetbox_show_motorhome_page">
-        <location filename="../InetboxPageSettings.qml" line="28"/>
+        <location filename="../InetboxPageSettings.qml" line="29"/>
         <source>Show Motorhome Page</source>
         <translation>显示房车页面</translation>
     </message>
@@ -160,8 +160,9 @@
         <translation type="obsolete">文档</translation>
     </message>
     <message id="settings_page_debug_application_version">
+        <location filename="../InetboxPageSettings.qml" line="11"/>
         <source></source>
-        <translation type="obsolete">文档</translation>
+        <translation type="unfinished">文档</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
         <source></source>

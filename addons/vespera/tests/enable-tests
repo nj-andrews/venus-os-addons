@@ -27,7 +27,7 @@ stage_enable_runtime() {
   cat > "$TEST_APP_ROOT/conf/vespera.conf" <<EOF
 #!/usr/bin/env bash
 VESPERA_DATA_DIR="/data/var/vespera"
-VESPERA_DBUS_NAME="dbus-name"
+VESPERA_DBUS_FILE="dbus-name"
 EOF
 
   cat > "$TEST_APP_ROOT/libs/opkg-lib" <<'EOF'
@@ -88,6 +88,24 @@ test_enable_sets_symlink_renames_json_and_updates_dbus() {
   assert_file_contains "$log_file" 'start:demo com.example.demo' "enable starts app services with dbus name"
   assert_file_contains "$log_file" 'dbus:-y com.victronenergy.settings /Settings/Vespera/Packages/com.example.demo/Enabled SetValue 1' "enable sets package enabled dbus setting"
   assert_file_contains "$TEST_ROOT/enable.out" '_refresh_devices="true"' "enable outputs refresh devices indicator"
+
+  cleanup_enable_runtime
+}
+
+test_enable_queues_no_services_and_no_errors_without_installer_services_file() {
+  stage_enable_runtime
+  rm -f "$TEST_DATA_DIR/info/demo.installer-services"
+  local log_file="$TEST_ROOT/enable.log"
+
+  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" PATH="$TEST_ROOT/bin:$PATH" \
+    bash "$TEST_APP_ROOT/scripts/enable" demo > "$TEST_ROOT/enable.out" 2> "$TEST_ROOT/enable.err"
+
+  assert_exitcode 0
+  [[ -L "$TEST_ROOT/data/apps/enabled/demo" ]]
+  assert_result "$?" "Enabled app path is a symlink"
+  assert_file_contains "$TEST_ROOT/enable.out" '_venus_services_to_restart=()'
+  assert_file_not_contain "$TEST_ROOT/enable.out" 'installer-services'
+  assert_equals "" "$(<"$TEST_ROOT/enable.err")"
 
   cleanup_enable_runtime
 }

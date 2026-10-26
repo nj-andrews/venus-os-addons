@@ -3,8 +3,8 @@
 ### SSH
 To install via SSH execute the following command
 
-```
-opkg install https://thespinmaster.github.io/venus-os-addons/feeds/release/vespera/vespera-latest.ipk
+```Shell
+wget -qO vespera-bootstrap https://thespinmaster.github.io/venus-os-addons/feeds/vespera-bootstrap && sh ./vespera-bootstrap
 ```
 
 ### Blind Install Using Removable USB Memory

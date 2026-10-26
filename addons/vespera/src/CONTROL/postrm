@@ -21,7 +21,7 @@ if ((VESPERA_VERBOSITY>1)); then
 fi
 
 if [[ $PKG_ACTION != "upgrade" ]]; then
-	"${PKG_OVERLAY_LIB}" overlay-unregister "${PKG_NAME}" 1>&"$STD_OUT"
+	"${PKG_OVERLAY_LIB}" overlay-uninstall "${PKG_NAME}" 1>&"$STD_OUT"
 fi
 
 if ((VESPERA_VERBOSITY>1)); then

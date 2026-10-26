@@ -8,6 +8,7 @@ Page {
 
 	property var pageUri:"qrc:/Inetbox/MotorhomePage.qml"
 	property var customPages: customPagesItem.valid ? customPagesItem.value.split(',') : []
+	property string app: qsTrId("settings_page_debug_application_version")
 
 	VeQuickItem {
 		id: customPagesItem
@@ -42,19 +43,15 @@ Page {
 				}
 			}
 
-			// ListText {
-			// 	text: qsTrId("settings_page_debug_application_version")
-			// 	secondaryText: GuiPluginLoader.plugin("Inetbox").version
-			// }
+			ListLink {
+				text: qsTrId("pagecontrollableloads_documentation")
+				url: "https://thespinmaster.github.io/venus-os-addons/"
+			}
+			ListText {
+				secondaryText: GuiPluginLoader.plugin("Inetbox").version
+			}
 
-			// ListLink {
-			// 	id: documentation
-
-			// 	text: qsTrId("pagesettingsgeneral_documentation")
-			// 	url: "https://thespinmaster.github.io/venus-os-addons/"
-			// }
 		}
 	}
-
 
 }

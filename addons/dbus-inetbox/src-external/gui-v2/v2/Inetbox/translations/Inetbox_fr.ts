@@ -151,7 +151,7 @@
         <translation>Paramètres Inetbox</translation>
     </message>
     <message id="inetbox_show_motorhome_page">
-        <location filename="../InetboxPageSettings.qml" line="28"/>
+        <location filename="../InetboxPageSettings.qml" line="29"/>
         <source>Show Motorhome Page</source>
         <translation>Afficher la page camping-car</translation>
     </message>
@@ -160,8 +160,9 @@
         <translation type="obsolete">Documentation</translation>
     </message>
     <message id="settings_page_debug_application_version">
+        <location filename="../InetboxPageSettings.qml" line="11"/>
         <source></source>
-        <translation type="obsolete">Documentation</translation>
+        <translation type="unfinished">Documentation</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
         <source></source>

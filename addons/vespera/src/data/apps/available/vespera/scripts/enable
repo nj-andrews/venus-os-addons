@@ -46,7 +46,7 @@ declare _refresh_devices=
 for app in $(opkg_lib_list_packages "all"); do
 	[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 	__enable_app "$app" _refresh_devices
-	[[ -f "$VESPERA_WORKING_DIR/$app.installer-services" ]] &&
+	[[ -f "$VESPERA_DATA_DIR/info/$app.installer-services" ]] &&
 		_venus_services_to_restart+=("$VESPERA_DATA_DIR/info/$app.installer-services")
 done
 

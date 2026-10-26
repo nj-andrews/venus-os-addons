@@ -56,12 +56,13 @@ Page {
 				}
 			}
 
-			// ListLink {
-			// 	text: qsTrId("pagesettingsgeneral_documentation")
-			// 	url: "https://thespinmaster.github.io/venus-os-addons/"
-			// }
+			ListLink {
+				text: qsTrId("pagecontrollableloads_documentation")
+				url: "https://thespinmaster.github.io/venus-os-addons/"
+			}
 			ListText {
-				text: qsTrId("settings_page_debug_application_version")
+				// bug "displays "Documentation" not "Application version"
+				// text: qsTrId("settings_page_debug_application_version")
 				secondaryText: GuiPluginLoader.plugin("Vespera").version
 			}
 		}

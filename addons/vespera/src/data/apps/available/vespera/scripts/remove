@@ -76,7 +76,7 @@ __update_patch_list() {
 	if [[ -f $overlay_file ]]; then
 		while IFS='=' read -r target upper_dir; do
     	overlay_path_mappings["$target"]="$upper_dir"
-		done < <("$VESPERA_DATA_DIR/info/vespera.overlay-lib" get-upper-overlay-path-mappings "$overlay_file")
+		done < <("$VESPERA_DATA_DIR/info/vespera.overlay-lib" get-upper-overlay-path-mappings "$PACKAGE_NAME")
 		installer_lib_log_verbose2 && echo "  overlay_path_mappings count=${#overlay_path_mappings[@]}"
 	fi
 

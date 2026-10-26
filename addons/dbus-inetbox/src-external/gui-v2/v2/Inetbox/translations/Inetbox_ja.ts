@@ -151,7 +151,7 @@
         <translation>Inetbox 設定</translation>
     </message>
     <message id="inetbox_show_motorhome_page">
-        <location filename="../InetboxPageSettings.qml" line="28"/>
+        <location filename="../InetboxPageSettings.qml" line="29"/>
         <source>Show Motorhome Page</source>
         <translation>モーターホームページを表示</translation>
     </message>
@@ -160,8 +160,9 @@
         <translation type="obsolete">ドキュメント</translation>
     </message>
     <message id="settings_page_debug_application_version">
+        <location filename="../InetboxPageSettings.qml" line="11"/>
         <source></source>
-        <translation type="obsolete">ドキュメント</translation>
+        <translation type="unfinished">ドキュメント</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
         <source></source>

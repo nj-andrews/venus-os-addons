@@ -24,6 +24,18 @@ stage_overlay_runtime() {
   : > "$UMOUNT_LOG"
 
   mkdir -p "$TEST_ROOT/targets/a" "$TEST_ROOT/targets/b"
+
+  OVERLAY_MASTER_FILE="$TEST_ROOT/vespera.installer-overlays"
+  printf '%s\n' '# masters' "$TEST_ROOT/master" "$TEST_ROOT/master2/" > "$OVERLAY_MASTER_FILE"
+  mkdir -p "$TEST_ROOT/master/qml" "$TEST_ROOT/master2"
+  INSTALLED_FILE="$OVERLAY_BASE_DIR/installed.conf"
+}
+
+# reg <app> <path>...; stderr is captured in REG_ERR, exit code in REG_RC
+reg() {
+  local app="$1"; shift
+  REG_RC=0
+  REG_ERR="$(printf '%s\n' "$@" | overlay_lib_register "$app" 2>&1 >/dev/null)" || REG_RC=$?
 }
 
 cleanup_overlay_runtime() {
@@ -60,12 +72,147 @@ test_overlay_lib_register_creates_conf_and_runtime_dirs() {
 
   assert_exitcode 0
   assert_file_contains "$OVERLAY_CONF_FILE" "demo|$TEST_ROOT/targets/a"
+  assert_file_contains "$INSTALLED_FILE" "demo|$TEST_ROOT/targets/a|$TEST_ROOT/targets/a"
 
   local runtime_dir
   runtime_dir="$(__overlay_lib_get_runtime_dir "$TEST_ROOT/targets/a")"
   assert_dir_exists "$runtime_dir/$OVERLAY_WORK_DIRNAME"
   assert_dir_exists "$runtime_dir/$OVERLAY_UPPER_DIRNAME"
   assert_dir_exists "$runtime_dir/$OVERLAY_MERGED_DIRNAME"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_path_below_master_resolves_to_master() {
+  stage_overlay_runtime
+
+  reg app2 "$TEST_ROOT/master/qml/"
+
+  assert_equals 0 "$REG_RC"
+  assert_file_contains "$OVERLAY_CONF_FILE" "app2|$TEST_ROOT/master"
+  assert_file_contains "$INSTALLED_FILE" "app2|$TEST_ROOT/master/qml|$TEST_ROOT/master"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_parent_of_master_is_rejected_and_nothing_registered() {
+  stage_overlay_runtime
+
+  reg app2 "$TEST_ROOT/ok" "$TEST_ROOT"
+
+  assert_equals 1 "$REG_RC"
+  assert_contains "too broad" "$REG_ERR"
+  assert_file_not_exist "$INSTALLED_FILE"
+  assert_file_not_exist "$OVERLAY_CONF_FILE"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_root_relative_and_dotdot_paths_are_rejected() {
+  stage_overlay_runtime
+
+  reg app2 "/"
+  assert_equals 1 "$REG_RC"
+  assert_contains "invalid overlay path" "$REG_ERR"
+  reg app2 "relative/path"
+  assert_equals 1 "$REG_RC"
+  reg app2 "$TEST_ROOT/a/../b"
+  assert_equals 1 "$REG_RC"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_string_prefix_sibling_is_not_a_descendant() {
+  stage_overlay_runtime
+  mkdir -p "$TEST_ROOT/master3"
+
+  reg app2 "$TEST_ROOT/master3"
+
+  assert_equals 0 "$REG_RC"
+  assert_file_contains "$OVERLAY_CONF_FILE" "app2|$TEST_ROOT/master3"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_parent_of_other_apps_target_is_rejected() {
+  stage_overlay_runtime
+  mkdir -p "$TEST_ROOT/x/y/z"
+
+  reg app1 "$TEST_ROOT/x/y/z"
+  reg app2 "$TEST_ROOT/x/y"
+
+  assert_equals 1 "$REG_RC"
+  assert_contains "would hide overlay '$TEST_ROOT/x/y/z' owned by app1" "$REG_ERR"
+  assert_file_not_contain "$INSTALLED_FILE" "app2"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_child_of_other_apps_target_resolves_to_parent() {
+  stage_overlay_runtime
+  mkdir -p "$TEST_ROOT/x/y"
+
+  reg app1 "$TEST_ROOT/x"
+  reg app2 "$TEST_ROOT/x/y"
+
+  assert_file_contains "$INSTALLED_FILE" "app2|$TEST_ROOT/x/y|$TEST_ROOT/x"
+  assert_file_contains "$OVERLAY_CONF_FILE" "app2|$TEST_ROOT/x"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_disabled_app_still_counts_for_resolution() {
+  stage_overlay_runtime
+  mkdir -p "$TEST_ROOT/x/y"
+
+  reg app1 "$TEST_ROOT/x"
+  overlay_lib_unregister app1
+  reg app2 "$TEST_ROOT/x/y"
+
+  assert_file_contains "$INSTALLED_FILE" "app2|$TEST_ROOT/x/y|$TEST_ROOT/x"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_resolution_is_pinned_after_other_app_uninstalls() {
+  stage_overlay_runtime
+  mkdir -p "$TEST_ROOT/x/y"
+
+  reg app1 "$TEST_ROOT/x"
+  reg app2 "$TEST_ROOT/x/y"
+  overlay_lib_uninstall app1
+  reg app2 "$TEST_ROOT/x/y"
+
+  assert_file_not_contain "$INSTALLED_FILE" "app1"
+  assert_file_contains "$INSTALLED_FILE" "app2|$TEST_ROOT/x/y|$TEST_ROOT/x"
+  assert_file_contains "$OVERLAY_CONF_FILE" "app2|$TEST_ROOT/x"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_check_does_not_change_state() {
+  stage_overlay_runtime
+  local rc=0
+
+  printf '%s\n' "$TEST_ROOT/targets/a" | overlay_lib_check demo || rc=$?
+  assert_equals 0 "$rc"
+  assert_file_not_exist "$INSTALLED_FILE"
+  assert_file_not_exist "$OVERLAY_CONF_FILE"
+
+  printf '%s\n' "$TEST_ROOT" | overlay_lib_check demo 2>/dev/null || rc=$?
+  assert_equals 1 "$rc"
+
+  cleanup_overlay_runtime
+}
+
+test_overlay_lib_mappings_use_resolved_targets() {
+  stage_overlay_runtime
+
+  reg app2 "$TEST_ROOT/master/qml"
+  local out; out="$(overlay_lib_get_upper_directories app2)"
+
+  assert_contains "$TEST_ROOT/master=" "$out"
+  assert_not_contain "master/qml" "$out"
 
   cleanup_overlay_runtime
 }

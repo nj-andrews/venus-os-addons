@@ -57,6 +57,23 @@ test_control_preinst_registers_overlay_for_package() {
   cleanup_preinst_runtime
 }
 
+test_control_preinst_aborts_when_overlay_registration_fails() {
+  stage_preinst_runtime
+  cat > "$TEST_ROOT/pkg/overlay-lib" <<'EOF'
+#!/usr/bin/env bash
+cat >/dev/null
+exit 1
+EOF
+  chmod +x "$TEST_ROOT/pkg/overlay-lib"
+
+  TEST_LOG="$TEST_ROOT/preinst.log" VESPERA_ROOT="$TEST_ROOT" \
+    bash "$SCRIPT_PATH" configure >/dev/null 2>&1
+
+  assert_exitcode 1
+
+  cleanup_preinst_runtime
+}
+
 test_control_preinst_skips_registration_when_overlays_file_missing() {
   stage_preinst_runtime
   rm -f "$TEST_ROOT/pkg/installer-overlays"

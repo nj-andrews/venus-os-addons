@@ -15,8 +15,16 @@
         <source>Feeds</source>
         <translation>软件源</translation>
     </message>
+    <message id="pagecontrollableloads_documentation">
+        <source></source>
+        <translation type="obsolete">无</translation>
+    </message>
+    <message id="pagesettingsgeneral_documentation">
+        <source></source>
+        <translation type="obsolete">无</translation>
+    </message>
     <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="64"/>
+        <location filename="../PageHome.qml" line="59"/>
         <source></source>
         <translation type="unfinished">无</translation>
     </message>

@@ -9,7 +9,7 @@ addsource "conf/vespera.conf"
 addsource "libs/serial-device-installer-lib"
 
 __list_overlays_for_app() {
-	"$VESPERA_DATA_DIR/info/vespera.overlay-lib" overlay-list-mounts "$VESPERA_DATA_DIR/info/$app.$VESPERA_OVERLAYS_FILE"
+	"$VESPERA_DATA_DIR/info/vespera.overlay-lib" overlay-list-mounts "$app"
 }
 
 __show_service_log_errors() {

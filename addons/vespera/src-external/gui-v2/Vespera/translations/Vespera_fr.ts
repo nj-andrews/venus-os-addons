@@ -15,8 +15,16 @@
         <source>Feeds</source>
         <translation>Sources</translation>
     </message>
+    <message id="pagecontrollableloads_documentation">
+        <source></source>
+        <translation type="obsolete">Aucun</translation>
+    </message>
+    <message id="pagesettingsgeneral_documentation">
+        <source></source>
+        <translation type="obsolete">Aucun</translation>
+    </message>
     <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="64"/>
+        <location filename="../PageHome.qml" line="59"/>
         <source></source>
         <translation type="unfinished">Aucun</translation>
     </message>

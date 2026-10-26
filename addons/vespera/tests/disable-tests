@@ -27,7 +27,7 @@ stage_disable_runtime() {
   cat > "$TEST_APP_ROOT/conf/vespera.conf" <<EOF
 #!/usr/bin/env bash
 VESPERA_DATA_DIR="/data/var/vespera"
-VESPERA_DBUS_NAME="dbus-name"
+VESPERA_DBUS_FILE="dbus-name"
 EOF
 
   cat > "$TEST_APP_ROOT/libs/opkg-lib" <<'EOF'
@@ -59,6 +59,8 @@ EOF
 com.example.demo
 EOF
 
+  : > "$TEST_DATA_DIR/info/demo.installer-services"
+
   ln -sf "$TEST_ROOT/data/apps/available/demo" "$TEST_ROOT/data/apps/enabled/demo"
 }
 
@@ -75,10 +77,27 @@ test_disable_unlinks_app_and_marks_dbus_disabled() {
 
   assert_exitcode 0
   assert_file_not_exist "$TEST_ROOT/data/apps/enabled/demo"
-  assert_file_contains "$log_file" 'remove-services:demo ___refresh_devices'
+  assert_file_contains "$log_file" 'remove-services:demo _refresh_devices'
   assert_file_contains "$log_file" 'overlay:overlay-unregister demo'
   assert_file_contains "$log_file" 'dbus:-y com.victronenergy.settings /Settings/Vespera/Packages/com.example.demo/Enabled SetValue 0'
   assert_file_contains "$TEST_ROOT/disable.out" "$TEST_DATA_DIR/info/demo.installer-services"
+
+  cleanup_disable_runtime
+}
+
+test_disable_queues_no_services_and_no_errors_without_installer_services_file() {
+  stage_disable_runtime
+  rm -f "$TEST_DATA_DIR/info/demo.installer-services"
+  local log_file="$TEST_ROOT/disable.log"
+
+  TEST_LOG="$log_file" VESPERA_ROOT="$TEST_ROOT" PATH="$TEST_ROOT/bin:$PATH" \
+    bash "$TEST_APP_ROOT/scripts/disable" demo > "$TEST_ROOT/disable.out" 2> "$TEST_ROOT/disable.err"
+
+  assert_exitcode 0
+  assert_file_not_exist "$TEST_ROOT/data/apps/enabled/demo"
+  assert_file_contains "$TEST_ROOT/disable.out" '_venus_services_to_restart=()'
+  assert_file_not_contain "$TEST_ROOT/disable.out" 'installer-services'
+  assert_equals "" "$(<"$TEST_ROOT/disable.err")"
 
   cleanup_disable_runtime
 }

@@ -35,31 +35,31 @@ cleanup_postrm_runtime() {
   [[ -n "${TEST_ROOT:-}" ]] && vt_safe_rm_rf "$TEST_ROOT"
 }
 
-test_control_postrm_unregisters_overlay_on_remove() {
+test_control_postrm_uninstalls_overlay_on_remove() {
   stage_postrm_runtime
 
   TEST_LOG="$TEST_ROOT/postrm.log" VESPERA_ROOT="$TEST_ROOT" \
     bash "$SCRIPT_PATH" remove >/dev/null 2>&1
 
   assert_exitcode 0
-  assert_file_contains "$TEST_ROOT/postrm.log" 'overlay:overlay-unregister demo'
+  assert_file_contains "$TEST_ROOT/postrm.log" 'overlay:overlay-uninstall demo'
 
   cleanup_postrm_runtime
 }
 
-test_control_postrm_skips_unregister_on_upgrade() {
+test_control_postrm_skips_uninstall_on_upgrade() {
   stage_postrm_runtime
 
   TEST_LOG="$TEST_ROOT/postrm.log" VESPERA_ROOT="$TEST_ROOT" \
     bash "$SCRIPT_PATH" upgrade >/dev/null 2>&1
 
   assert_exitcode 0
-  assert_file_not_contain "$TEST_ROOT/postrm.log" 'overlay:overlay-unregister demo'
+  assert_file_not_contain "$TEST_ROOT/postrm.log" 'overlay:overlay-uninstall demo'
 
   cleanup_postrm_runtime
 }
 
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
-  test_control_postrm_unregisters_overlay_on_remove
-  test_control_postrm_skips_unregister_on_upgrade
+  test_control_postrm_uninstalls_overlay_on_remove
+  test_control_postrm_skips_uninstall_on_upgrade
 fi

@@ -56,8 +56,8 @@ opkg_ensure_combined_conf_file() {
   printf '%s\n' 'ensure-combined-conf' >> "$TEST_LOG"
 }
 
-opkg_lib_configure_packages() {
-  printf 'configure:%s\n' "$*" >> "$TEST_LOG"
+vespera_lib_app_enabled() {
+  return 0
 }
 
 __vespera_lib_initialize() {
@@ -102,6 +102,13 @@ EOF
   cat > "$TEST_DATA_DIR/info/demo.dbus-name" <<'EOF'
 com.example.demo
 EOF
+
+  printf '%s\n' '/overlay/one' > "$TEST_DATA_DIR/info/demo.installer-overlays"
+  cat > "$TEST_DATA_DIR/info/demo.postinst" <<'EOF'
+#!/usr/bin/env bash
+printf 'configure:demo %s\n' "$*" >> "$TEST_LOG"
+EOF
+  chmod +x "$TEST_DATA_DIR/info/demo.postinst"
 
   ln -s "$TEST_ROOT/data/apps/available/demo" "$TEST_ROOT/data/apps/enabled/demo"
 
@@ -168,7 +175,7 @@ test_rcs_local_firmware_changed_reconciles_and_reconfigures() {
   assert_file_contains "$TEST_DATA_DIR/venus-version.old" 'v3.00' "firmware-changed stores previous firmware version"
   assert_file_contains "$TEST_DATA_DIR/venus-version" 'v3.01' "firmware-changed writes current firmware version"
   assert_file_contains "$TEST_ROOT/rcs.log" 'overlay:overlay-reconcile' "firmware-changed reconciles overlays"
-  assert_file_contains "$TEST_ROOT/rcs.log" 'overlay:overlay-mount' "firmware-changed mounts overlays after reconcile"
+  assert_file_contains "$TEST_ROOT/rcs.log" 'overlay:overlay-register demo' "firmware-changed registers (and mounts) overlays per app"
   assert_file_contains "$TEST_ROOT/rcs.log" 'ensure-combined-conf' "firmware-changed rebuilds opkg combined conf"
   assert_file_contains "$TEST_ROOT/rcs.log" 'configure:demo' "firmware-changed configures ordered packages"
   wait_for_log_match "$TEST_ROOT/rcs.log" 'start-services:demo com.example.demo'

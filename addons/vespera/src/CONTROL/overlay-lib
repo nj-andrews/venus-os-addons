@@ -12,14 +12,35 @@
 # - Runtime directories are always prepared as:
 #   /data/apps/available/vespera/overlays/<target-id>/{kernel-work,upper,merged}
 #
-# Config format (OVERLAY_CONF_FILE):
-#   app_name|<target>
+# Path resolution (see __overlay_lib_validate):
+# - Paths in vespera.installer-overlays are "master" paths. They are always
+#   used, whether vespera is enabled or disabled.
+# - A requested path inside a master (or inside a target already installed by
+#   another app) resolves to that master/target, so apps share one mount.
+# - A requested path that is a parent of a master, or a parent of a target
+#   installed by another app, is rejected. So is "/" and any relative path.
+# - Resolutions are pinned in installed.conf at install time and are not
+#   recomputed, so an app keeps its mount when another app is uninstalled.
+# - Paths are compared per path component: /opt/victronenergy2 is NOT inside
+#   /opt/victronenergy.
+# - Validation is all-or-nothing: if any path is rejected, nothing is registered.
+#
+# Config formats:
+#   OVERLAY_CONF_FILE (enabled apps, resolved targets):  app_name|<target>
+#   installed.conf (all installed apps, enabled or not): app_name|<requested>|<resolved>
+#
+# Commands:
+#   overlay-check <app> < overlays    validate only (no changes)
+#   overlay-register <app> < overlays validate, pin, and mount (enable/install)
+#   overlay-unregister [app]          unmount/remove from OVERLAY_CONF_FILE (disable)
+#   overlay-uninstall [app]           unregister and forget the pinned installation
 
 OVERLAY_BASE_DIR="/data/var/vespera/overlays"
 OVERLAY_CONF_FILE="${OVERLAY_BASE_DIR}/overlays.conf"
 OVERLAY_WORK_DIRNAME="kernel-work" #use kernel-work; will produce kernel-work/work
 OVERLAY_UPPER_DIRNAME="upper"
 OVERLAY_MERGED_DIRNAME="merged"
+OVERLAY_MASTER_APP="vespera"
 
 # Ensure base runtime directories exist
 __overlay_lib_init() {
@@ -27,6 +48,140 @@ __overlay_lib_init() {
 
 	mkdir -p "$OVERLAY_BASE_DIR"
 	touch "$OVERLAY_CONF_FILE"
+}
+
+__overlay_lib_installed_file() {
+	echo "${OVERLAY_BASE_DIR}/installed.conf"
+}
+
+__overlay_lib_master_file() {
+	echo "${OVERLAY_MASTER_FILE:-${VESPERA_ROOT:-}/data/var/vespera/info/${OVERLAY_MASTER_APP}.installer-overlays}"
+}
+
+__overlay_lib_trim() {
+	local value="$1"
+	value="${value#"${value%%[![:space:]]*}"}"
+	value="${value%"${value##*[![:space:]]}"}"
+	echo "$value"
+}
+
+# Print an absolute path without empty/"." components, or fail for relative
+# paths, "/" and paths containing "..".
+__overlay_lib_normalize_path() {
+	local path="$1" part out=""
+	local -a parts=()
+
+	[[ "$path" == /* ]] || return 1
+	IFS=/ read -r -a parts <<< "$path"
+	for part in ${parts[@]+"${parts[@]}"}; do
+		case "$part" in
+			''|.) continue;;
+			..) return 1;;
+		esac
+		out+="/$part"
+	done
+	[[ -n "$out" ]] || return 1
+	echo "$out"
+}
+
+# Succeeds when $1 equals $2 or is below it. Compares whole path components.
+__overlay_lib_is_within() {
+	[[ "$1" == "$2" || "$1" == "$2"/* ]]
+}
+
+# Reads requested overlay paths from stdin and prints "requested|resolved" lines.
+# Errors and warnings go to stderr; returns 1 if any path is rejected.
+__overlay_lib_validate() {
+	local app="$1"
+	local installed_file master_file
+	local line req resolved t a res rc=0 bad
+	local -a masters=()
+	local -A pins=() owners=()
+
+	installed_file="$(__overlay_lib_installed_file)"
+	master_file="$(__overlay_lib_master_file)"
+
+	if [[ "$app" != "$OVERLAY_MASTER_APP" ]]; then
+		if [[ ! -f "$master_file" ]]; then
+			echo "ERROR: $app: master overlay file not found: $master_file" >&2
+			return 1
+		fi
+		while IFS= read -r line || [[ -n "$line" ]]; do
+			line="$(__overlay_lib_trim "$line")"
+			[[ -z "$line" || "$line" == \#* ]] && continue
+			t="$(__overlay_lib_normalize_path "$line")" || continue
+			masters+=("$t")
+		done < "$master_file"
+	fi
+
+	if [[ -f "$installed_file" ]]; then
+		while IFS='|' read -r a req res; do
+			[[ -z "$res" ]] && continue
+			if [[ "$a" == "$app" ]]; then
+				pins["$req"]="$res"
+			elif [[ -z "${owners[$res]+x}" ]]; then
+				owners["$res"]="$a"
+			fi
+		done < "$installed_file"
+	fi
+
+	while IFS= read -r line || [[ -n "$line" ]]; do
+		line="$(__overlay_lib_trim "$line")"
+		[[ -z "$line" || "$line" == \#* ]] && continue
+
+		if ! req="$(__overlay_lib_normalize_path "$line")"; then
+			echo "ERROR: $app: invalid overlay path '$line' (must be absolute, not '/', no '..')" >&2
+			rc=1
+			continue
+		fi
+
+		resolved=""
+		bad=0
+		if [[ "$app" == "$OVERLAY_MASTER_APP" ]]; then
+			resolved="$req"
+		elif [[ -n "${pins[$req]+x}" ]]; then
+			resolved="${pins[$req]}"
+		else
+			for t in ${masters[@]+"${masters[@]}"}; do
+				if __overlay_lib_is_within "$req" "$t"; then resolved="$t"; break; fi
+			done
+			if [[ -z "$resolved" ]]; then
+				for t in ${masters[@]+"${masters[@]}"}; do
+					if __overlay_lib_is_within "$t" "$req"; then
+						echo "ERROR: $app: overlay '$req' is too broad; it contains protected path '$t'" >&2
+						bad=1
+						break
+					fi
+				done
+			fi
+			if [[ -z "$resolved" && $bad -eq 0 ]]; then
+				for t in "${!owners[@]}"; do
+					if __overlay_lib_is_within "$req" "$t"; then
+						resolved="$t"
+						break
+					elif __overlay_lib_is_within "$t" "$req"; then
+						echo "ERROR: $app: overlay '$req' would hide overlay '$t' owned by ${owners[$t]}" >&2
+						bad=1
+						break
+					fi
+				done
+			fi
+			[[ -z "$resolved" && $bad -eq 0 ]] && resolved="$req"
+		fi
+
+		if ((bad)); then
+			rc=1
+			continue
+		fi
+
+		if [[ "$resolved" != "$req" ]] && (( ${VESPERA_VERBOSITY:-1} > 1 )); then
+			echo "INFO: $app: overlay '$req' uses '$resolved'" >&2
+		fi
+		[[ -z "${owners[$resolved]+x}" ]] && owners["$resolved"]="$app"
+		echo "$req|$resolved"
+	done
+
+	return $rc
 }
 
 __overlay_lib_get_runtime_dir() {
@@ -227,32 +382,84 @@ __overlay_lib_mount_target() {
 	fi
 }
 
+# Validate the overlays read from stdin without changing any state.
+overlay_lib_check() {
+	local app="$1"
+	__overlay_lib_validate "$app" > /dev/null
+}
+
 # Register all requested target overlays for one app and apply mounts immediately.
+# Paths are resolved/validated first (all-or-nothing) and pinned in installed.conf.
 # Existing entries for the same app are removed first so registration order is refreshed.
-# Reads target paths from a config file and ignores comments and empty lines.
-# Registrations persist only app_name|target; the overlay tree itself is derived from them.
+# Reads target paths from stdin and ignores comments and empty lines.
 overlay_lib_register() {
-	local app_name="$1"
-	local mount_point
-	local line
+	local app="$1"
+	local rows row req resolved installed_file
+	local -A seen_rows=() seen_targets=()
+
+	rows="$(__overlay_lib_validate "$app")" || {
+		echo "ERROR: $app: overlays rejected; nothing registered" >&2
+		return 1
+	}
 
 	# Unregister existing entries to clean state first (note: removes conf file if empty)
-	overlay_lib_unregister "$app_name"
+	overlay_lib_unregister "$app"
 
 	__overlay_lib_init
+	installed_file="$(__overlay_lib_installed_file)"
+	__overlay_lib_forget_installed "$app"
 
-	[[ ! -f "$OVERLAY_CONF_FILE" ]] && { echo "ERROR: conf file not found:$OVERLAY_CONF_FILE" >&2; return 1; }
+	while IFS='|' read -r req resolved; do
+		[[ -z "$resolved" ]] && continue
+		row="$req|$resolved"
+		[[ -n "${seen_rows[$row]+x}" ]] && continue
+		seen_rows["$row"]=1
+		echo "${app}|${row}" >> "$installed_file"
+	done <<< "$rows"
 
-	while IFS= read -r line || [[ -n "$line" ]]; do
-		[[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
-		mount_point="$line"
+	while IFS='|' read -r req resolved; do
+		[[ -z "$resolved" ]] && continue
+		[[ -n "${seen_targets[$resolved]+x}" ]] && continue
+		seen_targets["$resolved"]=1
 
-		if ! __overlay_lib_target_in_use "$mount_point"; then
-			__overlay_lib_target_supported "$mount_point" || continue
+		if ! __overlay_lib_target_in_use "$resolved"; then
+			__overlay_lib_target_supported "$resolved" || continue
 		fi
-		echo "${app_name}|${mount_point}" >> "$OVERLAY_CONF_FILE"
-		__overlay_lib_mount_target "$mount_point"
-	done
+		echo "${app}|${resolved}" >> "$OVERLAY_CONF_FILE"
+		__overlay_lib_mount_target "$resolved"
+	done <<< "$rows"
+}
+
+# Remove the pinned installation rows of an app (or all apps when no app is given).
+__overlay_lib_forget_installed() {
+	local app="${1:-}"
+	local installed_file; installed_file="$(__overlay_lib_installed_file)"
+
+	[[ -f "$installed_file" ]] || return 0
+	if [[ -n "$app" ]]; then
+		awk -F'|' -v app="$app" '$1 != app { print $0 }' "$installed_file" > "${installed_file}.tmp" &&
+			mv "${installed_file}.tmp" "$installed_file"
+	else
+		: > "$installed_file"
+	fi
+	[[ -s "$installed_file" ]] || rm -f "$installed_file"
+}
+
+# Unregister and forget the app's installation (uninstall, as opposed to disable).
+overlay_lib_uninstall() {
+	local app="${1:-}"
+	overlay_lib_unregister "$app"
+	__overlay_lib_forget_installed "$app"
+	rmdir "$OVERLAY_BASE_DIR" 2>/dev/null || true
+}
+
+# Print the unique resolved targets pinned for an app.
+__overlay_lib_app_targets() {
+	local app="$1"
+	local installed_file; installed_file="$(__overlay_lib_installed_file)"
+
+	[[ -f "$installed_file" ]] || return 0
+	awk -F'|' -v app="$app" '$1 == app && $3 != "" && !seen[$3]++ { print $3 }' "$installed_file"
 }
 
 overlay_lib_unregister() {
@@ -300,13 +507,12 @@ overlay_lib_unregister() {
 }
 
 overlay_lib_get_upper_directories() {
-	local file="${1}"
-	while IFS='|' read -r target; do
-		[[ "$target" =~ ^[[:space:]]*(#|$) ]] && continue # skip comments and whitespace
-
+	local app="${1}"
+	local target upper_dir
+	while IFS= read -r target; do
 		upper_dir="$(__overlay_lib_get_runtime_dir "$target")/${OVERLAY_UPPER_DIRNAME}"
 		echo "$target=$upper_dir"
-	done < "$file"
+	done < <(__overlay_lib_app_targets "$app")
 }
 
 __overlay_lib_mount_unmount() {
@@ -343,26 +549,29 @@ __no_args_or_has_matched_arg() {
 }
 
 overlay_list_mounts() {
-	local overlay_file="${1}"
-	local runtime_dir
-	# installer-overlays is optional
-	[[ -f "$overlay_file" ]] || return 0
-	while IFS='|' read -r target; do
-		[[ "$target" =~ ^[[:space:]]*(#|$) ]] && continue # skip comments and whitespace
+	local app="${1}"
+	local target runtime_dir
+	while IFS= read -r target; do
 		runtime_dir="$(__overlay_lib_get_runtime_dir "$target")/${OVERLAY_MERGED_DIRNAME}"
 		mountpoint -q "$target" && mountpoint -q "$runtime_dir" \
 			&& echo "overlay: $target (mounted)" \
 			|| echo "overlay: $target (not mounted)"
-	done < "$overlay_file"
+	done < <(__overlay_lib_app_targets "$app")
 }
 
 case "${1:-}" in
 	overlay-unregister)
 		overlay_lib_unregister "${2-}"
 		;;
+	overlay-uninstall)
+		overlay_lib_uninstall "${2-}"
+		;;
+	overlay-check)
+		overlay_lib_check "${2}";;
 	overlay-register)
 		overlay_lib_register "${2}";;
 	overlay-list-mounts)
+		# overlay-list-mounts <app>
 		overlay_list_mounts "${2}";;
 	overlay-mount)
 		shift 1
@@ -371,6 +580,7 @@ case "${1:-}" in
 		shift 1
 		__overlay_lib_mount_unmount "$@";;
 	get-upper-overlay-path-mappings)
+		# get-upper-overlay-path-mappings <app>
 		overlay_lib_get_upper_directories "${2}";;
 	overlay-reconcile)
 		# overlay-reconcile <owned-files-list> <whiteouts-list>
