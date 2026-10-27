@@ -52,7 +52,7 @@ $GPGSA,A,3,16,18,25,26,27,28,29,31,,,,,0.7,0.4,0.5,1*22
 1. Download and run the installer:
 
 ```bash
-wget -O gpsdservice-install.sh https://raw.githubusercontent.com/thespinmaster/GLX3000-GPS/refs/heads/main/gpsdservice-install.sh
+wget -O gpsdservice-install.sh https://raw.githubusercontent.com/nj-andrews/GLX3000-GPS/refs/heads/main/gpsdservice-install.sh
 chmod 755 gpsdservice-install.sh
 ./gpsdservice-install.sh
 ```

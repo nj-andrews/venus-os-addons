@@ -1,0 +1,2 @@
+# list of services to restart on enable/disable
+/service/gui

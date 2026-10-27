@@ -11,7 +11,7 @@ require_cmd() {
 }
 
 if [[ ! -d ./opkg-utils ]]; then
-  local opkg_source="https://github.com/thespinmaster/opkg-utils"
+  local opkg_source="https://github.com/nj-andrews/opkg-utils"
   echo "cloning opkg-utils from (${opkg_source})"
   require_cmd git
   git clone "${opkg_source}"

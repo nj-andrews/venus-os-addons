@@ -27,7 +27,7 @@ Download and run dev_setup from github
 Adds a opkg feed for installing custom packages from this repository
 
 ```
-wget https://raw.githubusercontent.com/thespinmaster/venus-os/refs/heads/main/tasks/dev-setup -O /data/dev-setup
+wget https://raw.githubusercontent.com/nj-andrews/venus-os-addons/refs/heads/main/tasks/dev-setup -O /data/dev-setup
 chmod +x /data/dev-setup
 /data/dev-setup
 ```
@@ -44,7 +44,7 @@ chmod +x /data/dev-setup
 
 ## Install vespera only
 ```
-wget https://raw.githubusercontent.com/thespinmaster/venus-os/refs/heads/main/tasks/install-vespera -O /tmp/install-vespera
+wget https://raw.githubusercontent.com/nj-andrews/venus-os-addons/refs/heads/main/tasks/install-vespera -O /tmp/install-vespera
 chmod +x /tmp/install-vespera
 /tmp/install-vespera
 
@@ -55,7 +55,6 @@ root@192.xxx.xxx.xxx
 open remote folder in /data/dev/projects  
 may need to remove .env folder from project  
 debug code...  
-
 
 
 

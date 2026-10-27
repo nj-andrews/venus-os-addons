@@ -3,9 +3,9 @@ Version: 1.1.0
 Description: A simple service for testing adding and removing a serial device
 Section: utilities
 Priority: optional
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 License: MIT
 Architecture: all
 OE: einstine
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Depends: vespera

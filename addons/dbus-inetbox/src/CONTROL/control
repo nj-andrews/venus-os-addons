@@ -3,9 +3,9 @@ Version: 1.1.0
 Description: Adds support for Truma inetbox to Venus-OS
 Section: utilities
 Priority: optional
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 License: MIT
 Architecture: all
 OE: dbus-inetbox
-Source: https://thespinmaster.github.io/venus-os-addons-addons
+Source: https://nj-andrews.github.io/venus-os-addons-addons
 Depends: vespera

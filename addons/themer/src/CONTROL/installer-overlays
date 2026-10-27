@@ -1,0 +1,3 @@
+# list of paths to overlay
+#gui-v1 qml files, service-templates, gui-v2
+/opt/victronenergy

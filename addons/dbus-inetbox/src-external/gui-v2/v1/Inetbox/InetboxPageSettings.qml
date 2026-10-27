@@ -25,7 +25,7 @@ Page {
 
 				//% "Documentation"
 				text: qsTrId("pagecontrollableloads_documentation")
-				url: "https://thespinmaster.github.io/venus-os-addons/"
+				url: "https://nj-andrews.github.io/venus-os-addons/"
 			}
 		}
 	}

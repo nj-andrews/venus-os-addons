@@ -2,9 +2,13 @@
 
 set -o nounset
 
-this_path="$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 echo building /feeds/venus-data-vespera-blind-install.tgz
-tar czf "$this_path/../../../../feeds/release/vespera/venus-data-vespera-blind-install.tgz" -C "$this_path/src/" rc
+# vespera-bootstrap is stored next to blind-install.sh (rc/) in the archive
+tar czf "../../../../feeds/release/vespera/venus-data-vespera-blind-install.tgz" \
+	-C "src/" rc \
+	--transform 's,^vespera-bootstrap$,rc/vespera-bootstrap,' \
+	-C "../../../../../feeds" vespera-bootstrap
 
 echo "done"

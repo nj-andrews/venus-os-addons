@@ -46,6 +46,4 @@ Side effects to be aware of:
 - Install order matters for non-master paths: the first app decides the target that later apps fold into, and a later parent path cannot be installed.
 - Installs made before `installed.conf` existed have no pinned entries; reinstall such apps to pin them.
 
-## Practical rule of thumb
 
-If a change requires editing a shared file that other packages or firmware also modify, treat that as a design smell. Prefer a clear integration seam where ownership and cleanup are explicit and discoverable.

@@ -3,7 +3,7 @@
 VERSION=1.8
 VESPERA_VERBOSITY=1
 PROMPT=1
-FEED=https://thespinmaster.github.io/venus-os-addons/feeds/release/vespera
+FEED=https://nj-andrews.github.io/venus-os-addons/feeds/release/vespera
 
 while [ "$#" -gt 0 ]; do
 	case "$1" in
@@ -51,7 +51,7 @@ fsresize="/opt/victronenergy/swupdate-scripts/resize2fs.sh"
     ("$fsresize" && mount -o remount,ro /) >"$output" 2>&1
 }
 
-echo "bootstrap:OPKG install"
+echo "bootstrap: install: $FEED/vespera-latest.ipk"
 opkg -f "${OPKG_CONF}" "$@" install "$FEED/vespera-latest.ipk" || exit
 retval=$?
 

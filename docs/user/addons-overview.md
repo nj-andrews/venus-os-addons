@@ -10,7 +10,7 @@ This page lists the add-ons currently documented in this workspace and links to 
 
 ## User-facing integrations
 
-| Add-on | Purpose | Links |
+| Add&#8209;on&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Purpose | Links |
 |--------|---------|-------|
 | [Inetbox](inetbox/overview.md) | Controls Truma heating and air-conditioning via compatible Inetbox hardware. | [Overview](inetbox/overview.md) · [Hardware](inetbox/hardware.md) · [Setup](inetbox/setup.md) · [Usage](inetbox/usage.md) |
 | [Ne Shunt](ne-shunt/overview.md) | Integrates supported Nordelec / Nordelettronica shunt devices into Venus OS. | [Overview](ne-shunt/overview.md) · [Hardware](ne-shunt/hardware.md) · [Setup](ne-shunt/setup.md) · [Usage](ne-shunt/usage.md) |

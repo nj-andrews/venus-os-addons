@@ -3,11 +3,11 @@ Version: 1.1.0~d260926.1436
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: f446507068c5ee5ad64bfb2db3eaca28
 Size: 17834
 Filename: test-device_1.1.0~d260926.1436_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  A simple service for testing adding and removing a serial device
 OE: einstine
 License: MIT
@@ -17,11 +17,11 @@ Package: test-install
 Version: 1.1.0~d260926.1436
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: cd0bcff64203bdf096a54e552f64ff79
 Size: 1316
 Filename: test-install_1.1.0~d260926.1436_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  A simple app for testing installs
 OE: einstine
 License: MIT
@@ -32,13 +32,12 @@ Version: 1.1.0+d260625.1554
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: cc1a1f2e9b029c52f6b998a67f955ba0
 Size: 39846
 Filename: test-service_1.1.0+d260625.1554_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  A simple service for testing adding and removing a serial device
 OE: einstine
 License: MIT
 Priority: optional
-

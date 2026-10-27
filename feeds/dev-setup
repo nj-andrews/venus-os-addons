@@ -3,7 +3,7 @@
 set -o nounset
 
 declare config_dir="/data/conf/vespera"
-declare base_feed_url="https://thespinmaster.github.io/venus-os-addons/feeds"
+declare base_feed_url="https://nj-andrews.github.io/venus-os-addons/feeds"
 declare feeds_file_release="${config_dir}/feeds-release.conf"
 declare dev_mount_point="/data/mnt/dev"
 declare opkg_feed_file="/etc/opkg/vespera.conf"

@@ -3,11 +3,11 @@ Version: 1.1.0~d261025.1826
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: 521a653157ecce91b9aa76df5d91177e
 Size: 82522
 Filename: dbus-inetbox_1.1.0~d261025.1826_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons-addons
+Source: https://nj-andrews.github.io/venus-os-addons-addons
 Description:  Adds support for Truma inetbox to Venus-OS
 OE: dbus-inetbox
 License: MIT
@@ -18,11 +18,11 @@ Version: 1.1.0~d260926.1436
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: 194675eb3c6174c3f3db902cbf72f8f6
 Size: 27954
 Filename: dbus-ne-shunt_1.1.0~d260926.1436_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
 License: MIT
@@ -32,11 +32,11 @@ Package: mount-shares
 Version: 1.1.0~d260909.1204
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: 140dc7e00a5ef66c5310c5c16849efce
 Size: 3008
 Filename: mount-shares_1.1.0~d260909.1204_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for nfs and cifs shares to Venus OS
 OE: mount-shares
 License: MIT
@@ -47,11 +47,11 @@ Version: 1.1.0~d260906.2023
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: eb3e840e2f92f7fb0e966063d40b1a74
 Size: 2174
 Filename: network-gps_1.1.0~d260906.2023_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Network GPS using NMEA
 OE: network-gps
 License: MIT
@@ -62,13 +62,12 @@ Version: 1.1.0~d260906.2023
 Depends: vespera
 Section: utilities
 Architecture: all
-Maintainer: thespinmaster@github.com
+Maintainer: nj-andrews@github.com
 MD5Sum: 41acf37b8a86abebc00a2cf2fc54d4e0
 Size: 4384
 Filename: themer_1.1.0~d260906.2023_all.ipk
-Source: https://thespinmaster.github.io/venus-os-addons/tree/main/feeds/main/themer
+Source: https://nj-andrews.github.io/venus-os-addons/tree/main/feeds/main/themer
 Description:  Adds basic theming support to the Venus OS
 OE: einstine
 License: MIT
 Priority: optional
-
