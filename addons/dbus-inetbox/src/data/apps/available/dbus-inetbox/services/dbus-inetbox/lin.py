@@ -49,6 +49,7 @@ class Lin:
 		# /data persists on Venus OS (logs are rotated); override with INETBOX_DUMP_DIR
 		DUMP_DIR = os.environ.get("INETBOX_DUMP_DIR", "/data/log/dbus-inetbox/lin-dumps")
 		DUMP_KEEP = 20
+		RESTART_ERROR_CODE = 900  # see truma-error-codes.csv
 
 		# Check Alive-status periodically - with 1ms delay it is appx. 9s
 		# there must be more than 1 D8-requests in this periode, than is alive status "ON"
@@ -109,7 +110,6 @@ class Lin:
 
 		def response_waiting(self):
 			return len(self.ts_response_buffer)
-
 
 		def _send_answer_str(self, data_str):
 			self._send_answer(bytes.fromhex(data_str.replace(" ","")))
@@ -221,8 +221,7 @@ class Lin:
 				for i in self.cmd_buf:
 						self.prepare_tl_response(i)
 				self.updates_to_send = False
-				if p.startswith("_"): return
-				self.log.debug(p)
+
 
 		async def watchdog(self):
 				self.log.info("watchdog activated")
@@ -235,6 +234,7 @@ class Lin:
 				self.log.warning("watchdog: alive still OFF - dumping state and resetting")
 				self.dump_state()
 				self.reset()
+				self.raise_restart_error()
 
 
 		def dump_state(self):
@@ -269,6 +269,11 @@ class Lin:
 				except Exception:
 						self.log.exception("dump_state failed")
 
+
+		# error_code is stored raw and converted by cnv.error_code_to_string:
+		# (raw // 256) * 100 + raw % 256, so 900 == 9 * 256
+		def raise_restart_error(self):
+				self.app.status["error_code"] = [self.RESTART_ERROR_CODE // 100 * 256 + self.RESTART_ERROR_CODE % 100, True, False]
 
 		# Equivalent to a service restart for the LIN layer. Runs synchronously on the
 		# event loop, so it cannot interleave with _lin_loop.

@@ -1,12 +1,12 @@
 Package: dbus-inetbox
-Version: 1.1.0~d261028.0017
+Version: 1.1.0~d261028.1013
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 95e9498883ee10ef66e09d4e7a048f73
-Size: 82000
-Filename: dbus-inetbox_1.1.0~d261028.0017_all.ipk
+MD5Sum: 40821cf8c7c4038db89750eec2736f64
+Size: 82976
+Filename: dbus-inetbox_1.1.0~d261028.1013_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons-addons
 Description:  Adds support for Truma inetbox to Venus-OS
 OE: dbus-inetbox

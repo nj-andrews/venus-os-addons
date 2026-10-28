@@ -86,10 +86,7 @@ class InetboxController:
 		classAndVrmInstanceParts = classAndVrmInstance.split(':')
 		deviceInstance = int(classAndVrmInstanceParts[1])
 		customName = self._settings['/CustomName']
-
-		errdec = get_error_description(631)
-		self.log.debug(f'AAA:ErrorDescription={errdec}')
-
+ 
 		self._dbusInetboxService = dbusInetboxService(
 				serialPort,
 				serviceName,
