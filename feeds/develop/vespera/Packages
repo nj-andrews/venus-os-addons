@@ -1,13 +1,14 @@
 Package: vespera
-Version: 1.1.0~d261026.2025
+Version: 1.1.0~d261027.2250
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 2eff7af575bb19491d297ef8740448dc
-Size: 626432
-Filename: vespera_1.1.0~d261026.2025_all.ipk
+MD5Sum: 03ba9adfb0b9a404b9802467e1f005c5
+Size: 626482
+Filename: vespera_1.1.0~d261027.2250_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  An addon for installing opkg packages on the Venus OS
 OE: einstine
 License: MIT
 Priority: optional
+

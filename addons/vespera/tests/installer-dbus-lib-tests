@@ -46,11 +46,19 @@ dbus_lib_set_string_value() {
   printf '%s|%s\n' "$path" "$value" >> "$TEST_ROOT/set_string.log"
   return 0
 }
+
+dbus_lib_update_csv_items() {
+  local path="$1"
+  local action="$2"
+  shift 2
+  printf '%s|%s|%s\n' "$path" "$action" "$*" >> "$TEST_ROOT/update_csv.log"
+}
 EOF
 
   chmod +x "$TEST_APP_ROOT/libs/source-lib" "$TEST_APP_ROOT/libs/installer-dbus-lib" "$TEST_APP_ROOT/libs/json-lib" "$TEST_APP_ROOT/libs/dbus-lib"
 
   : > "$TEST_ROOT/set_string.log"
+  : > "$TEST_ROOT/update_csv.log"
   : > "$TEST_ROOT/add_settings.last"
   : > "$TEST_ROOT/remove_settings.last"
 }
@@ -93,20 +101,15 @@ test_installer_dbus_lib_nav_pages_sync_add_and_remove() {
   stage_installer_dbus_runtime
   load_installer_dbus_lib
 
-  # shellcheck disable=SC2034
-  DBUS_GET_VALUE='["qrc:/demo/Old.qml"]'
   installer_dbus_lib_nav_pages_sync add demo 'PageA PageB'
 
   assert_exitcode 0
-  assert_file_contains "$TEST_ROOT/set_string.log" '/Settings/Vespera/CustomNavPages|["qrc:/demo/Old.qml","qrc:/demo/PageA.qml","qrc:/demo/PageB.qml"]'
+  assert_file_contains "$TEST_ROOT/update_csv.log" '/Settings/Vespera/CustomNavPages|add|qrc:/demo/PageA.qml qrc:/demo/PageB.qml'
 
-  : > "$TEST_ROOT/set_string.log"
-  # shellcheck disable=SC2034
-  DBUS_GET_VALUE='["qrc:/demo/Old.qml"]'
   installer_dbus_lib_nav_pages_sync remove demo 'Old'
 
   assert_exitcode 0
-  assert_file_contains "$TEST_ROOT/set_string.log" '/Settings/Vespera/CustomNavPages|[]'
+  assert_file_contains "$TEST_ROOT/update_csv.log" '/Settings/Vespera/CustomNavPages|remove|qrc:/demo/Old.qml'
 
   cleanup_installer_dbus_runtime
 }

@@ -1,12 +1,12 @@
 Package: test-device
-Version: 1.1.0~d260926.1436
+Version: 1.1.0~d261027.1533
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: f446507068c5ee5ad64bfb2db3eaca28
-Size: 17834
-Filename: test-device_1.1.0~d260926.1436_all.ipk
+MD5Sum: 6ab261896c8b6d00d698f470970d7106
+Size: 17878
+Filename: test-device_1.1.0~d261027.1533_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  A simple service for testing adding and removing a serial device
 OE: einstine
@@ -14,13 +14,13 @@ License: MIT
 Priority: optional
 
 Package: test-install
-Version: 1.1.0~d260926.1436
+Version: 1.1.0~d261027.1533
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: cd0bcff64203bdf096a54e552f64ff79
-Size: 1316
-Filename: test-install_1.1.0~d260926.1436_all.ipk
+MD5Sum: 483ee77a4571b6c2831053928c76dc88
+Size: 1328
+Filename: test-install_1.1.0~d261027.1533_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  A simple app for testing installs
 OE: einstine
@@ -41,3 +41,4 @@ Description:  A simple service for testing adding and removing a serial device
 OE: einstine
 License: MIT
 Priority: optional
+

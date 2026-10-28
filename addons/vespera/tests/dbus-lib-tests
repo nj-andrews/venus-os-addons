@@ -93,6 +93,28 @@ test_dbus_lib_get_value_returns_unquoted_value() {
   assert_eq 'hello-world' "$result"
 }
 
+test_dbus_lib_update_csv_items_adds_unique_values() {
+  DBUS_CALLS=
+  DBUS_MODE=get-value
+  DBUS_GET_VALUE_RESPONSE='first, second'
+
+  dbus_lib_update_csv_items '/Settings/Test/Items' add second third
+
+  assert_exitcode 0
+  assert_contains 'SetValue,first,second,third' "$DBUS_CALLS"
+}
+
+test_dbus_lib_update_csv_items_removes_matching_values() {
+  DBUS_CALLS=
+  DBUS_MODE=get-value
+  DBUS_GET_VALUE_RESPONSE='first, second, third'
+
+  dbus_lib_update_csv_items '/Settings/Test/Items' remove second third
+
+  assert_exitcode 0
+  assert_contains 'SetValue,first' "$DBUS_CALLS"
+}
+
 test_dbus_lib_remove_settings_extracts_paths_and_calls_remove() {
   DBUS_CALLS=
   DBUS_MODE=set-ok

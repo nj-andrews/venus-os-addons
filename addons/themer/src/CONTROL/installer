@@ -1,9 +1,28 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 
+# USER EDITABLE SECTION
+# Copy this file as the minimal skeleton for a new install that uses Vespera.
+# Only the settings below are intended to be customized by package authors.
+# Everything else is managed by the shared installer runtime.
+
+# Valid callbacks
+# pre_remove
+# post_remove
+# finalize_remove - called after opkg has finished
+#
+# pre_install
+# post_install
+# finalize_install - called after opkg has finished
+#
+# Valid $PACKAGE_ACTION values
+# install|upgrade-install|configure|dev-install
+# remove|upgrade-remove|dev-remove
+
+PACKAGE_DBUS_NAME="Themer"
 PACKAGE_CUSTOM_MENUS="PageSettingsDisplay/ThemerPageSettingsSubMenu"
 
-DBUS_AVAILABLE_THEMES="Dark" # space separated list of themes
+# Optional package-level app settings (JSON entries for dbus-lib add_settings)
 PACKAGE_DBUS_SETTINGS='
 		{"path":"/Settings/Themer/AvailableThemes", "default":"Dark"}
 	  {"path":"/Settings/Themer/CurrentTheme", "default":""}
@@ -22,40 +41,25 @@ PACKAGE_DBUS_SETTINGS='
 		{"path":"/Settings/Themer/Themes/Dark/Color2", "default":"#c4c4c4"}
 '
 
-#PACKAGE_DBUS_SETTINGS_DEPRECATED=""
+DBUS_AVAILABLE_THEMES="Dark" # space separated list of themes
 
 pre_install() {
-
-	# 1. add themes to existing cvs list
-	local new_themes cur_themes
-	dbus_lib_get_value "/Settings/Themer/AvailableThemes" cur_themes
-	new_themes="$cur_themes"
-
-	for theme in $DBUS_AVAILABLE_THEMES; do
-			[[ ",$new_themes," == *,"$theme",* ]] ||
-					new_themes="${new_themes:+$new_themes,}$theme"
-	done
-
-	[[ "$new_themes" != "$cur_themes" ]] &&
-			dbus_lib_set_value "/Settings/Themer/AvailableThemes" "$new_themes"
-
+	local dbus_path="/Settings/Themer/AvailableThemes"
+	# 1. add themes to cvs list
+	dbus_lib_update_csv_items "$dbus_path" "add" "${DBUS_AVAILABLE_THEMES[@]}"
 }
 
 pre_remove() {
-	local new_themes cur_themes
+	installer_lib_is_upgrade && return
+
+	local dbus_path
 
 	# 1. remove themes from existing cvs list
-	dbus_lib_get_value "/Settings/Themer/AvailableThemes" cur_themes
-	new_themes=
+	dbus_path="/Settings/Themer/AvailableThemes"
+	dbus_lib_update_csv_items "$dbus_path" "remove" "${DBUS_AVAILABLE_THEMES[@]}"
 
-	for theme in ${cur_themes//,/ }; do
-		[[ " $DBUS_AVAILABLE_THEMES " == *" $theme "* ]] || new_themes="${new_themes:+$new_themes,}$theme"
-	done
-
-	[[ "$new_themes" != "$cur_themes" ]] &&
-		dbus_lib_set_value "/Settings/Themer/AvailableThemes" "$new_themes"
+  dbus_lib_get_value "$dbus_path" csv_values '' || true
+	if [[ -z "$csv_values" ]]; then
+		  dbus -y com.victronenergy.settings / RemoveSettings "%[ '$dbus_path' ]" &> /dev/null
+	fi
 }
-
-# shellcheck source=/data/dev/addons/vespera/src/data/apps/vespera/libs/source-lib
-source "${VESPERA_ROOT:-}/data/apps/vespera/libs/source-lib"
-addsource libs/installer-lib "$@"

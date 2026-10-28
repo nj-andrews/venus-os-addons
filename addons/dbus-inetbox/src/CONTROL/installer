@@ -24,9 +24,10 @@ PACKAGE_DBUS_NAME="Inetbox"
 # add only for custom devices, value is can be any string value
 PACKAGE_DEVICES="dbus-inetbox=Inetbox"
 
+PACKAGE_CUSTOM_MENUS="PageSettings/InetboxPageSettingsSubMenu"
 PACKAGE_CUSTOM_OVERVIEW_PAGES="InetboxOverview"
 PACKAGE_CUSTOM_NAV_PAGES="MotorhomePage"
-PACKAGE_CUSTOM_MENUS="PageSettings/InetboxPageSettingsSubMenu"
+
 
 # Optional package-level app settings (JSON entries for dbus-lib add_settings)
 PACKAGE_DBUS_SETTINGS=''

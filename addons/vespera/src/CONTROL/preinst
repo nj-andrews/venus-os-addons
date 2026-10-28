@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2155
 
 PKG_WORKING_DIR="$(readlink ${VESPERA_ROOT:-}/var/lock/vespera)"
 PKG_SOURCE="${0}"
@@ -8,6 +7,7 @@ PKG_SCRIPT_DIR="${PKG_SOURCE%/*}"
 PKG_NAME="$(sed -n 's/^Package:[[:space:]]*//p' "${PKG_SCRIPT_DIR}/control" | head -n 1)"
 PKG_OVERLAY_CONF_FILE="${PKG_SCRIPT_DIR}/installer-overlays"
 PKG_OVERLAY_LIB="${PKG_SCRIPT_DIR}/overlay-lib"
+[[ -f "$PKG_OVERLAY_LIB" ]] || PKG_OVERLAY_LIB="${VESPERA_ROOT:-}/data/var/vespera/info/vespera.overlay-lib"
 
 VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
 STD_OUT=/dev/null

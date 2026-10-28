@@ -165,9 +165,10 @@
         <translation type="unfinished">Dokumentaatio</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../InetboxPageSettings.qml" line="47"/>
         <source></source>
         <oldsource>Documentation</oldsource>
-        <translation type="obsolete">Dokumentaatio</translation>
+        <translation type="unfinished">Dokumentaatio</translation>
     </message>
     <message id="inetbox_no_device_found">
         <location filename="../components/MotorhomeInetbox.qml" line="25"/>

@@ -110,18 +110,62 @@ dbus_lib_set_string_value() {
 
 	__dbus_lib_normalize_dbus_path path
 
-	if dbus -y com.victronenergy.settings "$path" SetValue "$value" 2>/dev/null; then
+	if dbus -y com.victronenergy.settings "$path" SetValue "$value" >/dev/null 2>&1; then
 		return 0
 	fi
 
 	local base_path="${path%/*}"
   local name="${path##*/}"
-	if dbus -y com.victronenergy.settings / AddSetting "$base_path" "$name" "$value" s 0 0; then
+	if dbus -y com.victronenergy.settings / AddSetting "$base_path" "$name" "$value" s 0 0 >/dev/null; then
 		return 0
 	fi
 
 	echo "Error: Adding setting: AddSetting \"${path}\"" >&2
 	return 1
+}
+
+# Adds or removes one or more items in a comma-separated D-Bus setting.
+# Arguments:
+#   $1 - path: setting path
+#   $2 - action: "add" or "remove"
+#   $3... - items to add or remove
+dbus_lib_update_csv_items() {
+	local path="${1:-}" action="${2:-}"
+	local csv_values= item existing csv_out found
+	local -a raw_items=() csv_items=() remaining_items=()
+
+	[[ -n "$path" && ( "$action" == "add" || "$action" == "remove" ) && $# -ge 3 ]] || return 1
+	shift 2
+
+	dbus_lib_get_value "$path" csv_values '' || true
+	IFS=',' read -r -a raw_items <<< "$csv_values"
+	for item in "${raw_items[@]}"; do
+		item="${item//[[:space:]]/}"
+		[[ -n "$item" ]] && csv_items+=("$item")
+	done
+
+	for item in "$@"; do
+		[[ -n "$item" ]] || continue
+		if [[ "$action" == "add" ]]; then
+			found=0
+			for existing in "${csv_items[@]}"; do
+				if [[ "$existing" == "$item" ]]; then
+					found=1
+					break
+				fi
+			done
+			[[ "$found" == "1" ]] || csv_items+=("$item")
+		else
+			remaining_items=()
+			for existing in "${csv_items[@]}"; do
+				[[ "$existing" == "$item" ]] || remaining_items+=("$existing")
+			done
+			csv_items=("${remaining_items[@]}")
+		fi
+	done
+
+	IFS=', ' csv_out="${csv_items[*]}"
+	dbus_lib_set_string_value "$path" "$csv_out"
 }
 
 # Function: dbus_lib_get_value

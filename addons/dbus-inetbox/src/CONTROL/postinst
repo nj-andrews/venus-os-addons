@@ -1,28 +1,3 @@
 #!/bin/bash
-# shellcheck disable=SC2155
 
-PKG_WORKING_DIR="$(readlink /var/lock/vespera)"
-PKG_SOURCE="${0}"
-PKG_ACTION="${1}"
-PKG_INSTALLER_FILE="${0%.*}.installer"
-PKG_INSTALL_SCRIPT="/data/apps/available/vespera/scripts/install"
-
-export VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
-
-if ((VESPERA_VERBOSITY>1)); then
-	echo "*****************************************************"
-	echo "postinst"
-	echo "VESPERA_VERBOSITY=$VESPERA_VERBOSITY"
-	echo "PKG_WORKING_DIR=$PKG_WORKING_DIR"
-	echo "PKG_SOURCE=${PKG_SOURCE}"
-	echo "PKG_ACTION=${PKG_ACTION}"
-	echo "PKG_INSTALLER_FILE=${PKG_INSTALLER_FILE}"
-	echo "PKG_INSTALL_SCRIPT=${PKG_INSTALL_SCRIPT}"
-fi
-
-"$PKG_INSTALL_SCRIPT" "$PKG_ACTION" "$PKG_INSTALLER_FILE" "$PKG_WORKING_DIR" "$VESPERA_VERBOSITY"
-
-if ((VESPERA_VERBOSITY>1)); then
-	echo "*****************************************************"
-	echo
-fi
+source /data/var/vespera/info/vespera.postinst "$@"

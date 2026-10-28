@@ -75,42 +75,18 @@ __installer_dbus_lib_apply_queue_set() {
 }
 
 installer_dbus_lib_nav_pages_sync() {
-  local action="${1:-}" plugin_name="${2:-}" pages="${3:-}"
-  local dbus_path="/Settings/Vespera/CustomNavPages"
-  local csv_values="" qrc_path item
-  local -a nav_items=()
+	local action="${1:-}" plugin_name="${2:-}" pages="${3:-}"
+	local dbus_path="/Settings/Vespera/CustomNavPages" page
+	local -a qrc_paths=()
 
-  [[ -n "$plugin_name" && -n "$pages" ]] || return 0
-  [[ "$action" == "add" || "$action" == "remove" ]] || return 1
+	[[ -n "$plugin_name" && -n "$pages" ]] || return 0
+	[[ "$action" == "add" || "$action" == "remove" ]] || return 1
 
-  # Get current values and parse into array (splitting by comma, trimming spaces automatically)
-  dbus_lib_get_value "$dbus_path" csv_values '' || true
-  IFS=',' read -r -a raw_items <<< "$csv_values"
-  for item in "${raw_items[@]}"; do
-    item="${item//[[:space:]]/}" # strip all spaces for clean matching
-    [[ -n "$item" ]] && nav_items+=("$item")
-  done
+	for page in $pages; do
+		qrc_paths+=("qrc:/${plugin_name}/${page}.qml")
+	done
 
-  # Process add/remove for each page
-  for page in $pages; do
-    qrc_path="qrc:/${plugin_name}/${page}.qml"
-    if [[ "$action" == "add" ]]; then
-      # Append only if it doesn't already exist
-      [[ " ${nav_items[*]} " == *" $qrc_path "* ]] || nav_items+=("$qrc_path")
-    else
-      # Filter out matching items
-			# shellcheck disable=SC2206
-      nav_items=(${nav_items[@]/$qrc_path})
-    fi
-  done
-
-  # Join array back into a CSV string
-  IFS=", "; local csv_out="${nav_items[*]}"
-
-  # Write to D-Bus with fallback
-  dbus_lib_set_string_value "$dbus_path" "$csv_out" &>/dev/null || {
-    dbus -y com.victronenergy.settings / AddSetting "${dbus_path%/*}" "${dbus_path##*/}" "$csv_out" s 0 0
-  }
+	dbus_lib_update_csv_items "$dbus_path" "$action" "${qrc_paths[@]}"
 }
 
 __installer_dbus_lib_upgrade_compute_delta() {

@@ -197,18 +197,20 @@ __vespera_lib_restart_venus_services() {
 	local -a existing_files=()
 
 	# installer-services is optional; skip lists that do not exist
+
 	for file in "${_app_venus_service_files[@]}"; do
 		[[ -f "$file" ]] && existing_files+=("$file")
 	done
 	[[ ${#existing_files[@]} -eq 0 ]] && return 0
 
 	# shellcheck disable=SC2013
-	for service in $(sort -u "${existing_files[@]}"); do
+	# skip blank lines and comments
+	for service in $(grep -h -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "${existing_files[@]}" | sort -u); do
 		if [[ -d "$service" ]]; then
 			vespera_lib_log_verbose2 && echo "restarting $service"
 			svc -t "$service"
 		else
-			vespera_lib_log_verbose2 && echo "__vespera_lib_restart_venus_services:service not found:$service" >&2;
+			vespera_lib_log_verbose2 && echo "__vespera_lib_restart_venus_services: service not found:$service" >&2;
 		fi
 	done
 

@@ -186,9 +186,10 @@
         <translation type="unfinished">Documentation</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../InetboxPageSettings.qml" line="47"/>
         <source></source>
         <oldsource>Documentation</oldsource>
-        <translation type="obsolete">Documentation</translation>
+        <translation type="unfinished">Documentation</translation>
     </message>
     <message id="inetbox_heating_mode">
         <location filename="../InetboxDevicePage.qml" line="46"/>

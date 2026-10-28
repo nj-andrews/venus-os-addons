@@ -11,7 +11,9 @@ PACKAGE_ACTION="${1}"
 PACKAGE_INSTALLER_FILE="${2}"
 VESPERA_WORKING_DIR="${3}"
 VESPERA_VERBOSITY="${4}"
-PACKAGE_NAME="${PACKAGE_INSTALLER_FILE##*/}"; PACKAGE_NAME="${PACKAGE_NAME%.*}"
+PACKAGE_NAME="${PACKAGE_INSTALLER_FILE##*/}"
+PACKAGE_NAME="${PACKAGE_NAME%.*}"
+
 set --
 
 [[ -z "${PACKAGE_ACTION}" ]] && { echo "CRITICAL: ACTION not set. Usage: <action> [installer-source]"; exit 1; }
@@ -67,6 +69,14 @@ installer_lib_log_verbose2() { ((VESPERA_VERBOSITY>1)) }
 installer_lib_log_verbose3() { ((VESPERA_VERBOSITY>2)) }
 installer_lib_log_verbose4() { ((VESPERA_VERBOSITY>3)) }
 
+installer_lib_is_upgrade() {
+	[[ $PACKAGE_ACTION == "upgrade-remove" || $PACKAGE_ACTION == "upgrade-install" || $PACKAGE_ACTION == "upgrade-remove-post" ]]
+}
+
+installer_lib_is_remove() {
+	[[ $PACKAGE_ACTION == "remove" || $PACKAGE_ACTION == "upgrade-remove" || $PACKAGE_ACTION == "upgrade-remove-post" || $PACKAGE_ACTION == "remove-post" ]]
+}
+
 installer_lib_phase_sync_custom_nav_pages() {
 	local action="${1:-}"
 	[[ -n "${PACKAGE_CUSTOM_NAV_PAGES:-}" ]] || return 0
@@ -79,13 +89,6 @@ installer_lib_phase_sync_custom_nav_pages() {
 	installer_dbus_lib_nav_pages_sync "$action" "$PACKAGE_DBUS_NAME" "$pages"
 }
 
-installer_lib_is_upgrade() {
-	[[ $PACKAGE_ACTION == "upgrade-remove" || $PACKAGE_ACTION == "upgrade-install" || $PACKAGE_ACTION == "upgrade-remove-post" ]]
-}
-
-installer_lib_is_remove() {
-	[[ $PACKAGE_ACTION == "remove" || $PACKAGE_ACTION == "upgrade-remove" || $PACKAGE_ACTION == "upgrade-remove-post" || $PACKAGE_ACTION == "remove-post" ]]
-}
 
 installer_lib_update_install_list() {
 	# + installed (not enabled)
