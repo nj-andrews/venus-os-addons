@@ -4,7 +4,7 @@
 # slight changes, hidden status display, typos
 # modify logging structure
 
-from typing import Callable
+from typing import Any, Callable, Optional
 from taskmanager import TaskManager
 from calculate_checksum import calculate_checksum
 import conversions as cnv
@@ -335,6 +335,7 @@ class InetboxApp:
 	display_status = {}
 	log = logging.getLogger(__name__)
 	publish_callback: list[Callable[[str, None], None]] = []
+	watchdog_callback: Optional[Callable[[], Any]] = None
 
 	def __init__(self, tasks: TaskManager, debug, reflect=True):
 		# when requested, set logger to debug level
@@ -359,6 +360,7 @@ class InetboxApp:
 		# regisered callbacks.
 		# Every minute, publish an alive-heartbeat
 		# Sleep between loops for 3 seconds
+		wd_task = None
 
 		while True:
 			items = self.get_all(True)
@@ -371,9 +373,18 @@ class InetboxApp:
 
 			current_time = time.time()
 			if current_time - last_alive_time >= self.ALIVE_INTERVAL:
+					self.log.debug("publishing alive = true")
 					self.status["alive"][1] = True  # publish alive-heartbeat every min
 					last_alive_time = current_time
 
+			if self.status["alive"][0]=="OFF":
+				# re-arm after the watchdog finished (e.g. a reset that didn't help)
+				if (wd_task is None or wd_task.done()) and self.watchdog_callback:
+					wd_task = asyncio.create_task(self.watchdog_callback())
+			else:
+				wd_task = None
+
+			self.log.debug(f"sleeping: {self.PUBLISH_INTERVAL}")
 			await asyncio.sleep(self.PUBLISH_INTERVAL)
 
 	def add_publish_callback(self, callback: Callable[[str, None], None]):

@@ -24,6 +24,8 @@ import asyncio
 import logging
 import sys
 import time
+import os
+import json
 
 class Lin:
 
@@ -43,6 +45,10 @@ class Lin:
 
 		# Only for display control / slow event timing
 		CNT_ROWS_MAX = 200
+
+		# /data persists on Venus OS (logs are rotated); override with INETBOX_DUMP_DIR
+		DUMP_DIR = os.environ.get("INETBOX_DUMP_DIR", "/data/log/dbus-inetbox/lin-dumps")
+		DUMP_KEEP = 20
 
 		# Check Alive-status periodically - with 1ms delay it is appx. 9s
 		# there must be more than 1 D8-requests in this periode, than is alive status "ON"
@@ -220,24 +226,75 @@ class Lin:
 
 		async def watchdog(self):
 				self.log.info("watchdog activated")
-				await asyncio.sleep(60)
-				if (self.app.status["alive"][0] == "ON"):
-						self.log.info("watchdog deactivated_s1")
-						return
-				await asyncio.sleep(60)
-				if (self.app.status["alive"][0] == "ON"):
-						self.log.info("watchdog deactivated_s2")
-						return
-				await asyncio.sleep(60)
-				if (self.app.status["alive"][0] == "ON"):
-						self.log.info("watchdog deactivated_s3")
-				else:
-						if self.lin_debug:
-								self.log.debug("system reboot in debug_mode suppressed")
-						else:
-								self.log.info("system reboot required")
-								# For standard Python, use sys.exit() instead of machine.reset()
-								sys.exit(1)
+				# allow time for the device itself to reboot before resetting
+				for stage in (1, 2, 3):
+						await asyncio.sleep(60)
+						if (self.app.status["alive"][0] == "ON"):
+								self.log.info(f"watchdog deactivated_s{stage}")
+								return
+				self.log.warning("watchdog: alive still OFF - dumping state and resetting")
+				self.dump_state()
+				self.reset()
+
+
+		def dump_state(self):
+				try:
+						state = {
+								"serial_open": self.serial.is_open,
+								"serial_in_waiting": self.serial.in_waiting if self.serial.is_open else None,
+								"rx_buf": bytes(self._rx_buf).hex(" "),
+								"ts_response_buffer": [bytes(b).hex(" ") for b in self.ts_response_buffer],
+								"cpp_in_buffer": [bytes(b).hex(" ") for b in self.cpp_in_buffer],
+								"cpp_buffer": {k.hex(): bytes(v).hex(" ") for k, v in self.cpp_buffer.items()},
+								"cmd_buf": repr(self.cmd_buf),
+								"d8_alive": self.d8_alive,
+								"stop_async": self.stop_async,
+								"updates_to_send": self.updates_to_send,
+								"update_request": self.update_request,
+								"cnt_rows": self.cnt_rows,
+								"upload_buffer": self.app.upload_buffer,
+								"upload02_buffer": self.app.upload02_buffer,
+								"upload_wait": self.app.upload_wait,
+								"app_status": repr(self.app.status),
+						}
+						os.makedirs(self.DUMP_DIR, exist_ok=True)
+						path = os.path.join(self.DUMP_DIR, time.strftime("lin-dump-%Y%m%d-%H%M%S.json"))
+						with open(path, "w") as f:
+								json.dump(state, f, indent=2, default=repr)
+						self.log.warning(f"[LIN-DUMP] state written to {path}")
+						# keep only the newest dumps
+						dumps = sorted(n for n in os.listdir(self.DUMP_DIR) if n.startswith("lin-dump-"))
+						for old in dumps[:-self.DUMP_KEEP]:
+								os.remove(os.path.join(self.DUMP_DIR, old))
+				except Exception:
+						self.log.exception("dump_state failed")
+
+
+		# Equivalent to a service restart for the LIN layer. Runs synchronously on the
+		# event loop, so it cannot interleave with _lin_loop.
+		def reset(self):
+				self.log.warning("resetting lin state")
+				self.ts_response_buffer = []
+				self.cpp_in_buffer = [bytes([]) for _ in range(6)]
+				self.cpp_buffer = {}
+				self.cmd_buf = {}
+				self._rx_buf = bytearray()
+				self.updates_to_send = False
+				self.update_request = False
+				self.stop_async = False
+				self.d8_alive = False
+				self.cnt_rows = 1
+				self.app.upload_buffer = 0
+				self.app.upload02_buffer = 0
+				self.app.upload_wait = 1
+				try:
+						self.serial.close()
+						self.serial.open()
+						self.serial.reset_input_buffer()
+						self.serial.reset_output_buffer()
+				except Exception:
+						self.log.exception("serial reopen failed")
+
 
 		# check alive status
 		def status_monitor_timed(self):

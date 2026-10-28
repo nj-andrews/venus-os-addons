@@ -64,7 +64,7 @@ class InetboxController:
 	_lin : Lin
 	_settings : SettingsDevice
 	_dbusInetboxService : dbusInetboxService
-	_Schedules : InetboxSchedules
+	_schedules : InetboxSchedules
 
 	def __init__(self, tasks: TaskManager, serialPort, sid, debug_lin, debug_inet, record_file=None):
 
@@ -80,6 +80,7 @@ class InetboxController:
 		self._lin = Lin(self._app, serialPort, tasks, debug_lin, record_file)
 
 		self._app.add_publish_callback(self.inetbox_value_to_dbus)
+		self._app.watchdog_callback = self._lin.watchdog
 
 		classAndVrmInstance = self._settings['class_and_vrm_instance']
 		classAndVrmInstanceParts = classAndVrmInstance.split(':')
@@ -97,11 +98,11 @@ class InetboxController:
 				"sid_" + sid,
 				self.dbus_value_to_inetbox)
 
-		self._Schedules = InetboxSchedules(
+		self._schedules = InetboxSchedules(
 			settings=self._settings,
 			apply_callback=self.dbus_value_to_inetbox,
 			logger=self.log)
-		tasks.add_task("inetbox_schedules", self._Schedules.run_loop)
+		tasks.add_task("inetbox_schedules", self._schedules.run_loop)
 
 	# serial port -> dbus com.victronenergy.inetbox_sid_[xxxx]
 	def inetbox_value_to_dbus(self, name: str, value):
@@ -224,8 +225,8 @@ class InetboxController:
 				self._dbusInetboxService.set_value(path, newvalue)
 				return True
 
-			if path.startswith("/Schedules/") and hasattr(self, "_Schedules"):
-				self._Schedules.on_setting_changed(path, oldvalue, newvalue)
+			if path.startswith("/Schedules/") and hasattr(self, "_schedules"):
+				self._schedules.on_setting_changed(path, oldvalue, newvalue)
 				return True
 
 			return False
