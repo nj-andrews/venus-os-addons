@@ -14,14 +14,14 @@ License: MIT
 Priority: optional
 
 Package: dbus-ne-shunt
-Version: 1.1.0~d261101.0005
+Version: 1.1.0~d261101.2048
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 3899c5d8602f70381af27e4d20005cef
-Size: 28700
-Filename: dbus-ne-shunt_1.1.0~d261101.0005_all.ipk
+MD5Sum: 22eb1f48452b82713bed8dc3b7c0a339
+Size: 28670
+Filename: dbus-ne-shunt_1.1.0~d261101.2048_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
@@ -29,13 +29,13 @@ License: MIT
 Priority: optional
 
 Package: mount-shares
-Version: 1.1.0~d261027.1533
+Version: 1.1.0~d261101.1248
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: a7652b2b484dd9a1a1b3901a21d2f411
-Size: 3048
-Filename: mount-shares_1.1.0~d261027.1533_all.ipk
+MD5Sum: 17db3f7fc472e67817e37d43bb67e216
+Size: 2910
+Filename: mount-shares_1.1.0~d261101.1248_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for nfs and cifs shares to Venus OS
 OE: mount-shares

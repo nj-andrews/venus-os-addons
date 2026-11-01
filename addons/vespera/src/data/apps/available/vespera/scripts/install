@@ -83,6 +83,10 @@ __register_services() {
 
 __add_vespera_startup_scripts() {
 	[[ -s "$PACKAGE_RCS_LOCAL_SCRIPT_FILE" || -s "$PACKAGE_RC_LOCAL_SCRIPT_FILE" ]] || return
+	# update rcS.local/rc.local for vespera
+	# vespera calls the scripts [package].installer-rc-local [package].installer-rcS-local files at startup
+	[[ $PACKAGE_NAME == "vespera" ]] || return
+
 	(
 		addsource "libs/file-lib"
 		[[ ! -s "$PACKAGE_RCS_LOCAL_SCRIPT_FILE" ]] ||
@@ -92,9 +96,18 @@ __add_vespera_startup_scripts() {
 	)
 }
 
+# ensure the dbus sidecar file exists even when not provided
+# dbus name taked from package name
+__ensure_dbus_sidecar_file() {
+	[[ -f "$PACKAGE_DATA_INFO_DIR/$PACKAGE_NAME.installer-dbus-name" ]] ||
+		"$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.installer-dbus-name"
+}
+
 __install() {
 
 	__try_call "pre_install"
+
+	__ensure_dbus_sidecar_file
 
 	__process_default_conf_files
 

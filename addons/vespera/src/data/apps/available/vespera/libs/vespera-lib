@@ -69,9 +69,7 @@ __vespera_lib_cleanup() {
 
 	___remove_file_if_empty "$VESPERA_DATA_DIR/status"
 	rmdir "$VESPERA_DATA_DIR/info" 2>/dev/null
-	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/indexer.md5" \
-					"$VESPERA_DATA_DIR/opkg.conf" "$VESPERA_DATA_DIR/venus-version" \
-					"${VESPERA_DATA_DIR}/feeds.conf"
+	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/venus-version" \
 
 	find "$VESPERA_DATA_DIR" -type d -empty -exec rmdir -p {} \; 2>/dev/null
 

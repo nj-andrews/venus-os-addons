@@ -94,9 +94,7 @@ class ne_shunt_services_controller:
 
 		logging.debug('switch dbus value changed, name: %s, path: %s, newvalue: %s' % (name, path, newvalue))
 
-		if (path.endswith('/CustomName'))
-			self._settings[path] = newvalue
-		elif (path.endswith('/Group'))
+		if (path.endswith('/CustomName') or path.endswith('/Group') or path.endswith('/ShowUIControl')):
 			self._settings[path] = newvalue
 		elif (path == '/SwitchableOutput/ExternalLights/State'):
 			self._try_toggle_serial_switch_value("external_lights", newvalue)
@@ -107,7 +105,7 @@ class ne_shunt_services_controller:
 		elif (path == "/SwitchableOutput/Aux/State" ):
 			self._try_toggle_serial_switch_value("aux", newvalue)
 
-		else
+		else:
 			return False
 		return True
 
@@ -332,10 +330,10 @@ class ne_shunt_services_controller:
 
 		for key, value in newData.diff(curData):
 
-			logging.info(f"value changed: {key} = {value}")
+			logging.debug(f"value changed: {key} = {value}")
 
 			match key:
-				case 'FreshWaterTank' | 'grey_waste_tank' | 'grey_waste_tank2':
+				case 'fresh_water_tank' | 'grey_waste_tank' | 'grey_waste_tank2':
 					self.update_dbus_item(key, "/Level", value)
 				case 'external_lights':
 					self.update_dbus_item("switches", "/SwitchableOutput/ExternalLights/State", value)
@@ -345,7 +343,7 @@ class ne_shunt_services_controller:
 					self.update_dbus_item("switches", "/SwitchableOutput/WaterPump/State", value)
 				case 'aux':
 					self.update_dbus_item("switches", "/SwitchableOutput/Aux/State", value)
-				case 'VehicleBattery' | 'LeisureBattery':
+				case 'vehicle_battery' | 'leisure_battery':
 					self.update_dbus_item(key, "/Voltage", value)
 					dbus_service = self._services.get(key, None)
 					if dbus_service:

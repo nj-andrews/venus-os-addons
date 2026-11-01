@@ -193,14 +193,19 @@ sdi_get_available_devices() {
 		[[ "${serial_starter_pid}" != "${pid_tty_lock}" ]] &&
 			rm -f "${lock_dir}/${tty}"
 
-		if ((!serial_starter_pid)); then
-			# Check no other process is using the port
-			local tty_node
-			tty_node="$(__sdi_resolve_tty_path "$tty")" || continue
-			fuser "$tty_node" >/dev/null || echo "$tty";
-		else
-			__sdi_is_port_claimed "${tty}" ||	echo "$tty"
+		if ((serial_starter_pid)); then
+			# if the tty is in the /dev/serial-starter
+			# make sure the serial-starter does not find a service for it.
+			[[ -e "/dev/serial-starter/${tty}" ]] && {
+				__sdi_is_port_claimed "${tty}" || echo "$tty"
+				continue
+			}
 		fi
+		# serial-starter service is not running
+		# or tty is not under /dev/serial-starter folder
+		# Check no other process is using the port
+		local tty_node; tty_node="$(__sdi_resolve_tty_path "$tty")" || continue
+		fuser "$tty_node" >/dev/null || echo "$tty";
 
 	done
 

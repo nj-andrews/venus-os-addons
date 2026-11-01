@@ -16,8 +16,7 @@ This page lists the add-ons currently documented in this workspace and links to 
 | [Ne Shunt](ne-shunt/overview.md) | Integrates supported Nordelec / Nordelettronica shunt devices into Venus OS. | [Overview](ne-shunt/overview.md) · [Hardware](ne-shunt/hardware.md) · [Setup](ne-shunt/setup.md) · [Usage](ne-shunt/usage.md) |
 | [Network GPS](network-gps/overview.md) | Sends GPS tracking data from a network source to Venus OS. | [Overview](network-gps/overview.md) · [Setup](network-gps/setup.md) |
 | [Mount Shares](mount-shares/overview.md) | Mounts SMB/CIFS and NFS shares on the system and restores them after boot. | [Overview](mount-shares/overview.md) · [Usage](mount-shares/usage.md) |
-| [Themer](themer/overview.md) | Adds UI theme support and previews for the dashboard. | [Overview](themer/overview.md) |
-| [Solar Divert](solar-divert/overview.md) | Planned relay add-on driven by excess solar availability. | [Overview](solar-divert/overview.md) |
+| [Themer](themer/overview.md) | Adds UI theme support to the Classic Gui. (Does nothing in the Gui-V2) | [Overview](themer/overview.md)  |
 
 ## Recommended reading order
 

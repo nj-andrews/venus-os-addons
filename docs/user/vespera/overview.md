@@ -9,7 +9,7 @@ Vespera allows end users to install and manage `opkg` packages (add-ons) on the 
 * Based on Open Package Manager (opkg)
 * Deterministic installs, install and remove packages, in any order
 * Scan for and set up USB Serial Devices from the GUI or via the Command line Interface (CLI)
-* Use local, lan or remote feeds as the source of addins
+* Use local (offline), lan or remote feeds as the source of addins
 * Add custom feeds from 3rd parties
 * Keeps the Veuns file system readonly, Does not alter the Venus OS file system, except for /data which is writable.
 * Enable and disable addons without uninstalling

@@ -31,7 +31,6 @@ def main():
 	# Have a mainloop, so we can send/receive asynchronous calls to and from dbus
 	DBusGMainLoop(set_as_default=True)
 
-
 	nuss = ne_shunt_services_controller(serial, args.sid, args.readonly)
 	nuss.initialize()
 

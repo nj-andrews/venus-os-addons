@@ -6,12 +6,12 @@ class ne_shunt_data:
 	KEYS = [
 		"fresh_water_tank", "grey_waste_tank", "grey_waste_tank2",
 		"internal_lights", "external_lights", "aux", "water_pump",
-		"cab_battery", "leisure_battery"
+		"vehicle_battery", "leisure_battery"
 	]
 
-	def clone(self): 
+	def clone(self):
 		return copy.deepcopy(self)
-	
+
 	def __init__(self, rawData = None):
 		if rawData is None:
 			self.data = {k: "" for k in self.KEYS}
@@ -24,7 +24,7 @@ class ne_shunt_data:
 				"external_lights": self._get_outdoor_light_state(rawData[31:32]),
 				"water_pump": self._get_pump_state(rawData[31:32]),
 				"aux": self._get_aux_state(rawData[31:32]),
-				"cab_battery": self._get_battery_level(rawData[24:26]),
+				"vehicle_battery": self._get_battery_level(rawData[24:26]),
 				"leisure_battery": self._get_battery_level(rawData[26:28]),
 			}
 
@@ -48,14 +48,14 @@ class ne_shunt_data:
 	@staticmethod
 	def _get_pump_state(data):
 		return 1 if (int(data, 16) & 4) else 0
-	
+
 	@staticmethod
 	def _get_aux_state(data):
 		return 1 if (int(data, 16) & 8) else 0
-	
+
 	@staticmethod
 	def _get_battery_level(data):
-		
+
 		encoded_voltage = int(data, 16)
 		voltage = (encoded_voltage - 30) / 10
 		#logging.debug("_get_battery_level: " + data + ", voltage = " + str(f"{voltage:.2f}"))
@@ -67,7 +67,7 @@ class ne_shunt_data:
 			return self.data[name]
 		else:
 			raise KeyError(f"Invalid key: {name}")
-		
+
 	def diff(self, other):
 		"""Yield (key, value) pairs where value differs from other."""
 		for k in self.KEYS:
