@@ -27,7 +27,7 @@ device_remove_all() {
 
 device_remove() {
 	local sid_or_tty="${1:-}"
-	local tty= sid=
+	local sid=
 
 	[[ -n "${sid_or_tty}" ]] \
 		|| { echo "Invalid arguments: bind expects <sid|tty>" >&2; return 1; }
@@ -35,19 +35,18 @@ device_remove() {
 	local tty_or_sid="${sid_or_tty#/dev/}"
 
 	if [[ -e "/dev/${tty_or_sid}" ]]; then
-		tty="${tty_or_sid}"
-		DEVICE_TTY=$tty
+		DEVICE_TTY="${tty_or_sid}"
 	else
-		sid="${tty_or_sid}"
-		DEVICE_SID="${sid}"
-		sdi_TTY_from_SID || { echo "Error: sid (${sid}) does not map to an available tty" >&2; return 1; }
-		tty="${DEVICE_TTY:-}"
+		DEVICE_SID="${tty_or_sid}"
+		sdi_TTY_from_SID
 	fi
 
-	sdi_service_name_from_tty "${tty:-}" service_name 2>/dev/null &&
-		service_lib_remove_service "$service_name.$tty"
- 
-	sdi_remove_rule
+	if [[ -n "$DEVICE_TTY" ]]; then
+		sdi_service_name_from_tty "${DEVICE_TTY:-}" service_name 2>/dev/null &&
+			service_lib_remove_service "$service_name.$DEVICE_TTY"
+		echo "AAA:$service_name.$DEVICE_TTY"
+		sdi_remove_rule
+	fi
 
 	[[ -n ${DEVICE_SID} ]] &&
 		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null 2>&1

@@ -82,15 +82,15 @@ test_installer_dbus_lib_build_manifest_includes_expected_entries() {
     "$manifest" \
     'demo' \
     '{"path":"/Settings/Base","default":"x"}' \
-    'ovA=PageA ovB=PageB' \
     'menuA=MenuA' \
-    $'svcA=Display A\nsvcB=Display B'
+    $'# ignored device mapping\n\nsvcA "Display A"\nsvcB=Display B'
 
   assert_exitcode 0
   assert_file_contains "$manifest" '/Settings/Base'
-  assert_file_contains "$manifest" '/Settings/Vespera/CustomOverviewPages/ovA'
+  assert_file_not_contain "$manifest" '/Settings/Vespera/CustomOverviewPages'
   assert_file_contains "$manifest" '/Settings/Vespera/CustomMenuPages/menuA'
   assert_file_contains "$manifest" '/Settings/Vespera/Packages/demo/DeviceServices/0/DisplayName'
+  assert_file_contains "$manifest" '"default":"Display A"'
   assert_file_contains "$manifest" '/Settings/Vespera/Packages/demo/DeviceServices/1/ServiceName'
   assert_file_contains "$manifest" '/Settings/Vespera/Packages/demo/Enabled'
 

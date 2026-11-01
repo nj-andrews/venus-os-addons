@@ -21,7 +21,7 @@ while ! dbus -y | grep -q "com.victronenergy.settings"; do
 	sleep 1
 done
 
-for app in $(opkg_lib_list_packages "all"); do
+for app in $(opkg_lib_list_packages); do
 	echo "starting services for $app"
 
 	[[ -L "${VESPERA_ROOT:-}/data/apps/enabled/$app" ]] || {

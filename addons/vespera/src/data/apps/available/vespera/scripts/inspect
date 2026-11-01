@@ -38,11 +38,10 @@ __list_service_status() {
 	# shellcheck disable=SC2034
 	local -n __template_services="${1}"
 
-
 	shift 1
 	shopt -s globstar nullglob
 
-	for app in $(opkg_lib_list_packages "all"); do
+	for app in $(opkg_lib_list_packages); do
 
 		[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 
@@ -89,6 +88,11 @@ __print_section() {
 	echo "$info" | sed "s/^/      $extra_indent/"
 }
 
+__query_dbus() {
+	dbus -y "${2:-com.victronenergy.settings}" "${1}" GetValue  2>/dev/null | \
+		sed 's/[{}]//g' | sed -E 's/,[[:space:]]*$//' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sort
+}
+
 __list_dbus_settings() {
 	local app="${1}"
 	local -n __template_service_paths="${2}"
@@ -97,29 +101,37 @@ __list_dbus_settings() {
 
 	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}")
 	[[ -z $dbus_name ]] && dbus_name="$app"
+	local dbus_services=0
 
 	for dbus_service in $(dbus -y | grep -i "$dbus_name"); do
-		info+="- $dbus_service"$'\n'
-		info+="$(dbus -y "$dbus_service" / GetValue \ | sed 's/[{}]//g' | sed -E 's/,[[:space:]]*$//')"
+		info="$(__query_dbus / "$dbus_service")"
+		[[ $dbus_services == 0 ]] && { dbus_services=1; __print_header "  - Dbus Services"; }
+		__print_section "   - $dbus_service"
 	done
+	info=
 
 	for template_service_path in "${__template_service_paths[@]}"; do
 		template_service="${template_service_path##*/}"
 		dbus_service=$(dbus -y | grep -im1 "$template_service" | sort)
 		[[ -z $dbus_service ]] && continue
-		info+="- $dbus_service"$'\n'
-		info+="$( dbus -y "$dbus_service" / GetValue | sed -E 's/,[[:space:]]*$//')"
+		info="$(__query_dbus "/" "$dbus_service")"
+		[[ $dbus_services == 0 ]] && { dbus_services=1; __print_header "  - Dbus Services"; }
+		__print_section "   - $dbus_service"
 	done
-	__print_section "  - Dbus Services"
 
-	info="$(dbus -y "com.victronenergy.settings" "/Settings/Vespera" GetValue | \
-		grep "$dbus_name" | sed 's/[{}]//g' | sed -E 's/,[[:space:]]*$//' | sort)"
-	__print_section "  - Dbus Settings: /Settings/Vespera"
+
+	if [[ "$dbus_name" != "Vespera" ]]; then
+		info="$(__query_dbus "/Settings/Vespera")"
+		__print_section "  - Dbus Settings: /Settings/Vespera"
+		info=
+	fi
+
+	info="$(__query_dbus "/Settings/$dbus_name")"
+	__print_section "  - Dbus Settings: /Settings/$dbus_name"
 	info=
 
 	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do
-		info="$(dbus -y "com.victronenergy.settings" "/Settings/Devices/sid_$sid" GetValue \
-			| sed 's/[{}]//g' | sed -E 's/,[[:space:]]*$//' | sort)"
+		info="$(__query_dbus "/Settings/Devices/sid_$sid")"
 		__print_header "  - Device info:$sid"
 		__print_section "    - Dbus Device Settings: /Settings/Devices/sid_$sid"
 		info="$(grep "$sid" "$VESPERA_APP_DIR/conf/serial-starter.rules")"
@@ -137,14 +149,14 @@ __list_dbus_settings() {
 }
 
 declare info=
-for app in $(opkg_lib_list_packages "all"); do
+for app in $(opkg_lib_list_packages); do
 
 	[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
 	[[ -n $info ]] && echo
 	info=
 	[[ -e /data/apps/enabled/$app ]] \
 		&& __print_header "$app - enabled" \
-		|| __print_header "$app - not enabled"
+		|| __print_header "$app - disabled"
 
 	# shellcheck disable=SC2034
 	declare -a template_service_paths=()

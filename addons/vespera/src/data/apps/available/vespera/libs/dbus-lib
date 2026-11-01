@@ -47,21 +47,14 @@ dbus_lib_remove_settings () {
 
 	[[ -n "$paths" ]] || paths="$settings"
 
-	settings="$(
-		printf '%s\n' "$paths" |
-			tr -s '[:space:]' '\n' |
-			sed "s/.*/'&'/" |
-			sed '$!s/$/, /'
-	)"
+	settings="$(printf '%s\n' "$paths" tr -s '[:space:]' '\n' sed "s/.*/'&'/" sed '$!s/$/, /')"
 
 	[[ -n "$settings" ]] || {
 		echo "ERROR:dbus_lib_remove_settings: No settings supplied" >&2
 		return 1
 	}
 
-	dbus -y com.victronenergy.settings / RemoveSettings \
-		"%[ $settings ]" \
-		&> /dev/null
+	dbus -y com.victronenergy.settings / RemoveSettings "%[ $settings ]" &> /dev/null
 }
 
 # Function: dbus_lib_get_branch_names
@@ -124,6 +117,46 @@ dbus_lib_set_string_value() {
 	return 1
 }
 
+# Splits a comma-separated string into an array, trimming whitespace around items.
+# Arguments:
+#   $1 - comma-separated string
+#   $2 - name of the array variable to populate
+dbus_lib_parse_csv() {
+	local csv="${1:-}"
+	local output_name="${2:-}"
+	local item
+	local -a raw_items=()
+
+	[[ -n "$output_name" ]] || return 1
+	local -n output="$output_name"
+	output=()
+
+	IFS=',' read -r -a raw_items <<< "$csv"
+	for item in "${raw_items[@]}"; do
+		item="${item#"${item%%[![:space:]]*}"}"
+		item="${item%"${item##*[![:space:]]}"}"
+		[[ -n "$item" ]] && output+=("$item")
+	done
+}
+
+# Joins an array into a comma-separated string.
+# Arguments:
+#   $1 - name of the array variable
+#   $2 - name of the string variable to populate
+dbus_lib_join_csv() {
+	local -n input="${1:-}"
+	local -n output="${2:-}"
+	local -a nonempty_items=()
+	local item
+
+	for item in "${input[@]}"; do
+		[[ -n "$item" ]] && nonempty_items+=("$item")
+	done
+
+	local IFS=','
+	output="${nonempty_items[*]}"
+}
+
 # Adds or removes one or more items in a comma-separated D-Bus setting.
 # Arguments:
 #   $1 - path: setting path
@@ -132,17 +165,13 @@ dbus_lib_set_string_value() {
 dbus_lib_update_csv_items() {
 	local path="${1:-}" action="${2:-}"
 	local csv_values= item existing csv_out found
-	local -a raw_items=() csv_items=() remaining_items=()
+	local -a csv_items=() remaining_items=()
 
 	[[ -n "$path" && ( "$action" == "add" || "$action" == "remove" ) && $# -ge 3 ]] || return 1
 	shift 2
 
 	dbus_lib_get_value "$path" csv_values '' || true
-	IFS=',' read -r -a raw_items <<< "$csv_values"
-	for item in "${raw_items[@]}"; do
-		item="${item//[[:space:]]/}"
-		[[ -n "$item" ]] && csv_items+=("$item")
-	done
+	dbus_lib_parse_csv "$csv_values" csv_items || return 1
 
 	for item in "$@"; do
 		[[ -n "$item" ]] || continue
@@ -164,9 +193,10 @@ dbus_lib_update_csv_items() {
 		fi
 	done
 
-	IFS=', ' csv_out="${csv_items[*]}"
+	dbus_lib_join_csv csv_items csv_out || return 1
 	dbus_lib_set_string_value "$path" "$csv_out"
 }
+
 
 # Function: dbus_lib_get_value
 # Get a value from the dbus settings service
@@ -174,7 +204,7 @@ dbus_lib_update_csv_items() {
 # AddSetting is called first to create the path if it doesn't exist (idempotent).
 # Arguments:
 #   $1 - path (string) Path and name of the value to retrieve "Vespera/SerialInstaller"
-#   $2 - setting (string) The name of the setting to get
+#   $2 - the value to return
 #   $3 - default (optional string) The default value if the value returned is empty.
 dbus_lib_get_value() {
 	local path="$1"

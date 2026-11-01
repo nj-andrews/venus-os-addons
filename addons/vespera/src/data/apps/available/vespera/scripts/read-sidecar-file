@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+if [[ $# != 1 ]]; then
+	echo "Usage: read-sidecar-file <file>" >&2
+	exit 2
+fi
+
+file="$1"
+[[ -f "$file" ]] || exit 0
+
+awk '
+	{
+		sub(/\r$/, "")
+		sub(/^[[:space:]]+/, "")
+		sub(/[[:space:]]+$/, "")
+		if ($0 == "" || $0 ~ /^#/) next
+		print
+	}
+' "$file"

@@ -43,6 +43,12 @@ printf 'remove-services:%s\n' "$*" >> "$TEST_LOG"
 EOF
   chmod +x "$TEST_APP_ROOT/scripts/remove-services"
 
+  cat > "$TEST_APP_ROOT/scripts/set-state-nav-pages" <<'EOF'
+#!/usr/bin/env bash
+printf 'nav-pages:%s\n' "$*" >> "$TEST_LOG"
+EOF
+  chmod +x "$TEST_APP_ROOT/scripts/set-state-nav-pages"
+
   cat > "$TEST_DATA_DIR/info/vespera.overlay-lib" <<'EOF'
 #!/usr/bin/env bash
 printf 'overlay:%s\n' "$*" >> "$TEST_LOG"
@@ -78,6 +84,7 @@ test_disable_unlinks_app_and_marks_dbus_disabled() {
   assert_exitcode 0
   assert_file_not_exist "$TEST_ROOT/data/apps/enabled/demo"
   assert_file_contains "$log_file" 'remove-services:demo _refresh_devices'
+  assert_file_contains "$log_file" "nav-pages:$TEST_DATA_DIR/info/demo.installer-navigation-pages disable"
   assert_file_contains "$log_file" 'overlay:overlay-unregister demo'
   assert_file_contains "$log_file" 'dbus:-y com.victronenergy.settings /Settings/Vespera/Packages/com.example.demo/Enabled SetValue 0'
   assert_file_contains "$TEST_ROOT/disable.out" "$TEST_DATA_DIR/info/demo.installer-services"

@@ -12,7 +12,6 @@ __write_dbus_settings_to_dbus_list_file() {
 		"${PACKAGE_DBUS_LIST_FILE}" \
 		"${PACKAGE_DBUS_NAME:-}" \
 		"${PACKAGE_DBUS_SETTINGS:-}" \
-		"${PACKAGE_CUSTOM_OVERVIEW_PAGES:-}" \
 		"${PACKAGE_CUSTOM_MENUS:-}" \
 		"${PACKAGE_DEVICES:-}"
 }
@@ -83,15 +82,18 @@ __register_services() {
 }
 
 __add_vespera_startup_scripts() {
-	[[ -z $RCS_LOCAL_SCRIPT ]] && [[ -z $RCS_LOCAL_SCRIPT ]] && return
+	[[ -s "$PACKAGE_RCS_LOCAL_SCRIPT_FILE" || -s "$PACKAGE_RC_LOCAL_SCRIPT_FILE" ]] || return
 	(
 		addsource "libs/file-lib"
-		[[ -n $RCS_LOCAL_SCRIPT ]] && file_lib_append_content_to_file "/data/rcS.local" 755 <<< "${RCS_LOCAL_SCRIPT}"
-		[[ -n $RC_LOCAL_SCRIPT ]] && file_lib_append_content_to_file "/data/rc.local" 755 <<< "${RC_LOCAL_SCRIPT}"
+		[[ ! -s "$PACKAGE_RCS_LOCAL_SCRIPT_FILE" ]] ||
+			file_lib_append_content_to_file "/data/rcS.local" 755 < "$PACKAGE_RCS_LOCAL_SCRIPT_FILE"
+		[[ ! -s "$PACKAGE_RC_LOCAL_SCRIPT_FILE" ]] ||
+			file_lib_append_content_to_file "/data/rc.local" 755 < "$PACKAGE_RC_LOCAL_SCRIPT_FILE"
 	)
 }
 
 __install() {
+
 	__try_call "pre_install"
 
 	__process_default_conf_files
@@ -103,13 +105,12 @@ __install() {
 	__add_vespera_startup_scripts
 
 	# Phase 2: patch + settings apply
+
 	__install_patch_files
 	echo_lang "$LANG_PROCESSING_DBUS_SETTINGS"
 	__add_dbus_settings_from_dbus_list_file
 
 	# Phase 3: runtime enablement
-	echo "$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_FILE"
-
 	installer_lib_update_install_list
 	__register_services
 

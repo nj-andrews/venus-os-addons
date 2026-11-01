@@ -16,17 +16,14 @@
         <translation>Dispositivi personalizzati</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../PageHome.qml" line="60"/>
         <source></source>
-        <translation type="obsolete">Nessuno</translation>
+        <translation>Documentazione</translation>
     </message>
-    <message id="pagesettingsgeneral_documentation">
-        <source></source>
-        <translation type="obsolete">Nessuno</translation>
-    </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="59"/>
-        <source></source>
-        <translation type="unfinished">Nessuno</translation>
+    <message id="vespera_version">
+        <location filename="../PageHome.qml" line="67"/>
+        <source>Version</source>
+        <translation>Versione</translation>
     </message>
     <message id="page_settings_modbus_scan_for_devices">
         <location filename="../PageSettingsDevicesList.qml" line="54"/>
@@ -37,10 +34,6 @@
         <location filename="../PageSettingsDevicesList.qml" line="67"/>
         <source></source>
         <translation></translation>
-    </message>
-    <message id="vespera_settings_to_top">
-        <source>Move settings to top</source>
-        <translation type="obsolete">Sposta le impostazioni in alto</translation>
     </message>
     <message id="vespera_packages">
         <location filename="../PageHome.qml" line="24"/>
@@ -61,7 +54,7 @@
     <message id="vespera_no_service_templates">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
         <source>No service templates installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Nessun modello di servizio installato</translation>
     </message>
     <message id="vespera_serial_device_service">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
@@ -189,7 +182,7 @@ Il servizio partirà a breve...</translation>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
         <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
-        <translation type="unfinished"></translation>
+        <translation>Nessun accesso</translation>
     </message>
     <message id="vespera_add_new_feed">
         <location filename="../PageSettingsFeeds.qml" line="92"/>
@@ -200,7 +193,7 @@ Il servizio partirà a breve...</translation>
     <message id="vespera_edit_feed">
         <location filename="../PageSettingsFeedEdit.qml" line="8"/>
         <source></source>
-        <translation type="unfinished">Nessuno</translation>
+        <translation>Modifica feed</translation>
     </message>
     <message id="vespera_save">
         <location filename="../PageSettingsFeedEdit.qml" line="23"/>

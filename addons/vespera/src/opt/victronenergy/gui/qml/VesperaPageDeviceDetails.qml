@@ -38,7 +38,7 @@ MbPage {
 	function onRemoveDevice(removeDeviceCallback) {
 		return false
 	}
-qsTrEx
+
 	model: VisibleItemModel {
 		MbSubMenu {
 			id: device

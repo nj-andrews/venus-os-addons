@@ -18,71 +18,58 @@ example:
 */
 
 import QtQuick 2
+import Vespera 1.0
 
 OverviewPage {
 	id: root
 
-	readonly property string bindPrefix: service?.value ?? ""
+	property string bindPrefix
 	property string settingsPrefix
-	required property string source
 
-	VBusItem { id:service; bind: settingsPrefix + "/ServiceName"}
-
-	Component.onCompleted: {
-		addServices()
+	Text {
+		text: "No device found"
+		visible: !root.bindPrefix
+		anchors.centerIn: parent
 	}
+
+	Component.onCompleted: addServices()
 
 	function addServices() {
-		//see Main.qml for vesperaCustomOverviewPages
-		for (var i = 0; i < vesperaCustomOverviewPages.pages.rowCount; i++) {
-			let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
-			if (addService(uid, pageName))
-				return
-		}
+		var devices = VesperaDeviceModel.deviceList
+		for (var i = 0; i < devices.rowCount; i++)
+			if (__addService(devices, i) === false) return
 	}
 
-	function addService(uid, pageName) {
-		if (pageName === source) {
-			settingsPrefix = uid
-			// check for and call override if available
-			if (typeof onAddService === "function")
-					return onAddService(uid)
-
-			return true // we only support 1 service for now.
-		}
+	function removeServices() {
+		var devices = VesperaDeviceModel.deviceList
+		for (var i = 0; i < devices.rowCount; i++)
+			if (__removeService(devices, i) === false) return
 	}
 
-	function removeService(uid, pageName) {
-		if (pageName === source) {
-			// check for and call override if available
-			if (typeof onRemoveService === "function")
-					return onRemoveService(uid)
+	function __addService(devices, idx) {
+		var currentIndex = devices.index(idx, 0)
+		var uid = devices.data(currentIndex, VeQItemTableModel.UniqueIdRole)
+		return onAddService(uid)
+	}
 
-			if (root.bindPrefix === uid) {
-				extraOverview(pageName, false)
-				return true
-			}
-		}
+	function __removeService(devices, idx) {
+		var currentIndex = devices.index(idx, 0)
+		var uid = devices.data(currentIndex, VeQItemTableModel.UniqueIdRole)
+		return onRemoveService(uid)
 	}
 
 	Connections {
-		target: vesperaCustomOverviewPages.pages
+		target: VesperaDeviceModel.deviceList
 
 		function onRowsInserted(parent, first, last) {
-			for (var i = first; i <= last; i++) {
-				let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
-				if (addService(uid, pageName))
-					return
-			}
+			for (var i = first; i <= last; i++)
+				if (root.__addService(target, i) === false) return
 		}
 
 		function onRowsAboutToBeRemoved(parent, first, last) {
-			for (var i = first; i <= last; i++) {
-				let [uid, pageName] = vesperaCustomOverviewPages.getPageInfo(i)
-				if (removeService(uid, pageName))
-					return
-			}
+			for (var i = first; i <= last; i++)
+				if (root.__removeService(target, i) === false) return
 		}
-	}
 
+	}
 }

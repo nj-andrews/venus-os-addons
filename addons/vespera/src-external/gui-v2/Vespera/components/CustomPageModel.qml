@@ -48,6 +48,7 @@ QtObject {
 			var parts = value.split(",")
 			for (var i = 0; i < parts.length; ++i) {
 				var item = parts[i].trim()
+				if (item.startsWith("~")) continue
 				if (item) customPagesArray.push(item)
 			}
 		}
@@ -95,7 +96,6 @@ QtObject {
 			return
 		}
 
-
 		_inSyncPages = true
 
 		if (customPages === undefined)
@@ -103,9 +103,7 @@ QtObject {
 
 		const model = Global.mainView.swipeView.contentModel
 
-		//
 		// Build current page lookup from the SwipeView model
-		//
 		const currentPages = {}
 
 		for (let i = 0; i < model.count; ++i) {
@@ -114,17 +112,13 @@ QtObject {
 				currentPages[page.url] = page
 		}
 
-		//
 		// Build requested page lookup
-		//
 		const requestedPages = {}
 
 		for (var url of customPages)
 			requestedPages[url] = true
 
-		//
 		// Remove custom pages that no longer exist
-		//
 		for (var url of _customPages) {
 			if (requestedPages[url])
 				continue
@@ -134,10 +128,8 @@ QtObject {
 				delete _customPageItems[url]
 		}
 
-		//
 		// Add new custom pages.
 		// Insert backwards so final order matches customPages.
-		//
 		//console.debug("CustomPageModel: syncPages customPages:", customPages.length )
 		for (var i = customPages.length - 1; i >= 0; --i) {
 			const url = customPages[i]
@@ -146,8 +138,10 @@ QtObject {
 				continue // page already exists
 
 			var page = _customPageItems[url]
-			if (!page) {
-				page = VesperaSingleton.createPage(url, Global.mainView, {view:Global.mainView.swipeView})
+			if (!page && !url.startsWith("~"))  {
+
+				var fullUrl="qrc:" + url + ".qml"
+				page = VesperaSingleton.createPage(fullUrl, Global.mainView, {view:Global.mainView.swipeView})
 				if (!page) continue
 				_customPageItems[url] = page
 			}
@@ -155,10 +149,7 @@ QtObject {
 			Global.mainView.swipeView.insertItem(0, page)
 		}
 
-		//
 		// Update NavBar pages from the final SwipeView model
-		//
-
 		Global.mainView.navBar.pages.length = model.count
 		for (var i = 0; i < model.count; ++i)
 			Global.mainView.navBar.pages[i] = model.get(i)
@@ -169,6 +160,7 @@ QtObject {
 	}
 
 	function removePage(page) {
+		if (page === undefined) return
 		const swipeView = Global.mainView.swipeView
 
 		for (let i = 0; i < swipeView.contentChildren.length; ++i) {

@@ -10,17 +10,14 @@
         <translation>Kilder</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../PageHome.qml" line="60"/>
         <source></source>
-        <translation type="obsolete">Ingen</translation>
+        <translation>Dokumentation</translation>
     </message>
-    <message id="pagesettingsgeneral_documentation">
-        <source></source>
-        <translation type="obsolete">Ingen</translation>
-    </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="59"/>
-        <source></source>
-        <translation type="unfinished">Ingen</translation>
+    <message id="vespera_version">
+        <location filename="../PageHome.qml" line="67"/>
+        <source>Version</source>
+        <translation>Version</translation>
     </message>
     <message id="listItem_no_access">
         <location filename="../PageSettingsSavedDevice.qml" line="66"/>
@@ -33,7 +30,7 @@
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
         <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen adgang</translation>
     </message>
     <message id="vespera_loading">
         <location filename="../PageSettingsFeeds.qml" line="18"/>
@@ -81,7 +78,7 @@
     <message id="vespera_no_service_templates">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
         <source>No service templates installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen servicemaler installeret</translation>
     </message>
     <message id="vespera_serial_device_service">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
@@ -191,10 +188,6 @@ Tjenesten starter snart...</translation>
         <source>Clicking yes will permanently remove this devices settings</source>
         <translation>Hvis du vaelger Ja, fjernes indstillingerne for denne enhed permanent</translation>
     </message>
-    <message id="vespera_settings_to_top">
-        <source>Move settings to top</source>
-        <translation type="obsolete">Flyt indstillinger til toppen</translation>
-    </message>
     <message id="vespera_packages">
         <location filename="../PageHome.qml" line="24"/>
         <location filename="../PageSettingsPackages.qml" line="8"/>
@@ -204,7 +197,7 @@ Tjenesten starter snart...</translation>
     <message id="vespera_edit_feed">
         <location filename="../PageSettingsFeedEdit.qml" line="8"/>
         <source></source>
-        <translation type="unfinished">Ingen</translation>
+        <translation>Rediger kilde</translation>
     </message>
     <message id="vespera_save">
         <location filename="../PageSettingsFeedEdit.qml" line="23"/>

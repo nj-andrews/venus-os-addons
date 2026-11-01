@@ -48,6 +48,8 @@ Page {
 				url: "https://nj-andrews.github.io/venus-os-addons/"
 			}
 			ListText {
+				//% "Version"
+				text: qsTrId("inetbox_version")
 				secondaryText: GuiPluginLoader.plugin("Inetbox").version
 			}
 

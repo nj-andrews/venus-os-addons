@@ -1,0 +1,3 @@
+# menus for gui-v1
+# [The location of the menu]/[qml file name containing the menu to display (without qml extension)]
+PageSettings/InetboxPageSettingsSubMenu

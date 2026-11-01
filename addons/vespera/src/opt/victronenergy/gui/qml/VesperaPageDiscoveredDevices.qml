@@ -5,7 +5,7 @@ MbPage {
 	id: root
 
 	required property VesperaManager vesperaManager
-	required property MbStyle mbStyle: MbStyle {}
+	property MbStyle mbStyle: MbStyle {}
 
 	VesperaDbusChildModel {
 		id: devicesModel

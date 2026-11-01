@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+__vespera_path="$(dirname "${BASH_SOURCE[0]}")"
+__vespera_path="$(cd "${__vespera_path}/.." && pwd)"
+
+# shellcheck source="../libs/opkg-lib"
+source "$__vespera_path/libs/dbus-lib"
+
+file="${1}"
+action="${2}"
+menu="" menu_value=""
+menus="$("$__vespera_path/scripts/read-sidecar-file" "$file")"
+
+while IFS= read -r menu; do
+	[[ -n "$menu" ]] || continue
+
+	menu_value=""
+	dbus_lib_get_value "/Settings/Vespera/CustomMenuPages/$menu" menu_value
+
+	if [[ $action == "enable" ]] ; then
+		[[ "${menu_value:0:1}" != "~" ]] && continue
+		menu_value="${menu_value:1}"
+	elif [[ $action == "disable" ]]; then
+		[[ "${menu_value:0:1}" == "~" ]] && continue
+		menu_value="~${menu_value}"
+	else
+		exit 0
+	fi
+
+	dbus_lib_set_string_value "/Settings/Vespera/CustomMenuPages/$menu" "$menu_value"
+done <<< "$menus"

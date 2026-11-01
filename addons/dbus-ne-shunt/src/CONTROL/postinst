@@ -1,3 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 
-"${VE_ROOT_DIR:-}/data/apps/dbus-ne-shunt/installer" "$1" "$0"
+source /data/var/vespera/info/vespera.postinst "$@"

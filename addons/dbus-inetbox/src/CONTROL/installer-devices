@@ -1,0 +1,3 @@
+# add only for custom devices, value is can be any string value
+# [service name][space][display name]
+dbus-inetbox "Inetbox"

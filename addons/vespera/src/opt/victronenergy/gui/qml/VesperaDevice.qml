@@ -75,7 +75,7 @@ MbSubMenu {
 	function updateDynamicSubpage() {
 
 		var key = (root.deviceKey.value || "").toString().trim().toLowerCase()
-		if (key.length > 0 && setDynamicSubpage("OpkgPageDeviceDetails_%1.qml".arg(key)))
+		if (key.length > 0 && setDynamicSubpage("VesperaPageDeviceDetails_%1.qml".arg(key)))
 			return
 
 		setDynamicSubpage("VesperaPageDeviceDetails.qml")

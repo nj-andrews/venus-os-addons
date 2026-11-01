@@ -161,8 +161,10 @@ __remove_cleanup() {
 __remove_vespera_startup_scripts() {
 	(
 		addsource "libs/file-lib"
-		file_lib_remove_content_from_file "/data/rcS.local" <<< "${RCS_LOCAL_SCRIPT}"
-		file_lib_remove_content_from_file "/data/rc.local" <<< "${RC_LOCAL_SCRIPT}"
+		[[ ! -f "$PACKAGE_RCS_LOCAL_SCRIPT_FILE" ]] ||
+			file_lib_remove_content_from_file "/data/rcS.local" < "$PACKAGE_RCS_LOCAL_SCRIPT_FILE"
+		[[ ! -f "$PACKAGE_RC_LOCAL_SCRIPT_FILE" ]] ||
+			file_lib_remove_content_from_file "/data/rc.local" < "$PACKAGE_RC_LOCAL_SCRIPT_FILE"
 	)
 }
 

@@ -135,9 +135,9 @@ Page {
 			id: btn_remove
 			width: actionsRow.defaultButtonWidth
 			text: CommonWords.remove
-			enabled: !vespera_running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			enabled: !root.vespera_running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
-				if (!vesperaManager.installerAccess) return
+				if (!root.vesperaManager.installerAccess) return
 				root.vesperaManager.removePackage(root.model.packageName, completionCallback)
 			}
 			anchors.right: parent.right
@@ -148,9 +148,9 @@ Page {
 			text: root.actionLabel
 			width: actionsRow.defaultButtonWidth
 			anchors {right: btn_remove.left; rightMargin: actionsRow.spacing}
-			enabled: !vespera_running && root.available && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			enabled: !root.vespera_running && root.available && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
-				if (!vesperaManager.installerAccess) return
+				if (!root.vesperaManager.installerAccess) return
 				if (!root.installed) {
 					root.vesperaManager.installPackage(root.model.packageName, completionCallback)
 				} else {
@@ -161,7 +161,7 @@ Page {
 		}
 		ListItemButton {
 			width: actionsRow.defaultButtonWidth
-			visible: root.model.enabled != undefined
+			visible: root.model.enabled != undefined && root.installed
 			anchors {left: parent.left}
 
 			text: root.model.enabled === true
@@ -170,9 +170,9 @@ Page {
 				//% "Enable"
 				: qsTrId("vespera_enable")
 
-			enabled: visible && !vespera_running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
+			enabled: visible && !root.vespera_running && root.installed && root.model.packageName != "vespera" && Global.systemSettings.canAccess(VenusOS.User_AccessType_Installer)
 			onClicked: function() {
-				if (!vesperaManager.installerAccess) return
+				if (!root.vesperaManager.installerAccess) return
 				var enabled = root.model.enabled === true
 				root.vesperaManager.setPackageEnabledState(root.model.packageName, !enabled, completionCallback)
 			}

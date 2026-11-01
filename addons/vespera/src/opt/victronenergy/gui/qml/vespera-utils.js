@@ -1,14 +1,14 @@
 
 .pragma library
 
-function initCreateComponent(customItems) {
+function initCustomMenus(customItems) {
 
   if (customItems.value === undefined)
     return
 
   for (var path in customItems.value) {
     var parts = path.split("/");
-    var qmlItemName = parts[parts.length - 1]; // "OpkgPageSettingsSubMenu"
+    var qmlItemName = parts[parts.length - 1];
     //console.log("caching:" + qmlItemName + ".qml")
     var cmo = Qt.createComponent(qmlItemName + ".qml")
     cmo.destroy()
@@ -29,6 +29,28 @@ function qmlFileExists(qmlFileName) {
   return exists
 }
 
+function addRemoveCustomItems(customItems, model, componentFactoryCallback, itemIndexCallback) {
+	console.log("addRemoveCustomItems in:",customItems.value)
+	if (customItems == undefined || customItems.length == 0)
+		return
+
+	if (itemIndexCallback == undefined)
+		throw new Error("itemIndexCallback not set")
+
+	for (var item of customItems.value.split(",")) {
+		console.log("addRemoveCustomItems item:", item)
+		var qmlItemName = item.trim()
+		var qmlItemValue = ""
+
+		if ("^+*-".includes(qmlItemValue[0])) {
+			qmlItemName=qmlItemValue[0]
+			qmlItemValue= qmlItemValue.substring(1)
+		}
+		_doItemAction(qmlItemName, qmlItemValue, model, componentFactoryCallback, itemIndexCallback)
+	}
+
+}
+
 //functionality
 // actions:
 // "" : empty/undefined (add to end)
@@ -36,14 +58,7 @@ function qmlFileExists(qmlFileName) {
 // +  : add before item name (value is name) (insert index)
 // *  : replace item (value starts with "+")  (insert index)
 // -  : remove item (value starts with "-")  (remove index)
-function addRemoveCustomItems(customItems, model, componentFactoryCallback, itemIndexCallback) {
-  if (!customItems.valid || customItems.value.length === 0) {
-    return;
-  }
-  addRemoveCustomItemsQuick(customItems, model, componentFactoryCallback, itemIndexCallback)
-}
-
-function addRemoveCustomItemsQuick(customItems, model, componentFactoryCallback, itemIndexCallback) {
+function addRemoveCustomMenuItems(customItems, model, componentFactoryCallback, itemIndexCallback) {
 
   if (customItems == undefined)
     return
@@ -51,11 +66,13 @@ function addRemoveCustomItemsQuick(customItems, model, componentFactoryCallback,
 	if (itemIndexCallback == undefined)
 		throw new Error("itemIndexCallback not set")
 
-  for (var prop in customItems.value) {
-    var qmlItemName = prop
-    var qmlItemValue = customItems.value[qmlItemName]
-    _doItemAction(qmlItemName, qmlItemValue, model, componentFactoryCallback, itemIndexCallback)
-  }
+	for (var prop in customItems.value) {
+		var qmlItemName = prop
+		var qmlItemValue = customItems.value[qmlItemName]
+
+		_doItemAction(qmlItemName, qmlItemValue, model, componentFactoryCallback, itemIndexCallback)
+	}
+
 }
 
 function findIndex(model, typeName, typeCallback) {
@@ -147,9 +164,11 @@ function _doItemAction(qmlItemName, qmlItemValue, model, componentFactoryCallbac
   if (qmlItemValue?.length > 0)
     action = qmlItemValue[0]
 
-  if (!qmlItemName.endsWith(".qml")) {
-    qmlItemName += ".qml";
-  }
+	if (action !== undefined && action.startsWith("~"))
+		return // app is disabled exit
+
+  if (!qmlItemName.endsWith(".qml"))
+		qmlItemName += ".qml";
 
   switch (action) {
     case "":

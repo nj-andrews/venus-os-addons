@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# see also
-# /data/dev/addons/vespera/src/CONTROL/overlay-targets.conf
-
 # USER EDITABLE SECTION
 # This is the minimal Vespera package installer template.
 # Add or change only the values below for a new package.
-# Shared lifecycle logic stays in installer-lib and should not be duplicated here.
 
 # Valid callbacks
 # pre_remove
@@ -20,27 +16,4 @@
 # remove|upgrade-remove|dev-remove
 # firmware-changed
 
-# shellcheck disable=SC2034
-
-PACKAGE_DBUS_NAME="Vespera"
-
-RCS_LOCAL_SCRIPT="
-# vespera (do not edit)
-/data/apps/available/vespera/scripts/rcS-local
-"
-
-RC_LOCAL_SCRIPT="
-# vespera (do not edit)
-/data/apps/available/vespera/scripts/rc-local
-"
-
-PACKAGE_CUSTOM_MENUS="
-	PageSettings/VesperaPageSettingsSubMenu
-	PageSettingsDisplay/VesperaPageSettingsDisplaySubMenu
-	PageMain/PageHome
-"
-
-PACKAGE_DBUS_SETTINGS='
-	{"path":"/Settings/Vespera/CustomNavPages", "default":"", "min":0, "max":0}
-	{"path":"/Settings/Vespera/Version", "default": 1, "min":0, "max":0}
-'
+# Package metadata is read from the installer-* files alongside this installer.

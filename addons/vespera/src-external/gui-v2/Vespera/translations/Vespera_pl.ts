@@ -16,21 +16,14 @@
         <translation>Źródła</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../PageHome.qml" line="60"/>
         <source></source>
-        <translation type="obsolete">Brak</translation>
+        <translation>Dokumentacja</translation>
     </message>
-    <message id="pagesettingsgeneral_documentation">
-        <source></source>
-        <translation type="obsolete">Brak</translation>
-    </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="59"/>
-        <source></source>
-        <translation type="unfinished">Brak</translation>
-    </message>
-    <message id="vespera_settings_to_top">
-        <source>Move settings to top</source>
-        <translation type="obsolete">Przenieś ustawienia na górę</translation>
+    <message id="vespera_version">
+        <location filename="../PageHome.qml" line="67"/>
+        <source>Version</source>
+        <translation>Wersja</translation>
     </message>
     <message id="vespera_add_usb_serial_device">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="10"/>
@@ -45,7 +38,7 @@
     <message id="vespera_no_service_templates">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
         <source>No service templates installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Nie zainstalowano szablonów usług</translation>
     </message>
     <message id="vespera_serial_device_service">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
@@ -173,7 +166,7 @@ Usługa uruchomi się wkrótce...</translation>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
         <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
-        <translation type="unfinished"></translation>
+        <translation>Brak dostępu</translation>
     </message>
     <message id="vespera_add_new_feed">
         <location filename="../PageSettingsFeeds.qml" line="92"/>
@@ -184,7 +177,7 @@ Usługa uruchomi się wkrótce...</translation>
     <message id="vespera_edit_feed">
         <location filename="../PageSettingsFeedEdit.qml" line="8"/>
         <source></source>
-        <translation type="unfinished">Brak</translation>
+        <translation>Edytuj źródło</translation>
     </message>
     <message id="vespera_save">
         <location filename="../PageSettingsFeedEdit.qml" line="23"/>

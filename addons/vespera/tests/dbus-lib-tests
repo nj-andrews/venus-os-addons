@@ -93,6 +93,28 @@ test_dbus_lib_get_value_returns_unquoted_value() {
   assert_eq 'hello-world' "$result"
 }
 
+test_dbus_lib_parse_csv_populates_array_and_trims_items() {
+  local -a items=()
+
+  dbus_lib_parse_csv ' first, second item ,, third ' items
+
+  assert_exitcode 0
+  assert_eq 3 "${#items[@]}"
+  assert_eq 'first' "${items[0]}"
+  assert_eq 'second item' "${items[1]}"
+  assert_eq 'third' "${items[2]}"
+}
+
+test_dbus_lib_join_csv_populates_string() {
+  local -a items=('first' 'second item' '')
+  local csv=
+
+  dbus_lib_join_csv items csv
+
+  assert_exitcode 0
+  assert_eq 'first,second item' "$csv"
+}
+
 test_dbus_lib_update_csv_items_adds_unique_values() {
   DBUS_CALLS=
   DBUS_MODE=get-value
@@ -101,7 +123,7 @@ test_dbus_lib_update_csv_items_adds_unique_values() {
   dbus_lib_update_csv_items '/Settings/Test/Items' add second third
 
   assert_exitcode 0
-  assert_contains 'SetValue,first,second,third' "$DBUS_CALLS"
+  assert_contains 'SetValue first,second,third' "$DBUS_CALLS"
 }
 
 test_dbus_lib_update_csv_items_removes_matching_values() {
@@ -112,7 +134,7 @@ test_dbus_lib_update_csv_items_removes_matching_values() {
   dbus_lib_update_csv_items '/Settings/Test/Items' remove second third
 
   assert_exitcode 0
-  assert_contains 'SetValue,first' "$DBUS_CALLS"
+  assert_contains 'SetValue first' "$DBUS_CALLS"
 }
 
 test_dbus_lib_remove_settings_extracts_paths_and_calls_remove() {

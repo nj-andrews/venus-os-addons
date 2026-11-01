@@ -7,6 +7,9 @@
 			"path": "/data/dev/addons/dbus-inetbox"
 		},
 		{
+			"path": "/data/dev/addons/dbus-ne-shunt"
+		},
+		{
 			"path": "/data/dev/docs"
 		},
 		{

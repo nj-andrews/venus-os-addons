@@ -155,6 +155,11 @@
         <source>Show Motorhome Page</source>
         <translation>Mostrar página de autocaravana</translation>
     </message>
+    <message id="inetbox_version">
+        <location filename="../InetboxPageSettings.qml" line="52"/>
+        <source>Version</source>
+        <translation>Versión</translation>
+    </message>
     <message id="pagesettingsgeneral_documentation">
         <source></source>
         <translation type="obsolete">Documentación</translation>
@@ -162,13 +167,13 @@
     <message id="settings_page_debug_application_version">
         <location filename="../InetboxPageSettings.qml" line="11"/>
         <source></source>
-        <translation type="unfinished">Documentación</translation>
+        <translation>Documentación</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
         <location filename="../InetboxPageSettings.qml" line="47"/>
         <source></source>
         <oldsource>Documentation</oldsource>
-        <translation type="unfinished">Documentación</translation>
+        <translation>Documentación</translation>
     </message>
     <message id="inetbox_no_device_found">
         <location filename="../components/MotorhomeInetbox.qml" line="25"/>
@@ -210,13 +215,13 @@
     <message id="inetbox_water_mode">
         <location filename="../InetboxSchedules.qml" line="137"/>
         <source>Water mode</source>
-        <translation type="unfinished">Modo de agua</translation>
+        <translation>Modo de agua</translation>
     </message>
     <message id="inetbox_aircon_mode">
         <location filename="../InetboxDevicePage.qml" line="52"/>
         <location filename="../InetboxSchedules.qml" line="146"/>
         <source>Aircon mode</source>
-        <translation type="unfinished">Modo de aire acondicionado</translation>
+        <translation>Modo de aire acondicionado</translation>
     </message>
     <message id="inetbox_schedules">
         <location filename="../InetboxSchedules.qml" line="10"/>

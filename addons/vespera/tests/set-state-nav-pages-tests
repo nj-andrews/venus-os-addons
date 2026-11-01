@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+this_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source_root="$this_path/../src/data/apps/available/vespera"
+
+. "$this_path/../../../scripts/libs/test-lib"
+. "$this_path/lib/vespera-test-fixtures"
+
+TEST_ROOT=
+
+stage_nav_pages_runtime() {
+	TEST_ROOT="$(vt_make_test_root)"
+	mkdir -p "$TEST_ROOT/bin" "$TEST_ROOT/work"
+
+	cat > "$TEST_ROOT/bin/dbus" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$DBUS_LOG"
+
+case "${4:-}" in
+	GetValue)
+		printf "'%s'\n" "${DBUS_CURRENT:-}"
+		;;
+	SetValue)
+		printf '%s' "${5:-}" > "$DBUS_SET_VALUE"
+		;;
+esac
+EOF
+	chmod +x "$TEST_ROOT/bin/dbus"
+}
+
+cleanup_nav_pages_runtime() {
+	[[ -n "${TEST_ROOT:-}" ]] && vt_safe_rm_rf "$TEST_ROOT"
+}
+
+run_nav_pages_script() {
+	local sidecar="$1"
+	local action="$2"
+	local current_value="$3"
+
+	: > "$TEST_ROOT/dbus.log"
+	rm -f "$TEST_ROOT/set-value"
+	DBUS_LOG="$TEST_ROOT/dbus.log" \
+		DBUS_SET_VALUE="$TEST_ROOT/set-value" \
+		DBUS_CURRENT="$current_value" \
+		PATH="$TEST_ROOT/bin:$PATH" \
+		bash "$source_root/scripts/set-state-nav-pages" "$sidecar" "$action" \
+		> "$TEST_ROOT/stdout" 2> "$TEST_ROOT/stderr"
+}
+
+test_set_state_nav_pages_disables_matching_pages() {
+	stage_nav_pages_runtime
+	local sidecar="$TEST_ROOT/work/demo.installer-navigation-pages"
+	cat > "$sidecar" <<'EOF'
+# package pages
+PageA
+PageB.qml
+EOF
+
+	run_nav_pages_script "$sidecar" disable \
+		'qrc:/demo/PageA.qml, qrc:/demo/PageB.qml, qrc:/other/Other.qml'
+
+	assert_exitcode 0
+	assert_eq '~qrc:/demo/PageA.qml,~qrc:/demo/PageB.qml,qrc:/other/Other.qml' "$(<"$TEST_ROOT/set-value")"
+	assert_file_contains "$TEST_ROOT/dbus.log" '/Settings/Vespera/CustomNavPages SetValue'
+
+	cleanup_nav_pages_runtime
+}
+
+test_set_state_nav_pages_enables_matching_pages() {
+	stage_nav_pages_runtime
+	local sidecar="$TEST_ROOT/work/demo.installer-navigation-pages"
+	printf '%s\n' 'PageA' > "$sidecar"
+
+	run_nav_pages_script "$sidecar" enable \
+		'~qrc:/demo/PageA.qml,qrc:/demo/PageB.qml'
+
+	assert_exitcode 0
+	assert_eq 'qrc:/demo/PageA.qml,qrc:/demo/PageB.qml' "$(<"$TEST_ROOT/set-value")"
+
+	cleanup_nav_pages_runtime
+}
+
+test_set_state_nav_pages_does_not_write_when_already_in_requested_state() {
+	stage_nav_pages_runtime
+	local sidecar="$TEST_ROOT/work/demo.installer-navigation-pages"
+	printf '%s\n' 'PageA' > "$sidecar"
+
+	run_nav_pages_script "$sidecar" disable '~qrc:/demo/PageA.qml'
+
+	assert_exitcode 0
+	assert_file_not_exist "$TEST_ROOT/set-value"
+	assert_file_not_contain "$TEST_ROOT/dbus.log" ' SetValue '
+
+	cleanup_nav_pages_runtime
+}
+
+test_set_state_nav_pages_rejects_invalid_action() {
+	stage_nav_pages_runtime
+	local sidecar="$TEST_ROOT/work/demo.installer-navigation-pages"
+	printf '%s\n' 'PageA' > "$sidecar"
+
+	run_nav_pages_script "$sidecar" remove 'qrc:/demo/PageA.qml'
+
+	assert_exitcode 2
+	assert_file_not_exist "$TEST_ROOT/set-value"
+	assert_file_contains "$TEST_ROOT/stderr" 'Usage: set-state-nav-pages'
+
+	cleanup_nav_pages_runtime
+}
+
+if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
+	test_runner_all --summary ""
+fi

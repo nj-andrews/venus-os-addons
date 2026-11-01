@@ -1,0 +1,55 @@
+import QtQuick 2
+import com.victron.velib 1.0
+import "utils.js" as Utils
+
+MbPage {
+  id: root
+	title: qsTr("Themes")
+
+  property string bindPrefix: "com.victronenergy.settings/Settings/Themer"
+  property VBusItem availableThemesItem: VBusItem {
+    bind: bindPrefix + "/AvailableThemes"
+    onValueChanged: availableThemesOptions.possibleValues = getAvailableThemes(availableThemesItem.value)
+  }
+	Component.onCompleted: {
+		console.log("AAA: Component.onCompleted in")
+	}
+  Component {
+		id: mbOptionFactory
+		MbOption {}
+	}
+
+	function getAvailableThemes(availableThemesString) {
+		console.log("AAA: getAvailableThemes in")
+    var availableThemes = Utils.stringToArray(availableThemesString)
+		if (!availableThemes)
+			return [];
+
+		var options = [];
+
+    options.push(mbOptionFactory.createObject(root, {"description": "System", "value": ""}))
+
+		for (var i = 0; i < availableThemes.length; i++) {
+			var params = {
+				"description": availableThemes[i],
+				"value": availableThemes[i]
+      }
+			console.log("AAA:", availableThemes[i])
+			options.push(mbOptionFactory.createObject(root, params));
+		}
+		console.log("BBB:", options.length)
+		return options;
+	}
+
+  model: VisibleItemModel {
+
+    MbItemOptions {
+      id: availableThemesOptions
+      description: qsTr("Current Theme")
+      unknownOptionText: "System"
+      bind:  Utils.path(bindPrefix, "/CurrentTheme")
+      writeAccessLevel: User.AccessUser
+    }
+  }
+
+}

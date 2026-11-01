@@ -1,0 +1,15 @@
+{"path":"/Settings/Themer/AvailableThemes", "default":"Dark"}
+{"path":"/Settings/Themer/CurrentTheme", "default":""}
+{"path":"/Settings/Themer/Themes/Dark/TextColor", "default":"#ffffff"}
+{"path":"/Settings/Themer/Themes/Dark/WindowBackgroundColor", "default":"#202020"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundColor", "default":"#202020"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundColorSelected", "default":"#4790d0"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundColor2", "default":"#313131"}
+{"path":"/Settings/Themer/Themes/Dark/IconSuffixNormal", "default":"-active"}
+{"path":"/Settings/Themer/Themes/Dark/IconSuffixSelected", "default":"-active"}
+{"path":"/Settings/Themer/Themes/Dark/BorderColor", "default":"#3c3c3c"}
+{"path":"/Settings/Themer/Themes/Dark/ServiceBackgroundColor", "default":"#b07c04"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundColorSelected", "default":"#2969a1"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundTankColor", "default":"#cccccc"}
+{"path":"/Settings/Themer/Themes/Dark/BackgroundTankColor", "default":"#cccccc"}
+{"path":"/Settings/Themer/Themes/Dark/Color2", "default":"#c4c4c4"}

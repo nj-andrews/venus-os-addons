@@ -483,9 +483,11 @@ sdi_service_name_from_tty() {
 	[[ ! -f "${SERIAL_STARTER_CONFIG_FILE}" ]] && {
 		__log_error "SERIAL_STARTER_CONFIG_FILE not found"; return 1; }
 
-	local fields=
-	read -ra fields <<< "$(grep -F "service ${ve_service}" "${SERIAL_STARTER_CONFIG_FILE}")"
-	__service_name="${fields[-1]}"
+
+	local -a fields=()
+	read -ra fields <<< "$(grep -F "service ${ve_service}" "${SERIAL_STARTER_CONFIG_FILE}" | head -n1)"
+	(( ${#fields[@]} )) || return 0
+	__service_name="${fields[${#fields[@]}-1]}"
 
 	[[ -z "${__service_name}" ]] && { __service_name=""; return 1; }
 

@@ -92,8 +92,10 @@ function processArgs() {
 
 	command=""
 	args=()
+
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
+			li) command="list-installed";;
 			--in-gui)
 			  # shellcheck disable=SC2034 # used upstream
 				VESPERA_IN_GUI=true;;

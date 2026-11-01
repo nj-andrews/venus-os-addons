@@ -176,6 +176,11 @@
         <source>Show Motorhome Page</source>
         <translation>Show Motorhome Page</translation>
     </message>
+    <message id="inetbox_version">
+        <location filename="../InetboxPageSettings.qml" line="52"/>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message id="pagesettingsgeneral_documentation">
         <source></source>
         <translation type="obsolete">Documentation</translation>

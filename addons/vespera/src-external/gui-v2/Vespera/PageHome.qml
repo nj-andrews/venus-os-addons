@@ -63,6 +63,8 @@ Page {
 			ListText {
 				// bug "displays "Documentation" not "Application version"
 				// text: qsTrId("settings_page_debug_application_version")
+				//% "Version"
+				text: qsTrId("vespera_version")
 				secondaryText: GuiPluginLoader.plugin("Vespera").version
 			}
 		}

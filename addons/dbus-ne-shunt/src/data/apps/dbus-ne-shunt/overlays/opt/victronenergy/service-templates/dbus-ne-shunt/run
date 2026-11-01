@@ -1,5 +1,0 @@
-#!/bin/sh
-echo "*** starting dbus-ne-shunt ***"
-exec 2>&1
-. /etc/profile.d/profile.sh
-exec /data/apps/dbus-ne-shunt/service/start-ne-shunt TTY

@@ -7,7 +7,7 @@ MbPage {
 
 	model: VisibleItemModel {
 		MbSwitch {
-			bind: "com.victronenergy.settings/Settings/Vespera/CustomOverviewPages/InetboxOverview"
+			bind: "com.victronenergy.settings/Settings/Vespera/CustomOverviewPages/MotorhomePage"
 			name: qsTr("Show Overview page")
 			valueFalse: ""
 			valueTrue: "^"

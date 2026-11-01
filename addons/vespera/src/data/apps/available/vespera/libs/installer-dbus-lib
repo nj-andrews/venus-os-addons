@@ -46,10 +46,21 @@ installer_dbus_lib_manifest_add_custom_service() {
 	[[ -n "$manifest_file" && -n "$package_dbus_name" && -n "$package_device" ]] || return 1
 
 	while IFS= read -r entry; do
-		[[ -n "$entry" ]] || continue
-		service_name="${entry%%=*}"
-		display_name="${entry#*=}"
-		[[ "$entry" == *=* ]] || display_name=
+		entry="${entry#"${entry%%[![:space:]]*}"}"
+		entry="${entry%"${entry##*[![:space:]]}"}"
+		[[ -n "$entry" && "$entry" != \#* ]] || continue
+
+		if [[ "$entry" == *=* ]]; then
+			service_name="${entry%%=*}"
+			display_name="${entry#*=}"
+		else
+			service_name="${entry%%[[:space:]]*}"
+			display_name="${entry#"$service_name"}"
+			display_name="${display_name#"${display_name%%[![:space:]]*}"}"
+			if [[ "$display_name" == \"*\" && "$display_name" == *\" ]]; then
+				display_name="${display_name:1:${#display_name}-2}"
+			fi
+		fi
 		[[ -n "$service_name" && -n "$display_name" ]] || continue
 
 		printf '%s\n' "{\"path\":\"/Settings/Vespera/Packages/${package_dbus_name}/DeviceServices/${service_index}/DisplayName\", \"default\":\"${display_name}\"}" >> "$manifest_file"
@@ -74,21 +85,6 @@ __installer_dbus_lib_apply_queue_set() {
 	done < "$queue_file"
 }
 
-installer_dbus_lib_nav_pages_sync() {
-	local action="${1:-}" plugin_name="${2:-}" pages="${3:-}"
-	local dbus_path="/Settings/Vespera/CustomNavPages" page
-	local -a qrc_paths=()
-
-	[[ -n "$plugin_name" && -n "$pages" ]] || return 0
-	[[ "$action" == "add" || "$action" == "remove" ]] || return 1
-
-	for page in $pages; do
-		qrc_paths+=("qrc:/${plugin_name}/${page}.qml")
-	done
-
-	dbus_lib_update_csv_items "$dbus_path" "$action" "${qrc_paths[@]}"
-}
-
 __installer_dbus_lib_upgrade_compute_delta() {
 	local current_file="${1:-}" previous_file="${2:-}" add_file="${3:-}" remove_file="${4:-}"
 	local source_line path compare_line compare_path
@@ -98,9 +94,7 @@ __installer_dbus_lib_upgrade_compute_delta() {
 	: > "$add_file"
 	: > "$remove_file"
 
-	if [[ ! -f "$current_file" ]]; then
-		return 0
-	fi
+	[[ ! -f "$current_file" ]] && return 0
 
 	while IFS= read -r source_line; do
 		[[ -z "$source_line" ]] && continue
@@ -156,19 +150,13 @@ __installer_dbus_lib_upgrade_apply_delta() {
 
 installer_dbus_lib_build_manifest() {
 	local manifest_file="${1:-}" package_dbus_name="${2:-}" package_dbus_settings="${3:-}"
-	local custom_overview_pages="${4:-}" custom_menus="${5:-}"
-
-	local package_device="${6:-}"
+	local custom_menus="${4:-}" package_device="${5:-}"
 
 	[[ -n "$manifest_file" ]] || return 1
 	installer_dbus_lib_manifest_init "$manifest_file"
 
 	if [[ -n "$package_dbus_settings" ]]; then
 		printf '%s\n' "$package_dbus_settings" | installer_dbus_lib_manifest_add_raw "$manifest_file"
-	fi
-
-	if [[ -n "$custom_overview_pages" ]]; then
-		installer_dbus_lib_manifest_add_kv_group "$manifest_file" "/Settings/Vespera/CustomOverviewPages" "$custom_overview_pages"
 	fi
 
 	if [[ -n "$custom_menus" ]]; then

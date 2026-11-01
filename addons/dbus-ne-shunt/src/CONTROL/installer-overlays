@@ -1,0 +1,5 @@
+/opt/victronenergy
+# serial starter rules folder
+/etc/udev/rules.d
+# contains serial-starter.conf
+/etc/venus

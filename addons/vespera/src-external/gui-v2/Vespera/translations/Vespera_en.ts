@@ -188,9 +188,14 @@ The service will start shortly...</source>
         <source>Packages</source>
         <translation type="unfinished"></translation>
     </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="59"/>
+    <message id="pagecontrollableloads_documentation">
+        <location filename="../PageHome.qml" line="60"/>
         <source></source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="vespera_version">
+        <location filename="../PageHome.qml" line="67"/>
+        <source>Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message id="vespera_edit_feed">

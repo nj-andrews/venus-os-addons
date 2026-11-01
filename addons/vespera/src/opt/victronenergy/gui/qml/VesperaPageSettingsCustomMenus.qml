@@ -19,7 +19,7 @@ QtObject {
     if (customItems.value === undefined)
       return
 
-    VesperaUtils.addRemoveCustomItemsQuick(customItems, _subpageInstance.model,
+    VesperaUtils.addRemoveCustomMenuItems(customItems, _subpageInstance.model,
 			function (componentName) {
 				return {
 					component: Qt.createComponent(componentName),
@@ -36,9 +36,6 @@ QtObject {
 	function indexFromDescription(model, description) {
 		var translatedDescription = qsTr(description) //use qsTr so we translate to UI text
 
-		//TODO var translatedDescription = qsTranslate([pagename], description) //use qsTr so we translate to UI text
-		//TODO change to a straight index?
-		
 		for (var i = 0; i < model.count; i++)
 			if (model.get(i).description === translatedDescription)
 				return i
@@ -48,7 +45,6 @@ QtObject {
   function _onSubpageInstanceChanged()  {
     if (!_subpageInstance)
       return
-
     var pageName = _subpageInstance.toString()
     pageName = pageName.split("_")[0]
 		if (pageName) customItems.uid = baseDbusCustomMenusPath + pageName

@@ -19,7 +19,7 @@ __enable_app() {
 	[[ ! -d "$available_app_path" ]] && return
 
 	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}" 2>/dev/null)
-	local overlay_targets_conf="$VESPERA_DATA_DIR/info/${app}.installer-overlays"
+	local overlay_targets_conf="$VESPERA_DATA_DIR/info/$app.installer-overlays"
 
 	[[ -f "$overlay_targets_conf" ]] &&
 		"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-register "${app}" <"$overlay_targets_conf" 1>/dev/null
@@ -43,11 +43,27 @@ __enable_app() {
 declare _venus_services_to_restart=()
 declare _refresh_devices=
 
-for app in $(opkg_lib_list_packages "all"); do
+for app in $(opkg_lib_list_packages); do
 	[[ "$#" -eq 0 ]] || [[ " $* " == *" $app "* ]] || continue
+
+	sidecar_file_prefix="$VESPERA_DATA_DIR/info/$app"
+
+	# call custom hook if available
+	[[ -f "${sidecar_file_prefix}.enable" ]] &&
+		"${sidecar_file_prefix}.enable"
+
+	# enable nav pages and overview menus
+	"$__vespera_path/scripts/set-state-v1-menus" "enable" "${sidecar_file_prefix}.installer-menus"
+	"$__vespera_path/scripts/set-state-nav-pages" "enable" \
+		"${sidecar_file_prefix}.installer-navigation-pages" "/Settings/Vespera/CustomNavPages"
+	# "$__vespera_path/scripts/set-state-nav-pages" "enable" \
+	# 	"${sidecar_file_prefix}.installer-overview-pages" "/Settings/Vespera/CustomOverviewPages"
+
 	__enable_app "$app" _refresh_devices
-	[[ -f "$VESPERA_DATA_DIR/info/$app.installer-services" ]] &&
-		_venus_services_to_restart+=("$VESPERA_DATA_DIR/info/$app.installer-services")
+
+	[[ -f "${sidecar_file_prefix}.installer-services" ]] &&
+		_venus_services_to_restart+=("${sidecar_file_prefix}.installer-services")
+
 done
 
 # outputs the attributes of each variable, use eval to restore variable

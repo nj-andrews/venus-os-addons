@@ -27,6 +27,22 @@ Installers run on many firmware versions and combinations of add-ons. Shared-fil
 - Keep ownership clear: install creates package-owned artifacts, uninstall removes only the artifacts it created.
 - Design for idempotency: repeated install/remove actions should converge to the same stable state.
 
+## Installer metadata files
+
+Package installer metadata is stored in optional files next to the package's `installer` file. When OPKG installs the package, it prefixes each sidecar's filename with the package name and `.`, matching the installed `<package>.installer` file. For example, source file `installer-dbus-name` is read at runtime as `<package>.installer-dbus-name`.
+
+| File | Purpose |
+| --- | --- |
+| `installer-dbus-name` | Package DBus name; defaults to the package name with spaces and hyphens replaced by underscores. |
+| `installer-devices` | Custom device service/display-name mappings. |
+| `installer-dbus-settings` | Raw JSON-lines entries passed to the DBus settings helper. |
+| `installer-menus` | GUI-v1 menu entries, one per line. |
+| `installer-navigation-pages` | Navigation pages, one per line; each page is registered as `qrc:/<dbus-name>/<page>.qml`. |
+| `installer-rcS-local` | Content appended to `/data/rcS.local`. |
+| `installer-rc-local` | Content appended to `/data/rc.local`. |
+
+Blank lines and lines whose first non-whitespace character is `#` are ignored in metadata files, except the two rc-local files, whose contents are preserved verbatim. Missing metadata files are treated as empty; the DBus name uses its default when its file is absent or empty. The old `PACKAGE_CUSTOM_OVERVIEW_PAGES` installer variable is no longer supported; use `installer-navigation-pages` instead.
+
 ## Overlay paths (`<app>.installer-overlays`)
 
 Vespera's own `vespera.installer-overlays` lists the **master** paths (for example `/opt/victronenergy`). They are always used, even when vespera is disabled.
@@ -45,5 +61,3 @@ Side effects to be aware of:
 - Apps that resolve to the same target share one overlay mount and one upper directory, so files written by one app are visible to the others.
 - Install order matters for non-master paths: the first app decides the target that later apps fold into, and a later parent path cannot be installed.
 - Installs made before `installed.conf` existed have no pinned entries; reinstall such apps to pin them.
-
-

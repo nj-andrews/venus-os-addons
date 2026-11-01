@@ -17,30 +17,31 @@ PACKAGE_NAME="${PACKAGE_NAME%.*}"
 set --
 
 [[ -z "${PACKAGE_ACTION}" ]] && { echo "CRITICAL: ACTION not set. Usage: <action> [installer-source]"; exit 1; }
-[[ ! -f "$PACKAGE_INSTALLER_FILE" ]] && { echo "CRITICAL: INSTALLER_FILE not found: $PACKAGE_INSTALLER_FILE"; exit 1; }
+# [[ ! -f "$PACKAGE_INSTALLER_FILE" ]] && { echo "CRITICAL: INSTALLER_FILE not found: $PACKAGE_INSTALLER_FILE"; exit 1; }
 [[ ! -d "$VESPERA_WORKING_DIR" ]] && { echo "CRITICAL: VESPERA_WORKING_DIR not found: $VESPERA_WORKING_DIR"; exit 1; }
 [[ -z "${PACKAGE_NAME:-}" ]] && { echo "CRITICAL: PACKAGE_NAME not set"; exit 1; }
 
 # shellcheck disable=SC1090
-source "$PACKAGE_INSTALLER_FILE"
+[[ -f "$PACKAGE_INSTALLER_FILE" ]] && source "$PACKAGE_INSTALLER_FILE"
+read_sidecar_file() { "$PACKAGE_INSTALL_DIR/vespera/scripts/read-sidecar-file" "$PACKAGE_SIDECAR_PREFIX-$1"; }
 
 # install path with the package name
 PACKAGE_DATA_INFO_DIR="$(dirname "$(realpath "${PACKAGE_INSTALLER_FILE}")")"
-PACKAGE_DBUS_SETTINGS="${PACKAGE_DBUS_SETTINGS-}"
+PACKAGE_SIDECAR_PREFIX="$PACKAGE_DATA_INFO_DIR/$PACKAGE_NAME.installer"
+PACKAGE_DBUS_NAME="$(read_sidecar_file dbus-name)"
 PACKAGE_DBUS_NAME="${PACKAGE_DBUS_NAME:-${PACKAGE_NAME//[ -]/_}}"
-PACKAGE_CUSTOM_OVERVIEW_PAGES="${PACKAGE_CUSTOM_OVERVIEW_PAGES-}"
-PACKAGE_CUSTOM_NAV_PAGES="${PACKAGE_CUSTOM_NAV_PAGES-}"
-PACKAGE_CUSTOM_MENUS="${PACKAGE_CUSTOM_MENUS-}"
-PACKAGE_DEVICES="${PACKAGE_DEVICES-}"
+PACKAGE_DEVICES="$(read_sidecar_file devices)"
+PACKAGE_DBUS_SETTINGS="$(read_sidecar_file dbus-settings)"
+PACKAGE_CUSTOM_MENUS="$(read_sidecar_file menus)"
+
+PACKAGE_RC_LOCAL_SCRIPT_FILE="$PACKAGE_SIDECAR_PREFIX-rc-local"
+PACKAGE_RCS_LOCAL_SCRIPT_FILE="$PACKAGE_SIDECAR_PREFIX-rcS-local"
 PACKAGE_VERSION_NEW=
 PACKAGE_VERSION_CURRENT=
 PACKAGE_DBUS_LIST_FILE=
 
 RUNNING_FROM_GUI=
 FIRMWARE_CHANGED=
-
-RC_LOCAL_SCRIPT="${RC_LOCAL_SCRIPT-}"
-RCS_LOCAL_SCRIPT="${RCS_LOCAL_SCRIPT-}"
 
 # shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
 source "${VESPERA_ROOT:-}$PACKAGE_INSTALL_DIR/vespera/libs/source-lib"
@@ -79,14 +80,23 @@ installer_lib_is_remove() {
 
 installer_lib_phase_sync_custom_nav_pages() {
 	local action="${1:-}"
-	[[ -n "${PACKAGE_CUSTOM_NAV_PAGES:-}" ]] || return 0
-	[[ "$action" == "add" || "$action" == "remove" ]] || return 0
 
-	local pages
-	# shellcheck disable=SC2086
-	pages=$(printf "%s " $PACKAGE_CUSTOM_NAV_PAGES)
-	pages="${pages% }"
-	installer_dbus_lib_nav_pages_sync "$action" "$PACKAGE_DBUS_NAME" "$pages"
+	[[ "$action" == "add" || "$action" == "remove" ]] || return 0
+	[[ -z "$PACKAGE_DBUS_NAME" ]] && return 1
+
+	local -a pages
+	mapfile -t pages < <(read_sidecar_file "navigation-pages")
+
+	(( ${#pages[@]} > 0 )) &&
+		dbus_lib_update_csv_items "/Settings/Vespera/CustomNavPages" "$action" "${pages[@]}"
+
+	pages=()
+	mapfile -t pages < <(read_sidecar_file "overview-pages")
+
+	(( ${#pages[@]} > 0 )) &&
+		dbus_lib_update_csv_items "/Settings/Vespera/CustomOverviewPages" "$action" "${pages[@]}"
+
+	return 0
 }
 
 

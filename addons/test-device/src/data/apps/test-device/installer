@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-PACKAGE_DBUS_NAME="TestDevice"
-
 declare -A PACKAGE_DEVICE=(
 	["test-device-service"]="Test Device"
 )
-
-PACKAGE_CUSTOM_OVERVIEW_PAGES=
-PACKAGE_DBUS_SETTINGS=
 
 #PACKAGE_DBUS_SETTINGS_DEPRECATED="
 #		{'path':'/Settings/Vespera/CustomMenus/PageSettingsDisplay/PageSettingsNeShuntSubMenu'}

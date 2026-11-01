@@ -16,21 +16,14 @@
         <translation>Feeds</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
+        <location filename="../PageHome.qml" line="60"/>
         <source></source>
-        <translation type="obsolete">Keine</translation>
+        <translation>Dokumentation</translation>
     </message>
-    <message id="pagesettingsgeneral_documentation">
-        <source></source>
-        <translation type="obsolete">Keine</translation>
-    </message>
-    <message id="settings_page_debug_application_version">
-        <location filename="../PageHome.qml" line="59"/>
-        <source></source>
-        <translation type="unfinished">Keine</translation>
-    </message>
-    <message id="vespera_settings_to_top">
-        <source>Move settings to top</source>
-        <translation type="obsolete">Einstellungen nach oben verschieben</translation>
+    <message id="vespera_version">
+        <location filename="../PageHome.qml" line="67"/>
+        <source>Version</source>
+        <translation>Version</translation>
     </message>
     <message id="vespera_custom_devices">
         <location filename="../PageHome.qml" line="49"/>
@@ -61,7 +54,7 @@
     <message id="vespera_no_service_templates">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="111"/>
         <source>No service templates installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Dienstvorlagen installiert</translation>
     </message>
     <message id="vespera_serial_device_service">
         <location filename="../PageSettingsDiscoveredDevice.qml" line="114"/>
@@ -188,7 +181,7 @@ Der Dienst startet in Kürze...</translation>
         <location filename="../PageSettingsSavedDevices.qml" line="55"/>
         <location filename="../components/VesperaManager.qml" line="28"/>
         <source>No access</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein Zugriff</translation>
     </message>
     <message id="vespera_add_new_feed">
         <location filename="../PageSettingsFeeds.qml" line="92"/>
@@ -199,7 +192,7 @@ Der Dienst startet in Kürze...</translation>
     <message id="vespera_edit_feed">
         <location filename="../PageSettingsFeedEdit.qml" line="8"/>
         <source></source>
-        <translation type="unfinished">Keine</translation>
+        <translation>Feed bearbeiten</translation>
     </message>
     <message id="vespera_save">
         <location filename="../PageSettingsFeedEdit.qml" line="23"/>

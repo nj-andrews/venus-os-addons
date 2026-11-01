@@ -190,10 +190,10 @@ opkg_lib_process_opkg_status() {
 
 	___extra_status_content() {
 		local app="${1}"
-		[[ "$(readlink "/data/apps/enabled/$app")" == "/data/apps/available/$app" ]] && value=true
-		echo "Enabled: $([[ "$value" == true ]] && echo "yes" || echo "no")"
-		[[ -f /data/apps/available/$app/gui-v2/$app.json ]] && value=true || value=false
-		echo "Gui-v2 Addon: $([[ "$value" == true ]] && echo "yes" || echo "no")"
+		[[ "$(readlink "/data/apps/enabled/$app")" == "/data/apps/available/$app" ]] && value="yes" || value="no"
+		echo "Enabled: $value"
+		[[ -f /data/apps/available/$app/gui-v2/$app.json ]] && value="yes" || value="no"
+		echo "Gui-v2 Addon: $value"
 	}
 
 	while IFS= read -r line; do
@@ -210,21 +210,11 @@ opkg_lib_process_opkg_status() {
 }
 
 opkg_lib_list_packages() {
-	local all="${1:-}"
-
-	if [[ "$all" == "all" ]]; then
-		opkg -f "${VESPERA_COMBINED_CONF_FILE}" list-installed |
-			cut -d ' ' -f1
-	else
-		opkg -f "${VESPERA_COMBINED_CONF_FILE}" list-installed |
-			sed '/^vespera - /d' |
-			cut -d ' ' -f1
-	fi
+	opkg -f "${VESPERA_COMBINED_CONF_FILE}" list-installed | cut -d ' ' -f1
 }
 
 opkg_lib_list_enabled_packages() {
-	local all="${1:-}"
-	for package in $(opkg_lib_list_packages "$all"); do
+	for package in $(opkg_lib_list_packages); do
 		[[ ! -e "/data/apps/enabled/$package" ]] && continue
 		echo "$package"
 	done

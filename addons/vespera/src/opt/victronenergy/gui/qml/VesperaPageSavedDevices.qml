@@ -5,7 +5,7 @@ MbPage {
 	model: VesperaDeviceDelegateModel {}
 	pageToolbarHandler: model.count > 0 ? customToolbar : undefined
 
-	required property MbStyle mbStyle: MbStyle {}
+	property MbStyle mbStyle: MbStyle {}
 	required property VesperaManager vesperaManager
 
 	onActiveChanged: { dialog.close() }

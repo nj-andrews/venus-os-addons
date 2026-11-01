@@ -62,16 +62,18 @@ VESPERA_INSTALL_STATE_FILE="install-state"
 VESPERA_APP_SERVICES_FILE="app-services"
 VESPERA_APP_TEMPLATE_SERVICES_FILE="app-template-services"
 VESPERA_DBUS_NAME="dbus-name"
+VESPERA_DBUS_FILE="dbus-name"
 PACKAGE_DBUS_NAME="com.example.${PACKAGE_NAME}"
 PACKAGE_DBUS_LIST_FILE="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.dbus-list"
+PACKAGE_RCS_LOCAL_SCRIPT_FILE="$PACKAGE_DATA_INFO_DIR/demo.installer-rcS-local"
+PACKAGE_RC_LOCAL_SCRIPT_FILE="$PACKAGE_DATA_INFO_DIR/demo.installer-rc-local"
 PACKAGE_DBUS_SETTINGS=
-PACKAGE_CUSTOM_OVERVIEW_PAGES=
 PACKAGE_CUSTOM_MENUS=
 PACKAGE_DEVICES=
-RCS_LOCAL_SCRIPT=
-RC_LOCAL_SCRIPT=
 LANG_INSTALL_ACTION_ARG1=install_action
 LANG_PACKAGE_PATCHING_FILES=patching
+LANG_PROCESSING_DBUS_SETTINGS=processing_dbus_settings
+LANG_UPDATING_DATABASE=updating_database
 
 source "$PACKAGE_INSTALLER_FILE"
 
@@ -139,13 +141,23 @@ EOF
 
   cat > "$TEST_ROOT/data/apps/available/vespera/libs/file-lib" <<'EOF'
 #!/usr/bin/env bash
-file_lib_append_content_to_file() { :; }
+  file_lib_append_content_to_file() { cat >> "$1"; }
 EOF
 
   cat > "$TEST_ROOT/data/apps/available/demo/demo.installer" <<'EOF'
 firmware_changed() {
   printf '%s\n' 'installer-firmware-changed' >> "$VESPERA_ROOT/install.log"
 }
+EOF
+  cat > "$TEST_ROOT/data/apps/available/demo/demo.installer-rcS-local" <<'EOF'
+# preserved comment
+
+/data/example-rcS
+EOF
+  cat > "$TEST_ROOT/data/apps/available/demo/demo.installer-rc-local" <<'EOF'
+# preserved rc.local comment
+
+/data/example-rc
 EOF
 
   cat > "$TEST_ROOT/data/apps/available/demo/demo.installer-main-patch" <<'EOF'
@@ -177,6 +189,11 @@ test_install_script_registers_services_and_updates_install_state() {
   assert_file_contains "$TEST_ROOT/install.log" 'manifest:' "install builds dbus manifest"
   assert_file_contains "$TEST_ROOT/install.log" 'install-dbus:' "install applies dbus settings"
   assert_file_contains "$TEST_ROOT/install.log" 'serial-map-add:tpl-a' "install registers serial mapping for template service"
+  local rcS_contents rc_contents
+  rcS_contents="$(cat "$TEST_ROOT/data/rcS.local")"
+  rc_contents="$(cat "$TEST_ROOT/data/rc.local")"
+  assert_eq $'# preserved comment\n\n/data/example-rcS' "$rcS_contents" "rcS-local content is preserved verbatim"
+  assert_eq $'# preserved rc.local comment\n\n/data/example-rc' "$rc_contents" "rc-local content is preserved verbatim"
   assert_file_exists "$TEST_ROOT/data/apps/available/demo/conf/demo.conf" "install moves default conf into conf directory"
 
   cleanup_install_runtime

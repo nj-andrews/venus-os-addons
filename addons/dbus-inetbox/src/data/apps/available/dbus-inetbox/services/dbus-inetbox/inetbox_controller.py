@@ -86,7 +86,7 @@ class InetboxController:
 		classAndVrmInstanceParts = classAndVrmInstance.split(':')
 		deviceInstance = int(classAndVrmInstanceParts[1])
 		customName = self._settings['/CustomName']
- 
+
 		self._dbusInetboxService = dbusInetboxService(
 				serialPort,
 				serviceName,
@@ -329,11 +329,8 @@ class InetboxController:
 				'/Sid' : [f'{self._settingsPath}/Sid', sid, 0, 0],
 				'/Sid2' : [f'{self._settingsPath}/Sid2', sid, 0, 0],
 				'/ProductName' : [f'{self._settingsPath}/ProductName', dbus_constants.PRODUCT_NAME, "", ""],
-				'/ServiceName' : [f'{self._settingsPath}/ServiceName', service_name, "", ""],
 				'/CustomName' : [f'{self._settingsPath}/CustomName', "", "", ""],
-				'/DeviceKey' : [f'{self._settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY_NAME, "", ""],
 				'/LastHeatingTemp' : [f'{self._settingsPath}/LastHeatingTemp', 16, 4, 31],
-				'/OverviewPage': [f'{self._settingsPath}/OverviewPage', dbus_constants.OVERVIEW_PAGE, "", ""],
 				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1],
 				'/LastErrorCode': [f'{self._settingsPath}/LastErrorCode', "", 0, 0],
 				'/LastErrorTimeStamp': [f'{self._settingsPath}/LastErrorTimeStamp', "", 0, 0],

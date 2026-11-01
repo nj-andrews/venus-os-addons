@@ -11,12 +11,13 @@ source_root="$this_path/../src/data/apps/available/vespera"
 stage_installer_runtime() {
   local root="$1"
 
-  mkdir -p "$root/vespera/libs" "$root/vespera/conf-default" "$root/runner/bin" "$root/pkg" "$root/work" "$root/bin" "$root/data/var/vespera/info"
+  mkdir -p "$root/vespera/libs" "$root/vespera/scripts" "$root/vespera/conf-default" "$root/runner/bin" "$root/pkg" "$root/work" "$root/bin" "$root/data/var/vespera/info"
   mkdir -p "$root/data/apps/available" "$root/data/apps/enabled"
 
   cp "$source_root/libs/installer-lib" "$root/vespera/libs/installer-lib"
   cp "$source_root/libs/source-lib" "$root/vespera/libs/source-lib"
-  chmod +x "$root/vespera/libs/installer-lib" "$root/vespera/libs/source-lib"
+  cp "$source_root/scripts/read-sidecar-file" "$root/vespera/scripts/read-sidecar-file"
+  chmod +x "$root/vespera/libs/installer-lib" "$root/vespera/libs/source-lib" "$root/vespera/scripts/read-sidecar-file"
 
   sed -i 's|"/data/apps/enabled/\$PACKAGE_NAME"|"$ROOT_DIR/data/apps/enabled/$PACKAGE_NAME"|' "$root/vespera/libs/installer-lib"
 
@@ -50,8 +51,13 @@ fi
 EOF
   chmod +x "$root/bin/vespera"
 
-  cat > "$root/pkg/demo.installer" <<'EOF'
-PACKAGE_CUSTOM_NAV_PAGES="PageA PageB"
+  : > "$root/pkg/demo.installer"
+  cat > "$root/pkg/demo.installer-navigation-pages" <<'EOF'
+# Custom pages
+
+PageA
+  # another ignored comment
+PageB
 EOF
 
   cat > "$root/pkg/demo.control" <<'EOF'
@@ -247,6 +253,56 @@ test_installer_lib_phase_sync_custom_nav_pages_calls_sync_helper() {
 
   assert_exitcode 0
   assert_file_contains "$probe_output" 'sync:add|demo|PageA PageB'
+
+  vt_safe_rm_rf "$root"
+}
+
+test_installer_lib_loads_optional_metadata_files_and_ignores_comments() {
+  local root
+  root="$(vt_make_test_root)"
+  stage_installer_runtime "$root"
+
+  cat > "$root/pkg/demo.installer-dbus-name" <<'EOF'
+# package D-Bus service
+
+custom.service
+EOF
+  cat > "$root/pkg/demo.installer-devices" <<'EOF'
+# device mappings
+
+svc-a=Service A
+EOF
+  cat > "$root/pkg/demo.installer-dbus-settings" <<'EOF'
+# settings
+
+{"path":"/Settings/Test","default":"enabled"}
+EOF
+  cat > "$root/pkg/demo.installer-menus" <<'EOF'
+# menus
+
+PageSettings/DemoMenu
+EOF
+
+  local output
+  output="$(run_installer_probe "$root" install 'printf "%s\n" "$PACKAGE_DBUS_NAME" "$PACKAGE_DEVICES" "$PACKAGE_DBUS_SETTINGS" "$PACKAGE_CUSTOM_MENUS" "$PACKAGE_CUSTOM_NAV_PAGES"')"
+
+  assert_exitcode 0
+  assert_eq $'custom.service\nsvc-a=Service A\n{"path":"/Settings/Test","default":"enabled"}\nPageSettings/DemoMenu\nPageA\nPageB' "$output"
+
+  vt_safe_rm_rf "$root"
+}
+
+test_installer_lib_uses_package_name_when_optional_dbus_name_file_is_missing() {
+  local root
+  root="$(vt_make_test_root)"
+  stage_installer_runtime "$root"
+  rm "$root/pkg/demo.installer-navigation-pages"
+
+  local output
+  output="$(run_installer_probe "$root" install 'printf "%s|%s" "$PACKAGE_DBUS_NAME" "$PACKAGE_CUSTOM_NAV_PAGES"')"
+
+  assert_exitcode 0
+  assert_eq 'demo|' "$output"
 
   vt_safe_rm_rf "$root"
 }
