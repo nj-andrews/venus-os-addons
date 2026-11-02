@@ -127,14 +127,14 @@ class ne_shunt_services_controller:
 		else:
 			return
 
-		self._settings[f"{name}/{path}"]=newvalue
+		self._settings[f"{name}/{path}"] = newvalue
 
 	############################################
 	# if the value recieved has changed it
 	# sends the toggle switch serial message to
 	# the pysical device
 	############################################
-	def _try_toggle_serial_switch_value(self, name, path, newvalue):
+	def _try_toggle_serial_switch_value(self, name, newvalue):
 
 		if (self._serialService == None or self._curData == None):
 			logging.debug('_try_toggle_serial_switch_value: serial service or curData is None')

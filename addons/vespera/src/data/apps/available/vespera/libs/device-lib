@@ -44,7 +44,6 @@ device_remove() {
 	if [[ -n "$DEVICE_TTY" ]]; then
 		sdi_service_name_from_tty "${DEVICE_TTY:-}" service_name 2>/dev/null &&
 			service_lib_remove_service "$service_name.$DEVICE_TTY"
-		echo "AAA:$service_name.$DEVICE_TTY"
 		sdi_remove_rule
 	fi
 

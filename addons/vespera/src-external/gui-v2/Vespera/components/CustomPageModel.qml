@@ -139,9 +139,8 @@ QtObject {
 
 			var page = _customPageItems[url]
 			if (!page && !url.startsWith("~"))  {
-
-				var fullUrl="qrc:" + url + ".qml"
-				page = VesperaSingleton.createPage(fullUrl, Global.mainView, {view:Global.mainView.swipeView})
+				// console.debug("Vespera: customPage url:", url )
+				page = VesperaSingleton.createPage(url, Global.mainView, {view:Global.mainView.swipeView})
 				if (!page) continue
 				_customPageItems[url] = page
 			}

@@ -113,12 +113,15 @@ class InetboxController:
 				return
 
 			if (name == "error_code"):
-				error_description = get_error_description(value)
-				self._dbusInetboxService.set_value(self.DBUS_PATH + "ErrorDescription", error_description)
-				self._settings["/LastErrorCode"] = value
+				error_description = ""
 				if (int(value) > 0):
+					error_description = get_error_description(value)
+					self._settings["/LastErrorCode"] = value
 					self._settings["/LastErrorTimeStamp"] = datetime.now(timezone.utc).isoformat()
-				self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
+					self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
+
+				self._dbusInetboxService.set_value(self.DBUS_PATH + "ErrorDescription", error_description)
+
 
 			elif (name == "target_temp_room"): # coerse using LastHeatingTemp
 				if (value == "0"):

@@ -60,25 +60,29 @@ __add_dbus_settings_from_dbus_list_file() {
 }
 
 __register_services() {
-	local template_services_file="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE"
 
-	: > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE"
+	local services_file="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE"
+	local template_services_file="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE"
+	local file_list="$VESPERA_DATA_DIR/info/$PACKAGE_NAME.list"
+
+	: > "$template_services_file"
+	: > "$services_file"
+
 	for service_path in "/data/apps/available/$PACKAGE_NAME/service/"*; do
 		[[ ! -f "$service_path/run" ]] && continue
 		local service="${service_path##*/}"
-		echo "$service" >> "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE"
+		echo "$service" >> "$services_file"
 	done
 
-	: > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE"
-	for service_path in "/data/apps/available/$PACKAGE_NAME/service-templates/"*; do
-		[[ ! -f "$service_path/run" ]] && continue
-		local service="${service_path##*/}"
-		echo "$service" >> "$template_services_file"
+	# get a list of the templated services from the package list file
+	for service_name in $(sed -n 's|^/opt/victronenergy/service-templates/\([^/]*\)/run[[:space:]].*|\1|p' "$file_list"); do
+		echo "$service_name" >> "$template_services_file"
 		#shellcheck disable=SC2034
-		DEVICE_SERVICE_NAME="$service"
+		DEVICE_SERVICE_NAME="$service_name"
 		addsource "libs/serial-device-installer-lib"
 		sdi_add_service_mapping
 	done
+
 }
 
 __add_vespera_startup_scripts() {

@@ -87,8 +87,12 @@ installer_lib_phase_sync_custom_nav_pages() {
 	local -a pages
 	mapfile -t pages < <(read_sidecar_file "navigation-pages")
 
-	(( ${#pages[@]} > 0 )) &&
+	(( ${#pages[@]} > 0 )) && {
+		for ((i = 0; i < ${#pages[@]}; i++)); do
+			pages[i]="qrc:/$PACKAGE_DBUS_NAME/${pages[$i]}.qml"
+		done
 		dbus_lib_update_csv_items "/Settings/Vespera/CustomNavPages" "$action" "${pages[@]}"
+	}
 
 	pages=()
 	mapfile -t pages < <(read_sidecar_file "overview-pages")
