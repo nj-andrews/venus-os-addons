@@ -365,7 +365,7 @@
 			"command": "bash",
 			"args": [
 				"-lc",
-				"src=\"${file}\"; dest=\"${src#/data/dev/addons/*/src}\"; scp \"$src\" \"root@192.168.10.24:$dest\"; echo \"$src -> root@192.168.10.24:$dest\""
+				"src=\"${file}\"; dest=\"${src#/data/dev/addons/*/src}\"; scp \"$src\" \"root@192.168.10.20:$dest\"; echo \"$src -> root@192.168.10.24:$dest\""
 			],
 			"presentation": {
 				"echo": true,

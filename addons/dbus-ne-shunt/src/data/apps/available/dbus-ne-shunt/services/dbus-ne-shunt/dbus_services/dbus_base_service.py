@@ -90,7 +90,7 @@ class dbus_base_service(object):
 			try:
 				return self._valueChangedCallback(self._name, path, value)
 			except Exception as ex:
-				logging.error("Error in _on_valueChanged %s" % (ex))
+				logging.exception("Error in _on_valueChanged")
 
 
 

@@ -8,6 +8,7 @@ class ne_shunt_serial_service:
 
 	SERIAL_BAUD_RATE = 38400
 	_readonly = False
+	FRAME_LENGTH = 20
 
 	_idle = bytes(    [0xff, 0x40, 0x00, 0x80, 0xbf])    #FF400080BF
 	#_idle2 = bytes(  [0xff, 0x40, 0x00, 0x80, 0xbf])    #FF400080BF
@@ -20,6 +21,7 @@ class ne_shunt_serial_service:
 
 	def __init__(self, port_name, readonly):
 		self._readonly=readonly
+		self._rx_buffer = bytearray()
 
 		self.serial_port = serial.rs485.RS485(port=port_name,
 												baudrate=self.SERIAL_BAUD_RATE,
@@ -43,16 +45,16 @@ class ne_shunt_serial_service:
 		self._send_data(self._allOff)
 
 	def toggle_switch(self, name):
-		if (name == "InternalLights"):
+		if (name == "internal_lights"):
 			self._send_data(self._lightin)
 			return True
-		elif (name == "ExternalLights"):
+		elif (name == "external_lights"):
 			self._send_data(self._lightout)
 			return True
-		elif (name == "WaterPump"):
+		elif (name == "water_pump"):
 			self._send_data(self._pump)
 			return True
-		elif (name == "Aux"):
+		elif (name == "aux"):
 			self._send_data(self._aux)
 			return True
 
@@ -68,75 +70,48 @@ class ne_shunt_serial_service:
 		self._send_idle()
 		self.serial_port.write(data)
 		self.serial_port.reset_input_buffer()
+		self._rx_buffer.clear()
 		time.sleep(0.1)
 
 	def read_data(self) -> str:
+		"""Non-blocking: returns the newest complete frame received, or "" if none yet."""
 
 		if not self.serial_port.is_open:
 			self.serial_port.open()
 			if not self.serial_port.is_open:
 				return ""
 
-		BUFFER_LENGTH = 20
-		CHECKSUM_LENGTH = 2
-		CHECKSUM_MOD = 128
-		MAX_BYTES_READ = BUFFER_LENGTH * 3
+		waiting = self.serial_port.in_waiting
+		if waiting > 0:
+			self._rx_buffer += self.serial_port.read(waiting)
 
-		buffer_index = 0
-		buffer_all_index = 0
-		bytes_read = 0
-		checksum_match = False
-		buffer = bytearray(BUFFER_LENGTH)
-		buffer_all = bytearray(MAX_BYTES_READ)
+		buf = self._rx_buffer
+		frame = None
+		consumed = 0
+		i = 0
+		while i + self.FRAME_LENGTH <= len(buf):
+			if buf[i] == 255 and buf[i + 14] == 255 and self._checksum_ok(buf, i):
+				frame = bytes(buf[i:i + self.FRAME_LENGTH])
+				i += self.FRAME_LENGTH
+				consumed = i
+			else:
+				i += 1
 
-		buffer[:] = b'\x00' * BUFFER_LENGTH
-		buffer_all[:] = b'\x00' * MAX_BYTES_READ
+		if frame is not None:
+			del buf[:consumed]
+			return self.byte_array_to_string(frame)
 
-		#self._send_idle()
-		# Only reset the input buffer when absolutly nessasery
-		# currently this is only done after writing data
-		# This keeps the cpu % very low (under 1% otherwise can be as high as 7%)
-		#self.reset_input_buffer()
-
-		while not checksum_match:
-
-			time.sleep(0.1)
-
-			if self.serial_port.in_waiting > 0:
-				#print("in waiting:", self.serial_port.in_waiting)
-				next_byte = self.serial_port.read(1)
-				if not next_byte:
-					logging.debug("no byte read:")
-					continue
-
-				buffer[buffer_index] = next_byte[0]
-				buffer_all[buffer_all_index] = next_byte[0]
-				buffer_all_index += 1
-				bytes_read += 1
-				buffer_index += 1
-
-			if buffer_index >= BUFFER_LENGTH:
-				calced_checksum = sum(buffer[:BUFFER_LENGTH - CHECKSUM_LENGTH]) % CHECKSUM_MOD
-				received_checksum = ((buffer[BUFFER_LENGTH - 2] << 8) | buffer[BUFFER_LENGTH - 1]) % CHECKSUM_MOD
-				checksum_match = (calced_checksum == received_checksum - 2)
-
-				if checksum_match and buffer[0] == 255 and buffer[14] == 255:
-					res = self.byte_array_to_string(buffer)
-					#logging.debug("Success, read:" + res)
-
-					return res
-				else:
-					buffer_index -= 1
-					buffer[:BUFFER_LENGTH - 1] = buffer[1:BUFFER_LENGTH]
-					buffer[BUFFER_LENGTH - 1] = 0
-
-			if bytes_read >= MAX_BYTES_READ:
-				logging.debug("Timeout, read:" + self.byte_array_to_string(buffer_all))
-				return ""
-			elif bytes_read == 0:
-				return ""
-
+		# no frame: keep only a possible partial frame, bounded in size
+		keep = self.FRAME_LENGTH * 3
+		if len(buf) > keep:
+			del buf[:len(buf) - keep]
 		return ""
+
+	def _checksum_ok(self, buf, start):
+		L = self.FRAME_LENGTH
+		calced = sum(buf[start:start + L - 2]) % 128
+		received = ((buf[start + L - 2] << 8) | buf[start + L - 1]) % 128
+		return calced == received - 2
 
 	def _write_data(self, data):
 

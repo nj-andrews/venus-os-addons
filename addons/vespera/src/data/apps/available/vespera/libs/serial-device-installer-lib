@@ -177,8 +177,6 @@ sdi_get_available_devices() {
 	svstat "/service/serial-starter" | grep -q '^/service/serial-starter: up ' && serial_starter_pid=1
 
 	if [[ -z ${tty} ]]; then
-		udevadm control --reload-rules >/dev/null;
-		udevadm trigger --action=add --subsystem-match=tty --property-match=ID_BUS=usb >/dev/null
 		udevadm settle >/dev/null
 	fi
 

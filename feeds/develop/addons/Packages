@@ -14,14 +14,14 @@ License: MIT
 Priority: optional
 
 Package: dbus-ne-shunt
-Version: 1.1.0~d261102.0304
+Version: 1.1.0~d261103.1130
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: a70a6b17b270c1dddf3494d8c5018f22
-Size: 28514
-Filename: dbus-ne-shunt_1.1.0~d261102.0304_all.ipk
+MD5Sum: 1c5e7df2b7ed3d3cde990c72b54fc35d
+Size: 28488
+Filename: dbus-ne-shunt_1.1.0~d261103.1130_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
