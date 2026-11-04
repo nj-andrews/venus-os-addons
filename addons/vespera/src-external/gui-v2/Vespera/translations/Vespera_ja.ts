@@ -16,17 +16,17 @@
         <translation>フィード</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="60"/>
+        <location filename="../PageHome.qml" line="72"/>
         <source></source>
         <translation>ドキュメント</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="67"/>
+        <location filename="../PageHome.qml" line="79"/>
         <source>Version</source>
         <translation>バージョン</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="49"/>
+        <location filename="../PageHome.qml" line="48"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>カスタムデバイス</translation>
@@ -265,6 +265,12 @@ The service will start shortly...</source>
         <location filename="../PageSettingsDiscoveredDevices.qml" line="28"/>
         <source>No Usb devices discovered</source>
         <translation>USB デバイスは見つかりませんでした</translation>
+    </message>
+    <message id="vespera_auto_update">
+        <location filename="../PageSettings.qml" line="21"/>
+        <source>Auto update packages (Sunday)</source>
+        <oldsource>Auto update packages</oldsource>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

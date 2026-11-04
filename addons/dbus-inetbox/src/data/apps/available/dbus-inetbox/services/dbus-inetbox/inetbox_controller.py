@@ -232,11 +232,7 @@ class InetboxController:
 			return False
 		except Exception as e:
 			self.log.exception(
-				"Exception in _handle_dbus_setting_changed: path=%r, value=%r, error=%r",
-				path,
-				newvalue,
-				e,
-			)
+				"Exception in _handle_dbus_setting_changed: path=%r, value=%r, error=%r", path, newvalue,e)
 			return False
 
 	def _fromEnergyMixCombined(self, value: str):

@@ -1,0 +1,9 @@
+echo "Call stack:"
+
+for ((i=${#FUNCNAME[@]}-1; i>=1; i--)); do
+	printf '  #%d %s() - %s:%s\n' \
+		"${i}" \
+		"${FUNCNAME[$i]}" \
+		"${BASH_SOURCE[$i]}" \
+		"${BASH_LINENO[$((i-1))]}"
+done

@@ -4,6 +4,7 @@ import os
 import signal
 import subprocess
 import threading
+import time
 import uuid
 from typing import List, Optional
 
@@ -15,6 +16,9 @@ from command_state import CommandState
 log = logging.getLogger(__name__)
 
 VESPERA_PATH = "/data/apps/available/vespera/vespera"
+# Helper output goes to a file (not a pipe) so the helper survives this service being stopped
+# mid-run, e.g. when upgrading vespera itself removes and restarts this service.
+HELPER_OUTPUT_PATH = "/var/log/vespera-helper.log"  # re-created for every command
 
 COMMAND_REGISTRY = {
 	"packages": {
@@ -24,6 +28,7 @@ COMMAND_REGISTRY = {
 		},
 		"actions": {
 			"update": {},
+			"upgrade": {"prefix_args": ["update"]},
 		},
 	},
 	"feed": {
@@ -78,25 +83,61 @@ class CommandProcessor:
 		# ------------------------------------------------------------------
 
 		def mark_cancelled_sync(self):
-				"""Mark the active command as cancelled (must be called from the main thread).
+			"""Mark the active command as cancelled (must be called from the main thread).
 
-				This is called synchronously inside the D-Bus on_cancel callback so that
-				any drain idle callbacks already queued in GLib will see the flag and
-				skip emission when they run.
-				"""
-				with self._lock:
-						state = self._active
-				if state:
-						state.cancelled = True
+			This is called synchronously inside the D-Bus on_cancel callback so that
+			any drain idle callbacks already queued in GLib will see the flag and
+			skip emission when they run.
+			"""
+			with self._lock:
+					state = self._active
+			if state:
+					state.cancelled = True
 
-		def start_command(self):
+		def replay_previous_output(self, idle_timeout: float = 15.0):
+			"""Dump the last helper log into the service log.
+
+			Output written while this service was stopped (e.g. a vespera upgrade removing
+			it) is only in HELPER_OUTPUT_PATH. Follow the file until it has been quiet for
+			idle_timeout seconds, as the helper may still be running.
+			"""
+			if os.path.isfile(HELPER_OUTPUT_PATH):
+				threading.Thread(target=self._replay_output, args=(idle_timeout,), daemon=True).start()
+
+		def _replay_output(self, idle_timeout: float):
+			buffer = b""
+			idle = 0.0
+			try:
+				log.info("Previous helper output (%s):", HELPER_OUTPUT_PATH)
+				with open(HELPER_OUTPUT_PATH, "rb") as stream:
+						while idle < idle_timeout:
+								with self._lock:
+										if self._active is not None:
+												return  # a new command now owns the file
+								chunk = stream.read(65536)
+								if chunk:
+										idle = 0.0
+										buffer += chunk
+										*lines, buffer = buffer.split(b"\n")
+										for line in lines:
+												log.info("[previous run] %s", line.decode(errors="replace").rstrip("\r"))
+								else:
+										time.sleep(0.2)
+										idle += 0.2
+					if buffer:
+							log.info("[previous run] %s", buffer.decode(errors="replace"))
+			except Exception:
+					log.exception("Error replaying helper output")
+
+		def start_command(self, args_json: Optional[str] = None):
 				with self._lock:
 						if self._active and self._active.process.poll() is None:
 								log.warning("Rejecting start: command already running")
 								self._set_error("Command already running")
 								return False
 
-				args_json = str(self._dbusservice["/Request/ArgsJson"] or "[]")
+				if args_json is None:
+						args_json = str(self._dbusservice["/Request/ArgsJson"] or "[]")
 
 				try:
 						args = json.loads(args_json)
@@ -127,15 +168,15 @@ class CommandProcessor:
 				self._reset_result_state()
 
 				try:
-						process = subprocess.Popen(
-								[helper_path] + helper_args,
-								stdout=subprocess.PIPE,
-								stderr=subprocess.STDOUT,
-								text=True,
-								bufsize=1,
-								universal_newlines=True,
-								start_new_session=True,
-						)
+						with open(HELPER_OUTPUT_PATH, "wb") as output_file:
+								process = subprocess.Popen(
+										[helper_path] + helper_args,
+										stdin=subprocess.DEVNULL,
+										cwd="/",  # the inherited cwd may be deleted by a vespera upgrade
+										stdout=output_file,
+										stderr=subprocess.STDOUT,
+										start_new_session=True,
+								)
 						log.info("Started process pid=%s operation=%s", process.pid, operation_name)
 				except Exception as err:
 						self._finish_start_error(f"Failed to start process: {err}")
@@ -148,6 +189,7 @@ class CommandProcessor:
 						args=helper_args,
 						operation_name=operation_name,
 						process=process,
+						output_path=HELPER_OUTPUT_PATH,
 						stderr_done=True,
 				)
 
@@ -238,28 +280,43 @@ class CommandProcessor:
 								pass
 
 		def _stream_output(self, state: CommandState):
-				log.info(f"_stream_output")
-				stream = state.process.stdout
-				if stream is None:
-						self._mark_stream_done(state, True)
-						return
+				log.info("_stream_output")
+				buffer = b""
 				try:
-
-						for raw_line in stream:
-								if state.cancelled:
-										break
-
-								line = raw_line.rstrip("\r\n")
-
-								if not self._usb_scanner.handle_line(state, line):
-										state.output_queue.append(line)
-
-								with self._lock:
-										if not state._drain_pending and not state.cancelled:
-												state._drain_pending = True
-												state.drain_source_id = GLib.idle_add(self._drain_output, state)
+						with open(state.output_path, "rb") as stream:
+								while not state.cancelled:
+										exited = state.process.poll() is not None
+										chunk = stream.read(65536)
+										if chunk:
+												buffer += chunk
+												*lines, buffer = buffer.split(b"\n")
+												for line in lines:
+														self._handle_output_line(state, line.decode(errors="replace"))
+												continue
+										if exited:
+												break
+										time.sleep(0.1)
+						if buffer and not state.cancelled:
+								self._handle_output_line(state, buffer.decode(errors="replace"))
+				except Exception:
+						log.exception("Error reading helper output")
 				finally:
 						self._mark_stream_done(state, True)
+
+		def _handle_output_line(self, state: CommandState, raw_line: str):
+				for line in raw_line.splitlines():
+						log.info("[%s] %s", state.operation_name, line)
+
+						if state.cancelled:
+								continue
+
+						if not self._usb_scanner.handle_line(state, line):
+								state.output_queue.append(line)
+
+						with self._lock:
+								if not state._drain_pending and not state.cancelled:
+										state._drain_pending = True
+										state.drain_source_id = GLib.idle_add(self._drain_output, state)
 
 		def _drain_output(self, state: CommandState):
 				with self._lock:

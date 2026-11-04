@@ -44,7 +44,6 @@ Page {
 
 			ListNavigation {
 				topInset: Theme.geometry_listItem_itemSeparator_height
-				bottomInset: Theme.geometry_listItem_itemSeparator_height
 				//% "Custom Devices"
 				text: qsTrId("vespera_custom_devices")
 				showAccessLevel: VenusOS.User_AccessType_User
@@ -56,7 +55,20 @@ Page {
 				}
 			}
 
+			ListNavigation {
+				topInset: Theme.geometry_listItem_itemSeparator_height
+				text: CommonWords.settings
+				showAccessLevel: VenusOS.User_AccessType_User
+				writeAccessLevel: VenusOS.User_AccessType_Installer
+				onClicked: {
+					if (!vesperaManager.installerAccess()) return
+					Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {
+						title: text })
+				}
+			}
+
 			ListLink {
+				topInset: Theme.geometry_listItem_itemSeparator_height
 				text: qsTrId("pagecontrollableloads_documentation")
 				url: "https://nj-andrews.github.io/venus-os-addons/"
 			}

@@ -12,6 +12,7 @@ class CommandState:
 		args: List[str]
 		operation_name: str
 		process: subprocess.Popen
+		output_path: str = ""
 		stdout_done: bool = False
 		stderr_done: bool = False
 		wait_done: bool = False

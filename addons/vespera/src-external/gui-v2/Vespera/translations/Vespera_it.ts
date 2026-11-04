@@ -10,18 +10,18 @@
         <translation>Feed</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="49"/>
+        <location filename="../PageHome.qml" line="48"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>Dispositivi personalizzati</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="60"/>
+        <location filename="../PageHome.qml" line="72"/>
         <source></source>
         <translation>Documentazione</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="67"/>
+        <location filename="../PageHome.qml" line="79"/>
         <source>Version</source>
         <translation>Versione</translation>
     </message>
@@ -265,6 +265,12 @@ Il servizio partirà a breve...</translation>
         <location filename="../PageSettingsDiscoveredDevices.qml" line="28"/>
         <source>No Usb devices discovered</source>
         <translation>Nessun dispositivo USB rilevato</translation>
+    </message>
+    <message id="vespera_auto_update">
+        <location filename="../PageSettings.qml" line="21"/>
+        <source>Auto update packages (Sunday)</source>
+        <oldsource>Auto update packages</oldsource>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

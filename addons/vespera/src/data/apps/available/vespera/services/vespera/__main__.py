@@ -33,7 +33,7 @@ class LevelFilter(logging.Filter):
 # Leave the name set to None to get the root logger. For some reason specifying 'root' has a
 # different effect: there will be two root loggers, both with their own handlers...
 def setup_logging(debug=False, name=None):
-		formatter = logging.Formatter(fmt='%(asctime)s %(levelname)s:%(module)s:%(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+		formatter = logging.Formatter(fmt='%(levelname)s:%(module)s:%(message)s')
 
 		# Make info and debug stream to stdout and the rest to stderr
 		h1 = logging.StreamHandler(sys.stdout)

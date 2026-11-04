@@ -70,6 +70,8 @@ __vespera_lib_cleanup() {
 	___remove_file_if_empty "$VESPERA_DATA_DIR/status"
 	rmdir "$VESPERA_DATA_DIR/info" 2>/dev/null
 	rm -rf "$VESPERA_DATA_DIR/lists" "$VESPERA_DATA_DIR/venus-version" \
+		"$VESPERA_DATA_DIR/feeds.conf" "$VESPERA_DATA_DIR/indexer.md5" \
+		"$VESPERA_DATA_DIR/opkg.conf"
 
 	find "$VESPERA_DATA_DIR" -type d -empty -exec rmdir -p {} \; 2>/dev/null
 
@@ -79,7 +81,7 @@ __vespera_lib_cleanup() {
 
 }
 
-__vespera_send_gui_interrupt_signal() {
+__vespera_lib_send_gui_interrupt_signal() {
 	[[ "${VESPERA_IN_GUI:-}" != true ]] && return 0
 	echo ":::VESPERA-GUI-INTERRUPT:::"
 	sleep 3
@@ -139,7 +141,7 @@ __vespera_lib_post_install() {
 	local refresh_devices=false
 
 	# 1. let the ui know it will be interrupted
-	__vespera_send_gui_interrupt_signal
+	__vespera_lib_send_gui_interrupt_signal
 
 	# 2. enable new apps, remove old apps (symlink)
 	# VESPERA_INSTALL_STATE_FILE contains a list of the apps installed/removed
@@ -152,11 +154,10 @@ __vespera_lib_post_install() {
 		case "${status}" in
 			removed)
 				echo "Disabling ${app}"
+				__vespera_lib_enable_disable refresh_devices venus_services_to_restart "disable" "${app}"
 				rm -f "/data/apps/enabled/$app"
 				rm -f "/data/apps/available/$app/gui-v2/$app.json"
 				rmdir "/data/apps/available/$app/gui-v2" "/data/apps/available/$app" 2>/dev/null # remove if empty
-				[[ -f "$VESPERA_WORKING_DIR/$app.installer-services" ]] &&
-					venus_services_to_restart+=("$VESPERA_WORKING_DIR/$app.installer-services")
 				;;
 			enabled)
 				echo_lang "$LANG_INSTALLED_ARG1_ENABLING" "${app}"
@@ -235,9 +236,10 @@ vespera_lib_refresh_devices() {
 
 vespera_lib_enable_disable() {
 
-	__vespera_send_gui_interrupt_signal
+	__vespera_lib_send_gui_interrupt_signal
 
 	local refresh_devices=
+	# shellcheck disable=SC2034
 	local venus_services_to_restart=()
 
 	__vespera_lib_enable_disable refresh_devices venus_services_to_restart "$@"

@@ -5,6 +5,7 @@
 <file>../PageSettingsPackageInstall.qml</file>
 <file>../PageSettingsDevicesList.qml</file>
 <file>../PageSettingsFeeds.qml</file>
+<file>../PageSettings.qml</file>
 <file>../PageSettingsSavedDevice.qml</file>
 <file>../PageSettingsPackages.qml</file>
 <file>../PageSettingsFeedEdit.qml</file>
