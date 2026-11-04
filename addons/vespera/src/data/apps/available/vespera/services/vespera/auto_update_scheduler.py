@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 # Longest single sleep; the wall clock is re-checked after each, so clock jumps (NTP/GPS) self-correct
 AUTO_UPDATE_MAX_SLEEP_SECONDS = 3600
-AUTO_UPDATE_WEEKDAY = 1  # 0=Monday ... 6=Sunday
+AUTO_UPDATE_WEEKDAY = 6  # 0=Monday ... 6=Sunday
 
 
 class AutoUpdateScheduler:
