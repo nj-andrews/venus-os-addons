@@ -194,8 +194,3 @@ installer_dbus_lib_install() {
 	fi
 }
 
-installer_dbus_lib_remove() {
-	local manifest_file="${1:-}"
-	[[ -n "$manifest_file" && -f "$manifest_file" ]] || return 1
-	dbus_lib_remove_settings < "$manifest_file"
-}

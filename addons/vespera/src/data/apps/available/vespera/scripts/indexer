@@ -37,12 +37,15 @@ if [[ -f "${status_file}" ]]; then
     status_hash="$(md5sum "${status_file}" | awk '{print $1}')"
 else
     status_hash="missing"
+		conf_hash=
 fi
 
 if [[ -d "${lists_dir}" ]]; then
-    lists_hash="$(find "${lists_dir}" -maxdepth 1 -type f -print0 | sort -z | xargs -0 cat 2>/dev/null | md5sum | awk '{print $1}')"
+	lists_hash="$(find "$lists_dir" -maxdepth 1 -type f -exec md5sum {} \; \
+		| sort | md5sum | awk '{print $1}')"
 else
     lists_hash="missing"
+		conf_hash=
 fi
 
 package_hash="$(printf '%s:%s' "${status_hash}" "${lists_hash}" | md5sum | awk '{print $1}')"
@@ -55,7 +58,7 @@ fi
 [[ ! -f "${VESPERA_DATA_DIR}/feeds.json" ]] && prev_conf_hash=""
 [[ ! -f "${VESPERA_DATA_DIR}/packages.json" ]] && prev_package_hash=""
 
-if [[ -z "${prev_conf_hash}" || "${conf_hash}" != "${prev_conf_hash}" ]]; then
+if [[ -z "${prev_conf_hash}" || -z "${conf_hash}" || "${conf_hash}" != "${prev_conf_hash}" ]]; then
 	update_mode="all"
 elif [[ "${package_hash}" != "${prev_package_hash}" ]]; then
 	update_mode="packages"

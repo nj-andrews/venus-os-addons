@@ -11,11 +11,6 @@ MbPage {
 		toastNotifier: toast
 	}
 
-	Component.onDestruction: {
-		if (vesperaManager)
-			vesperaManager.cleanup()
-	}
-
 	model: VisibleItemModel {
 		MbSubMenu {
 			description: qsTrId("vespera_packages")

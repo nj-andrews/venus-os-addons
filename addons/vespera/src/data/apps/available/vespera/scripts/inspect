@@ -99,7 +99,7 @@ __list_dbus_settings() {
 	local info=
 	local dbus_service=
 
-	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}")
+	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.installer-dbus-name")
 	[[ -z $dbus_name ]] && dbus_name="$app"
 	local dbus_services=0
 
@@ -121,7 +121,7 @@ __list_dbus_settings() {
 
 
 	if [[ "$dbus_name" != "Vespera" ]]; then
-		info="$(__query_dbus "/Settings/Vespera")"
+		info="$(__query_dbus "/Settings/Vespera" | grep -i "$dbus_name")"
 		__print_section "  - Dbus Settings: /Settings/Vespera"
 		info=
 	fi

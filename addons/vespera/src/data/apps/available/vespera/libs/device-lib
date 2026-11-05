@@ -97,6 +97,9 @@ device_bind() {
 	# shellcheck disable=SC2034
 	DEVICE_SERVICE_NAME="${service_name}"
 
+	[[ -d /opt/victronenergy/service-templates/"${service_name}" ]] ||
+		sdi_service_mapping_exists || { echo "ERROR: invalid service" >&2; return 1; }
+
 	sdi_install 1>/dev/null || return 1
 
 	dbus_lib_set_string_value "/Settings/Devices/sid_${sid}/UsbProps" "${usbProps}" 1>/dev/null

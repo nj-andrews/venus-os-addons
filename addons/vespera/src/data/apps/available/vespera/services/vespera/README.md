@@ -8,28 +8,15 @@
 
 ## Writable Request Paths
 
-- /Request/ArgsJson
-- /Request/Start
-- /Request/Cancel
+- /Request/ArgsJson - JSON array: `["<family>", "<action>", ...args]`
+- /Request/Start - increment to run `scripts/gui-executor` with ArgsJson (ignored while a command is running)
 
-## Readable State/Event/Result Paths
+## Command Progress
 
-- /State/Running
-- /State/Stopping
-- /State/RequestId
-- /Event/StdoutLine
-- /Event/StdoutSeq
-- /Event/StderrLine
-- /Event/StderrSeq
-- /Event/FinishedSeq
-- /Result/ExitCode
-- /Result/ExitStatus
-- /Result/Json
-- /Result/Error
+The service publishes nothing about a running command. `scripts/gui-executor` writes progress to
+com.victronenergy.settings, which the GUI watches:
 
-## JSON Result Behavior
-
-The service populates `/Result/Json` for commands whose final structured result is either:
-- a JSON string written to stdout
-- a file path to JSON written to stdout
+- /Settings/Vespera/Gui/Command - `<family> <action>`
+- /Settings/Vespera/Gui/Output - latest output line
+- /Settings/Vespera/Gui/ExitCode - `-1` while running, then the exit code
 

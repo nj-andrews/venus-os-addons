@@ -276,14 +276,20 @@ sdi_install() {
 	return 0
 }
 
+sdi_service_mapping_exists() {
+	local service_mapping_name="${1:-}"
+	[[ -z "$service_mapping_name" ]] && __sdi_get_service_mapping_name_byref service_mapping_name
+	local find_pattern="^[[:space:]]*service[[:space:]]+${service_mapping_name}[[:space:]]+${DEVICE_SERVICE_NAME}[[:space:]]*$"
+	grep -Eq "${find_pattern}" "${SERIAL_STARTER_CONFIG_FILE}" 2>/dev/null;
+}
+
 # required vars: SERIAL_STARTER_CONFIG_FILE, DEVICE_SERVICE_NAME
 sdi_add_service_mapping() {
 	__sdi_ensure_include_config || return 1
 
-	local service_mapping_name; __sdi_get_service_mapping_name_byref service_mapping_name || true
-	local find_pattern="^[[:space:]]*service[[:space:]]+${service_mapping_name}[[:space:]]+${DEVICE_SERVICE_NAME}[[:space:]]*$"
+	local service_mapping_name; __sdi_get_service_mapping_name_byref service_mapping_name
 
-	if ! grep -Eq "${find_pattern}" "${SERIAL_STARTER_CONFIG_FILE}" 2>/dev/null; then
+	if ! sdi_service_mapping_exists "$service_mapping_name"; then
 		local entry="service ${service_mapping_name}"$'\t\t'"${DEVICE_SERVICE_NAME}"
 
 		mkdir -p "$(dirname "${SERIAL_STARTER_CONFIG_FILE}")"

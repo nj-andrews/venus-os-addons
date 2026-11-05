@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Publishes a discovered device as settings so the GUI can list it.
+# Usage: published-discovered-device $'Device Discovered:\t<sid>\t<port>\t<usbProps>'
+#
+# Creates under /Settings/Vespera/Gui/DiscoveredDevices/sid_<sid>/:
+#   Port, UsbProps
+# (the root must match the tree gui-executor clears before a scan)
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${script_dir}/../libs/dbus-lib"
+
+root_path="/Settings/Vespera/Gui/DiscoveredDevices"
+
+IFS=$'\t' read -r label sid port usb_props <<< "${1:-}"
+
+if [[ "$label" != "Device Discovered:" || -z "$sid" || -z "$port" || -z "$usb_props" ]]; then
+	echo "ERROR: Invalid 'Device Discovered:' line" >&2
+	exit 1
+fi
+
+# The sid becomes part of a dbus path
+if [[ ! "$sid" =~ ^[A-Za-z0-9_]+$ ]]; then
+	echo "ERROR: Invalid device sid: ${sid}" >&2
+	exit 1
+fi
+
+device_path="${root_path}/sid_${sid}"
+
+# Sets the value, adding the setting first if it does not exist yet
+dbus_lib_set_string_value "${device_path}/Port"     "$port"
+dbus_lib_set_string_value "${device_path}/UsbProps" "$usb_props"

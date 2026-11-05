@@ -4,24 +4,24 @@
 <context>
     <name></name>
     <message id="vespera_packages">
-        <location filename="../PageHome.qml" line="24"/>
+        <location filename="../PageHome.qml" line="23"/>
         <location filename="../PageSettingsPackages.qml" line="8"/>
         <source>Packages</source>
         <translation>패키지</translation>
     </message>
     <message id="vespera_feeds">
-        <location filename="../PageHome.qml" line="35"/>
+        <location filename="../PageHome.qml" line="34"/>
         <location filename="../PageSettingsFeeds.qml" line="8"/>
         <source>Feeds</source>
         <translation>피드</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="72"/>
+        <location filename="../PageHome.qml" line="71"/>
         <source></source>
         <translation>문서</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="79"/>
+        <location filename="../PageHome.qml" line="78"/>
         <source>Version</source>
         <translation>버전</translation>
     </message>
@@ -220,7 +220,7 @@ The service will start shortly...</source>
         <translation>새로 고침</translation>
     </message>
     <message id="vespera_move_settings_to_top">
-        <location filename="../PageHome.qml" line="14"/>
+        <location filename="../PageHome.qml" line="13"/>
         <source>Move settings to top</source>
         <translation>설정을 맨 위로 이동</translation>
     </message>
@@ -230,13 +230,13 @@ The service will start shortly...</source>
         <translation>작업이 끝날 때까지 기다려 주세요</translation>
     </message>
     <message id="vespera_finalize_install">
-        <location filename="../components/VesperaManager.qml" line="91"/>
+        <location filename="../components/VesperaManager.qml" line="88"/>
         <source>Finalizing. The UI will restart shortly</source>
         <oldsource>Finiazing install. The UI will restart shortly</oldsource>
         <translation>설치 완료 중입니다. 인터페이스가 곧 다시 시작됩니다</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="111"/>
+        <location filename="../components/VesperaManager.qml" line="108"/>
         <source>Operation failed</source>
         <translation>작업이 실패했습니다</translation>
     </message>
@@ -251,7 +251,7 @@ The service will start shortly...</source>
         <translation>검색된 USB 장치가 없습니다</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="48"/>
+        <location filename="../PageHome.qml" line="47"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>사용자 지정 장치</translation>
@@ -267,9 +267,9 @@ The service will start shortly...</source>
         <translation></translation>
     </message>
     <message id="vespera_auto_update">
-        <location filename="../PageSettings.qml" line="21"/>
+        <location filename="../PageSettings.qml" line="35"/>
         <source>Auto update packages (Sunday)</source>
-        <oldsource>Auto update packages</oldsource>
+        <oldsource>Auto update packages (weekly)</oldsource>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-"$@" 2>&1 | /data/dbus-stdout
-
-status=("${PIPESTATUS[@]}")
-
-dbus -y com.victronenergy.settings "/Settings/Vespera/Gui/ExitCode" SetValue "${status[0]}"

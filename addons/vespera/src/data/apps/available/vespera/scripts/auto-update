@@ -1,0 +1,58 @@
+#!/bin/bash
+
+
+__vespera_path="$(dirname "${BASH_SOURCE[0]}")"
+__vespera_path="$(cd "${__vespera_path}/.." && pwd)"
+
+# shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
+source "$__vespera_path/libs/source-lib"
+addsource "conf/vespera.conf"
+
+declare action="${1:-}"
+declare weekday=""
+
+if [[ -z "$action" ]]; then
+	declare event; event="$(dbus -y com.victronenergy.settings /Settings/Vespera/AutoUpdate GetValue 2>/dev/null)"
+	event="${event//\'/}"
+	IFS=' ' read -r seconds weekday<<< "$event"
+	[[ -z "$seconds" ]] && { echo "off"; exit 0; }
+	weekdays=(Monday Tuesday Wednesday Thursday Friday Saturday Sunday)
+	if [[ "$weekday" =~ ^[0-6]$ ]]; then
+		weekday=${weekdays[$weekday]}
+	else
+		weekday=${weekdays[${VESPERA_AUTO_UPDATE_WEEKDAY:-6}]}
+	fi
+
+	printf '%02d:%02d\t%s\n' "$((seconds / 3600))" "$((seconds / 60 % 60))" "$weekday"
+	exit 0
+fi
+
+declare total_seconds=""
+if [[ $action != "off" ]]; then
+	time="$action"
+	[[ "${time}" =~ ^([01]?[0-9]|2[0-3]):[0-5][0-9]([[:space:]]+.*)?$ ]] || { echo "Invalid time. Format is hours:minutes [weekday]"; exit 1; }
+	IFS=': ' read -r hours minutes<<< "$time"
+	total_seconds=$((10#$hours * 3600 + 10#$minutes * 60))
+	declare day="${2:-}"
+
+	if [[ -n "$day" ]]; then
+		weekday=$day
+		if [[ ! "$day" =~ ^[0-6]$ ]]; then
+			weekdays=(Monday Tuesday Wednesday Thursday Friday Saturday Sunday)
+			weekday="$(for i in "${!weekdays[@]}"; do [[ "${weekdays[$i],,}" == "${day,,}" ]] && { echo "$i"; break; }; done)"
+		fi
+	else
+		declare event; event="$(dbus -y com.victronenergy.settings /Settings/Vespera/AutoUpdate GetValue 2>/dev/null)"
+		event="${event//\'/}"
+		IFS=' ' read -r _ weekday<<< "$event"
+		[[ "$weekday" =~ ^[0-6]$ ]] || weekday="${VESPERA_AUTO_UPDATE_WEEKDAY:-6}"
+	fi
+fi
+
+addsource "libs/dbus-lib"
+if [[ "$action" == "off" ]]; then
+	dbus_lib_set_string_value "/Settings/Vespera/AutoUpdate" ""
+else
+	dbus_lib_set_string_value "/Settings/Vespera/AutoUpdate" "$total_seconds $weekday"
+fi
+exit 0

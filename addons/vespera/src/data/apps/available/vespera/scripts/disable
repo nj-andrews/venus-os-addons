@@ -33,7 +33,7 @@ for app in $(opkg_lib_list_enabled_packages); do
 	"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-unregister "${app}";
 
 	# updated dbus package enabled state
-	declare dbus_name; dbus_name=$(cat "${sidecar_file_prefix}.${VESPERA_DBUS_FILE}")
+	declare dbus_name; dbus_name=$(cat "${sidecar_file_prefix}.installer-dbus-name")
 	[[ -n $dbus_name ]] &&
 		dbus -y com.victronenergy.settings "/Settings/Vespera/Packages/$dbus_name/Enabled" SetValue "0" 1>/dev/null 2>&1
 

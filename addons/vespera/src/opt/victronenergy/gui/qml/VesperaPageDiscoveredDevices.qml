@@ -9,7 +9,7 @@ MbPage {
 
 	VesperaDbusChildModel {
 		id: devicesModel
-		uid: "dbus/com.victronenergy.vespera/Discovered"
+		uid: "dbus/com.victronenergy.settings/Settings/Vespera/Gui/DiscoveredDevices"
 		filterRegExp: "\/sid_[^/]+$"
 		childId: "Port"
 	}

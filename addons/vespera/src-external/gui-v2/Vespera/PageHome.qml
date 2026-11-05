@@ -5,7 +5,6 @@ import "qrc:/Vespera/components" as Vespera
 Page {
 	id: page
 	title: "Vespera"
-	Component.onDestruction: vesperaManager?.cleanup()
 
 	Vespera.VesperaManager { id: vesperaManager; traceEnabled: true }
 

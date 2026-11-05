@@ -18,7 +18,7 @@ __enable_app() {
 
 	[[ ! -d "$available_app_path" ]] && return
 
-	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.${VESPERA_DBUS_FILE}" 2>/dev/null)
+	local dbus_name; dbus_name=$(cat "$VESPERA_DATA_DIR/info/${app}.installer-dbus-name" 2>/dev/null)
 	local overlay_targets_conf="$VESPERA_DATA_DIR/info/$app.installer-overlays"
 
 	[[ -f "$overlay_targets_conf" ]] &&

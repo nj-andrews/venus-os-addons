@@ -1,5 +1,0 @@
-#!/bin/bash
-
-while IFS= read -r value || [[ -n "$value" ]]; do
-    dbus -y com.victronenergy.settings "/Settings/Vespera/Gui/StdoutLine" SetValue "$value" > /dev/null
-done

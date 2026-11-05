@@ -4,29 +4,29 @@
 <context>
     <name></name>
     <message id="vespera_packages">
-        <location filename="../PageHome.qml" line="24"/>
+        <location filename="../PageHome.qml" line="23"/>
         <location filename="../PageSettingsPackages.qml" line="8"/>
         <source>Packages</source>
         <translation>Paquetes</translation>
     </message>
     <message id="vespera_feeds">
-        <location filename="../PageHome.qml" line="35"/>
+        <location filename="../PageHome.qml" line="34"/>
         <location filename="../PageSettingsFeeds.qml" line="8"/>
         <source>Feeds</source>
         <translation>Repositorios</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="72"/>
+        <location filename="../PageHome.qml" line="71"/>
         <source></source>
         <translation>Documentación</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="79"/>
+        <location filename="../PageHome.qml" line="78"/>
         <source>Version</source>
         <translation>Versión</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="48"/>
+        <location filename="../PageHome.qml" line="47"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>Dispositivos personalizados</translation>
@@ -235,7 +235,7 @@ El servicio comenzará en breve...</translation>
         <translation>Actualizar</translation>
     </message>
     <message id="vespera_move_settings_to_top">
-        <location filename="../PageHome.qml" line="14"/>
+        <location filename="../PageHome.qml" line="13"/>
         <source>Move settings to top</source>
         <translation>Mover ajustes arriba</translation>
     </message>
@@ -245,12 +245,12 @@ El servicio comenzará en breve...</translation>
         <translation>Espera a que termine la operación</translation>
     </message>
     <message id="vespera_finalize_install">
-        <location filename="../components/VesperaManager.qml" line="91"/>
+        <location filename="../components/VesperaManager.qml" line="88"/>
         <source>Finalizing. The UI will restart shortly</source>
         <translation>Finalizando. La interfaz se reiniciará en breve</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="111"/>
+        <location filename="../components/VesperaManager.qml" line="108"/>
         <source>Operation failed</source>
         <translation>La operación falló</translation>
     </message>
@@ -265,9 +265,9 @@ El servicio comenzará en breve...</translation>
         <translation>No se han encontrado dispositivos USB</translation>
     </message>
     <message id="vespera_auto_update">
-        <location filename="../PageSettings.qml" line="21"/>
+        <location filename="../PageSettings.qml" line="35"/>
         <source>Auto update packages (Sunday)</source>
-        <oldsource>Auto update packages</oldsource>
+        <oldsource>Auto update packages (weekly)</oldsource>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -49,11 +49,8 @@ QtObject {
 
 	property VeQuickItem _connectedItem: VeQuickItem { uid: root.serviceUid + "/Connected" }
 
-	function cleanup() { bridge.cleanup() }
-
-	function cancel() {
-		if (bridge.running) bridge.stop()
-	}
+	// Cancelling a running command is not currently supported
+	function cancel() { }
 
 	function snapshotObject(source) {
 		return source ? JSON.parse(JSON.stringify(source)) : null

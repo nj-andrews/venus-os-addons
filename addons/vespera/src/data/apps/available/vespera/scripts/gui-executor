@@ -1,0 +1,150 @@
+#!/bin/bash
+
+# gui-executor: Runs a vespera command on behalf of the GUI and reports progress through
+# com.victronenergy.settings.
+# com.victronenergy.settings is used becase the vespera services/go down during upgrades
+#
+# Usage: gui-executor <family> <command> [args...]
+#
+# Commands (family command):
+#   packages update|upgrade
+#   package  install|remove|upgrade|enable|disable <package>
+#   feed     add|edit|remove <feed args...>
+#   device   scan|bind|remove <device args...>
+#
+# Progress is written to /Settings/Vespera/Gui/:
+#   Command  - "<family> <command>"
+#   Output   - the latest line of output from the command (stdout and stderr)
+#   ExitCode - -1 while running, then the exit code (1 for an invalid command)
+#
+# For "device scan", lines starting with "Device Discovered:<tab>" are not shown as output.
+# They are passed to published-discovered-device, which publishes them under
+# /Settings/Vespera/Gui/DiscoveredDevices, and that tree is cleared at the start of each scan.
+#
+# Started by the vespera service (command_processor.py) when the GUI requests a command.
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+family="${1}"
+command="${2}"
+exec_command=(vespera --in-gui)
+exit_code=1   # stays 1 if the script dies before the command finishes
+
+shift 2
+args=("$@")
+
+# When started by the vespera service stdout is discarded, so send it (and stderr) to the service log
+if [[ -n "${VESPERA_FROM_SERVICE:-}" && -w /var/log/vespera/current ]]; then
+	exec > >(tai64n >> /var/log/vespera/current) 2>&1
+fi
+
+set_dbus_value() {
+	dbus -y com.victronenergy.settings "/Settings/Vespera/Gui/$1" SetValue -- "$2" > /dev/null;
+}
+
+logError() {
+	[[ -n "${VESPERA_FROM_SERVICE:-}" ]] && echo "ERROR:gui-executer:${1}" || echo "${1}"
+	set_dbus_value "Output" "ERROR:${1}"
+}
+
+log() {
+	[[ -n "${VESPERA_FROM_SERVICE:-}" ]] && echo "INFO:gui-executer:${1}" || echo "${1}"
+	if [[ -z "${2:-}" ]]; then
+		set_dbus_value "Output" "${1}"
+	fi
+}
+
+set -E # make the ERR trap also fire inside functions
+
+#shellcheck disable=SC2329
+on_error() {
+	#shellcheck disable=SC2317
+	logError "line $1: $2" || true;
+}
+trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
+
+# Always report the exit code so the GUI never stays at -1 (running)
+#shellcheck disable=SC2329
+on_exit() {
+	#shellcheck disable=SC2317
+	set_dbus_value "ExitCode" "${exit_code}" || true
+}
+
+trap on_exit EXIT
+trap 'exit 143' TERM INT HUP # so a killed run still reaches the EXIT trap
+
+exec_device() {
+
+	source "${script_dir}/../libs/dbus-lib"
+	if [[ "$command" == "scan" ]]; then
+		log "Scanning..."
+		dbus_lib_delete_tree "/Settings/Vespera/Gui/DiscoveredDevices" > /dev/null
+	fi
+
+	"${exec_command[@]}" 2>&1 | (
+		while IFS= read -r line; do
+			log "$line" 0
+			if [[ "$command" == "scan" && "$line" == $'Device Discovered:\t'* ]]; then
+				source "${script_dir}/published-discovered-device" "$line"
+			elif [[ "$command" == "bind" && "$line" == $'Device Claimed:\t'* ]]; then
+				IFS=$'\t' read -r _ sid <<< "${line}"
+				[[ -n "$sid" ]] &&
+					dbus_lib_delete_tree "/Settings/Vespera/Gui/DiscoveredDevices/sid_${sid}" > /dev/null
+			fi
+		done
+	)
+	exit_code=${PIPESTATUS[0]}
+}
+
+case "${family:-}" in
+	packages)
+		case "${command}" in
+			update)  exec_command+=(update);;
+			upgrade) exec_command+=(update upgrade);;
+		esac
+		;;
+	package)
+		case "${command}" in
+			install) exec_command+=(update install 	"${args[@]}");;
+			remove)  exec_command+=(remove 					"${args[@]}");;
+			upgrade) exec_command+=(update upgrade 	"${args[@]}");;
+			enable)  exec_command+=(enable  				"${args[@]}");;
+			disable) exec_command+=(disable 				"${args[@]}");;
+		esac
+		;;
+	feed)
+		case "${command}" in
+			add)    exec_command+=(feed-source add    "${args[@]}");;
+			edit)   exec_command+=(feed-source edit   "${args[@]}");;
+			remove) exec_command+=(feed-source remove "${args[@]}");;
+		esac
+		;;
+	device)
+		case "${command}" in
+			scan)     exec_command+=(device scan   "${args[@]}");;
+			bind)    	exec_command+=(device add  	 "${args[@]}");;
+			remove)		exec_command+=(device remove "${args[@]}");;
+		esac
+		;;
+esac
+
+set_dbus_value "Command"  "${family} ${command}"
+set_dbus_value "Output"  ""
+set_dbus_value "ExitCode" "-1" # -1 means running; always set so the GUI sees every run start
+
+if [[ ${#exec_command[@]} -le 2 ]]; then
+	logError "Invalid command"
+	exit 1
+fi
+
+if [[ "${family}" == "device" ]] && [[ "$command" == "scan" || $command == "bind" ]]; then
+	exec_device
+else
+	"${exec_command[@]}" 2>&1 | (
+		while IFS= read -r line || [[ -n "$line" ]]; do
+			log "$line"
+		done
+	)
+	exit_code=${PIPESTATUS[0]}
+fi
+
+exit "${exit_code}"

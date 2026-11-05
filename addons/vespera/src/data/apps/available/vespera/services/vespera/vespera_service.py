@@ -3,7 +3,6 @@
 import logging
 import os
 import sys
-import threading
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
@@ -24,7 +23,6 @@ from settingsdevice import SettingsDevice  # type: ignore
 from auto_update_scheduler import AutoUpdateScheduler
 from chunk_processor import ChunkProcessor
 from command_processor import CommandProcessor
-from usb_scanner import UsbScanner
 from vespera_config import VesperaConfig
 
 SERVICE_NAME = "com.victronenergy.vespera"
@@ -71,28 +69,6 @@ class VesperaService:
 					onchangecallback=self._on_start_requested,
 			)
 			self._dbusservice.add_path(
-					"/Request/Cancel",
-					dbus.UInt32(0),
-					writeable=True,
-					valuetype=dbus.UInt32,
-					onchangecallback=self._on_cancel_requested,
-			)
-
-			self._dbusservice.add_path("/State/RequestId", "", valuetype=dbus.String)
-			self._dbusservice.add_path("/State/Status", dbus.UInt16(0), valuetype=dbus.UInt16)
-
-			self._dbusservice.add_path("/Event/StdoutLine", "", valuetype=dbus.String)
-			self._dbusservice.add_path("/Event/StdoutSeq", dbus.UInt32(0), valuetype=dbus.UInt32)
-			self._dbusservice.add_path("/Event/StderrLine", "", valuetype=dbus.String)
-			self._dbusservice.add_path("/Event/StderrSeq", dbus.UInt32(0), valuetype=dbus.UInt32)
-			self._dbusservice.add_path("/Event/FinishedSeq", dbus.UInt32(0), valuetype=dbus.UInt32)
-
-			self._dbusservice.add_path("/Result/ExitCode", 0, valuetype=dbus.Int32)
-			self._dbusservice.add_path("/Result/ExitStatus", dbus.UInt16(0), valuetype=dbus.UInt16)
-			self._dbusservice.add_path("/Result/Error", "", valuetype=dbus.String)
-			self._dbusservice.add_path("/Result/Json", "", valuetype=dbus.String, writeable=True)
-
-			self._dbusservice.add_path(
 					"/Chunk/Control/CreateSessionId",
 					"",
 					writeable=True,
@@ -114,15 +90,12 @@ class VesperaService:
 					onchangecallback=self._on_chunk_requested,
 			)
 
-			lock = threading.RLock()
-			self._usb_scanner = UsbScanner(self._dbusservice)
-			self._command_processor = CommandProcessor(self._dbusservice, lock, self._usb_scanner)
+			self._command_processor = CommandProcessor()
 			self._chunk_processor = ChunkProcessor(self._dbusservice)
 			self._auto_update = AutoUpdateScheduler(
 					lambda: self._command_processor.start_command('["packages", "upgrade"]'))
 
 			self._initialize_settings()
-			self._command_processor.replay_previous_output()
 			self._dbusservice.register()
 
 			log.info("D-Bus service registered: %s", SERVICE_NAME)
@@ -134,15 +107,7 @@ class VesperaService:
 
 	def _on_start_requested(self, _path, _value):
 			log.info("Start requested")
-			GLib.idle_add(self._command_processor.start_command)
-			return True
-
-	def _on_cancel_requested(self, _path, _value):
-			log.info("Cancel requested")
-			# Set cancelled synchronously here (on the main thread) so that any
-			# drain idle callbacks already in the GLib queue will see the flag.
-			self._command_processor.mark_cancelled_sync()
-			GLib.idle_add(self._command_processor.cancel_command)
+			GLib.idle_add(self._command_processor.start_command, self._dbusservice["/Request/ArgsJson"])
 			return True
 
 	def _on_chunk_requested(self, _path, _value):
@@ -173,6 +138,11 @@ class VesperaService:
 					# name: [path, default, min, max]
 					supportedSettings={
 							'AutoUpdate': [f'{self._settingsPath}/AutoUpdate', "", 0, 0],
+							# # Written by scripts/gui-executor, read by the GUI
+							# not needed by vespera_service just the ui
+							# 'GuiCommand': [f'{self._settingsPath}/Gui/Command', "", 0, 0],
+							# 'GuiOutput': [f'{self._settingsPath}/Gui/Output', "", 0, 0],
+							# 'GuiExitCode': [f'{self._settingsPath}/Gui/ExitCode', 0, 0, 0],
 					},
 					eventCallback=self._handle_dbus_setting_changed)
 

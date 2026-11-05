@@ -1,427 +1,75 @@
 import json
 import logging
 import os
-import signal
 import subprocess
 import threading
-import time
-import uuid
-from typing import List, Optional
-
-import dbus
-from gi.repository import GLib  # type: ignore
-
-from command_state import CommandState
+from typing import Optional
 
 log = logging.getLogger(__name__)
 
-VESPERA_PATH = "/data/apps/available/vespera/vespera"
-# Helper output goes to a file (not a pipe) so the helper survives this service being stopped
-# mid-run, e.g. when upgrading vespera itself removes and restarts this service.
-HELPER_OUTPUT_PATH = "/var/log/vespera-helper.log"  # re-created for every command
-
-COMMAND_REGISTRY = {
-	"packages": {
-		"default": {
-			"helper_name": "vespera",
-			"helper_path": f"{VESPERA_PATH}",
-		},
-		"actions": {
-			"update": {},
-			"upgrade": {"prefix_args": ["update"]},
-		},
-	},
-	"feed": {
-		"default": {
-			"helper_name": "vespera",
-			"helper_path": f"{VESPERA_PATH}",
-		},
-		"actions": {
-			"add": {"prefix_args": ["feed-source"]},
-			"edit": {"prefix_args": ["feed-source"]},
-			"remove": {"prefix_args": ["feed-source"]},
-		},
-	},
-	"package": {
-		"default": {
-			"helper_name": "vespera",
-			"helper_path": f"{VESPERA_PATH}",
-		},
-		"actions": {
-			"install": {"prefix_args": ["--in-gui"]},
-			"remove":  {"prefix_args": ["--in-gui"]},
-			"upgrade": {"prefix_args": ["--in-gui"]},
-			"enable": {"prefix_args": ["--in-gui"]},
-			"disable": {"prefix_args": ["--in-gui"]},
-		},
-	},
-	"device": {
-		"default": {
-			"helper_name": "vespera",
-			"helper_path": f"{VESPERA_PATH}",
-		},
-		"actions": {
-			"scan": {"prefix_args": ["device"]},
-			"bind": {"prefix_args": ["device"]},
-			"remove": {"prefix_args": ["device"]},
-		},
-	},
-}
-
+GUI_EXECUTOR_PATH = os.path.normpath(
+	os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts", "gui-executor"))
 
 class CommandProcessor:
-		"""Manages the full lifecycle of a single concurrent helper-process command."""
+	"""Runs one gui-executor command at a time.
 
-		def __init__(self, dbusservice, lock: threading.RLock, usb_scanner):
-				self._dbusservice = dbusservice
-				self._lock = lock
-				self._active: Optional[CommandState] = None
-				self._usb_scanner = usb_scanner
+	gui-executor validates the command family/action and reports its progress and
+	exit code through the /Settings/Vespera/Gui/* settings, so nothing is published here.
+	"""
 
-		# ------------------------------------------------------------------
-		# Public interface called from the service bootstrap
-		# ------------------------------------------------------------------
+	def __init__(self):
+		self._lock = threading.Lock()
+		self._process: Optional[subprocess.Popen] = None
 
-		def mark_cancelled_sync(self):
-			"""Mark the active command as cancelled (must be called from the main thread).
+	def start_command(self, args_json: Optional[str] = None):
+		"""Start gui-executor with args_json, a JSON array: [family, action, *args].
 
-			This is called synchronously inside the D-Bus on_cancel callback so that
-			any drain idle callbacks already queued in GLib will see the flag and
-			skip emission when they run.
-			"""
-			with self._lock:
-					state = self._active
-			if state:
-					state.cancelled = True
+		Returns False so it can be used directly as a GLib.idle_add callback.
+		"""
+		try:
+			args = json.loads(args_json or "[]")
+			if not isinstance(args, list) or len(args) < 2:
+				raise ValueError("expected [family, action, *args]")
+			args = [str(a) for a in args if a is not None]
+		except (TypeError, ValueError) as e:
+			log.error("Rejecting start: invalid args %r: %s", args_json, e)
+			return False
 
-		def replay_previous_output(self, idle_timeout: float = 15.0):
-			"""Dump the last helper log into the service log.
+		if not os.access(GUI_EXECUTOR_PATH, os.X_OK):
+			log.error("Rejecting start: %s not found or not executable", GUI_EXECUTOR_PATH)
+			return False
 
-			Output written while this service was stopped (e.g. a vespera upgrade removing
-			it) is only in HELPER_OUTPUT_PATH. Follow the file until it has been quiet for
-			idle_timeout seconds, as the helper may still be running.
-			"""
-			if os.path.isfile(HELPER_OUTPUT_PATH):
-				threading.Thread(target=self._replay_output, args=(idle_timeout,), daemon=True).start()
+		with self._lock:
+			if self._process and self._process.poll() is None:
+				log.warning("Rejecting start: command already running")
+				return False
 
-		def _replay_output(self, idle_timeout: float):
-			buffer = b""
-			idle = 0.0
+			log.info("Starting gui-executor: %s", args)
 			try:
-				log.info("Previous helper output (%s):", HELPER_OUTPUT_PATH)
-				with open(HELPER_OUTPUT_PATH, "rb") as stream:
-						while idle < idle_timeout:
-								with self._lock:
-										if self._active is not None:
-												return  # a new command now owns the file
-								chunk = stream.read(65536)
-								if chunk:
-										idle = 0.0
-										buffer += chunk
-										*lines, buffer = buffer.split(b"\n")
-										for line in lines:
-												log.info("[previous run] %s", line.decode(errors="replace").rstrip("\r"))
-								else:
-										time.sleep(0.2)
-										idle += 0.2
-					if buffer:
-							log.info("[previous run] %s", buffer.decode(errors="replace"))
-			except Exception:
-					log.exception("Error replaying helper output")
-
-		def start_command(self, args_json: Optional[str] = None):
-				with self._lock:
-						if self._active and self._active.process.poll() is None:
-								log.warning("Rejecting start: command already running")
-								self._set_error("Command already running")
-								return False
-
-				if args_json is None:
-						args_json = str(self._dbusservice["/Request/ArgsJson"] or "[]")
-
-				try:
-						args = json.loads(args_json)
-						if not isinstance(args, list):
-								raise ValueError("ArgsJson must contain a JSON array")
-						args = [str(arg) for arg in args]
-						log.info("Parsed request args: %s", args)
-				except Exception as err:
-						self._finish_start_error(f"Invalid args json: {err}")
-						return False
-
-				try:
-						helper_name, helper_path, helper_args, operation_name = self.resolve_command(args)
-						log.info(
-								"Resolved command operation=%s helper=%s path=%s args=%s",
-								operation_name,
-								helper_name,
-								helper_path,
-								helper_args,
-						)
-				except ValueError as err:
-						self._finish_start_error(str(err))
-						return False
-				log.info(operation_name)
-				if operation_name == "device scan":
-						self._usb_scanner.clear_discovered_devices()
-				log.info([helper_path] + helper_args)
-				self._reset_result_state()
-
-				try:
-						with open(HELPER_OUTPUT_PATH, "wb") as output_file:
-								process = subprocess.Popen(
-										[helper_path] + helper_args,
-										stdin=subprocess.DEVNULL,
-										cwd="/",  # the inherited cwd may be deleted by a vespera upgrade
-										stdout=output_file,
-										stderr=subprocess.STDOUT,
-										start_new_session=True,
-								)
-						log.info("Started process pid=%s operation=%s", process.pid, operation_name)
-				except Exception as err:
-						self._finish_start_error(f"Failed to start process: {err}")
-						return False
-
-				state = CommandState(
-						request_id=str(uuid.uuid4()),
-						helper_name=helper_name,
-						helper_path=helper_path,
-						args=helper_args,
-						operation_name=operation_name,
-						process=process,
-						output_path=HELPER_OUTPUT_PATH,
-						stderr_done=True,
+				# New session so the command survives this service being stopped,
+				# e.g. when upgrading vespera itself restarts the service.
+				process = subprocess.Popen(
+					[GUI_EXECUTOR_PATH, *args],
+					stdin=subprocess.DEVNULL,
+					stdout=subprocess.DEVNULL,
+					stderr=subprocess.DEVNULL,
+					env={**os.environ, "VESPERA_FROM_SERVICE": "1"},
+					# The service's own cwd can be deleted when vespera upgrades itself,
+					# which makes the child shell fail with "getcwd: cannot access parent directories"
+					cwd="/",
+					start_new_session=True,
 				)
-
-				with self._lock:
-						self._active = state
-
-				self._dbusservice["/State/Status"] = dbus.UInt16(1)  # running
-
-				threading.Thread(target=self._stream_output, args=(state,), daemon=True).start()
-				threading.Thread(target=self._wait_for_process, args=(state,), daemon=True).start()
+			except OSError:
+				log.exception("Failed to start gui-executor")
 				return False
+			self._process = process
 
-		def cancel_command(self):
-				with self._lock:
-						state = self._active
+		threading.Thread(target=self._wait_for_process, args=(process, args), daemon=True).start()
+		return False
 
-				if not state:
-						log.info("Cancel requested with no active process")
-						return False
-
-				state.cancelled = True
-				self._cancel_pending_drain(state)
-
-				if state.process.poll() is not None:
-						log.info("Cancel requested but process already exited; suppressing remaining output")
-						return False
-
-				self._dbusservice["/State/Status"] = dbus.UInt16(3)  # cancelling
-				log.info("Stopping process pid=%s operation=%s", state.process.pid, state.operation_name)
-
-				try:
-						os.killpg(state.process.pid, signal.SIGTERM)
-				except Exception:
-						try:
-								state.process.terminate()
-						except Exception:
-								pass
-
-				return False
-
-		def resolve_command(self, args: List[str]):
-				if len(args) < 2:
-						raise ValueError("Expected args: <family> <action> [args...]")
-
-				family = args[0].strip()
-				action = args[1].strip()
-				if not family or not action:
-						raise ValueError("Family and action are required")
-
-				family_spec = COMMAND_REGISTRY.get(family)
-				if not family_spec:
-						raise ValueError(f"Unsupported command family: {family}")
-
-				action_spec = family_spec["actions"].get(action)
-				if action_spec is None:
-						raise ValueError(f"Unsupported {family} action: {action}")
-
-				helper_name = family_spec["default"]["helper_name"]
-				helper_path = action_spec.get("helper_path") or family_spec["default"]["helper_path"]
-				prefix_args = action_spec.get("prefix_args", [])
-
-				if not os.path.isfile(helper_path):
-						raise ValueError(f"Helper not found: {helper_path}")
-				if not os.access(helper_path, os.X_OK):
-						raise ValueError(f"Helper not executable: {helper_path}")
-
-
-				helper_args = [*prefix_args, action, *args[2:]]
-
-				operation_name = f"{family} {action}"
-				return helper_name, helper_path, helper_args, operation_name
-
-		# ------------------------------------------------------------------
-		# Internal helpers
-		# ------------------------------------------------------------------
-
-		def _cancel_pending_drain(self, state: CommandState):
-				with self._lock:
-						drain_source_id = state.drain_source_id
-						state.drain_source_id = 0
-						state.output_queue.clear()
-						state._drain_pending = False
-
-				if drain_source_id:
-						try:
-								GLib.source_remove(drain_source_id)
-						except Exception:
-								pass
-
-		def _stream_output(self, state: CommandState):
-				log.info("_stream_output")
-				buffer = b""
-				try:
-						with open(state.output_path, "rb") as stream:
-								while not state.cancelled:
-										exited = state.process.poll() is not None
-										chunk = stream.read(65536)
-										if chunk:
-												buffer += chunk
-												*lines, buffer = buffer.split(b"\n")
-												for line in lines:
-														self._handle_output_line(state, line.decode(errors="replace"))
-												continue
-										if exited:
-												break
-										time.sleep(0.1)
-						if buffer and not state.cancelled:
-								self._handle_output_line(state, buffer.decode(errors="replace"))
-				except Exception:
-						log.exception("Error reading helper output")
-				finally:
-						self._mark_stream_done(state, True)
-
-		def _handle_output_line(self, state: CommandState, raw_line: str):
-				for line in raw_line.splitlines():
-						log.info("[%s] %s", state.operation_name, line)
-
-						if state.cancelled:
-								continue
-
-						if not self._usb_scanner.handle_line(state, line):
-								state.output_queue.append(line)
-
-						with self._lock:
-								if not state._drain_pending and not state.cancelled:
-										state._drain_pending = True
-										state.drain_source_id = GLib.idle_add(self._drain_output, state)
-
-		def _drain_output(self, state: CommandState):
-				with self._lock:
-						state.drain_source_id = 0
-						if state.cancelled:
-								state.output_queue.clear()
-								state._drain_pending = False
-								return False
-
-				# Process a small batch so the main loop stays responsive to D-Bus events.
-				batch = 10
-				for _ in range(batch):
-						if state.cancelled:
-								break
-						if state.output_queue:
-								line = state.output_queue.popleft()
-								self._dbusservice["/Event/StdoutLine"] = line
-								self._dbusservice["/Event/StdoutSeq"] = dbus.UInt32(int(self._dbusservice["/Event/StdoutSeq"]) + 1)
-						else:
-								break
-
-				with self._lock:
-						if state.cancelled:
-								state.output_queue.clear()
-								state._drain_pending = False
-						elif state.output_queue:
-								state.drain_source_id = GLib.idle_add(self._drain_output, state)
-						else:
-								state._drain_pending = False
-				return False
-
-		def _mark_stream_done(self, state: CommandState, is_stdout: bool):
-				with self._lock:
-						if self._active is not state:
-								return
-						if is_stdout:
-								state.stdout_done = True
-						else:
-								state.stderr_done = True
-						self._maybe_finish_command_locked(state)
-
-		def _wait_for_process(self, state: CommandState):
-				exit_code = 1
-				exit_status = 1
-				try:
-						rc = state.process.wait()
-						exit_code = int(rc)
-						exit_status = 0
-						log.info("Process exited pid=%s operation=%s code=%s", state.process.pid, state.operation_name, exit_code)
-				except Exception:
-						log.exception("Error while waiting for process pid=%s operation=%s", state.process.pid, state.operation_name)
-
-				with self._lock:
-						if self._active is not state:
-								return
-						state.exit_code = exit_code
-						state.exit_status = exit_status
-						state.wait_done = True
-						self._maybe_finish_command_locked(state)
-
-		def _maybe_finish_command_locked(self, state: CommandState):
-				if self._active is not state or state.finish_scheduled:
-						return
-
-				if not (state.wait_done and state.stdout_done and state.stderr_done):
-						return
-
-				state.finish_scheduled = True
-				GLib.idle_add(self._finish_command, state, state.exit_code, state.exit_status)
-
-		def _finish_command(self, state: Optional[CommandState], exit_code: int, exit_status: int):
-				with self._lock:
-						active = self._active
-						if state is not None and active is not state:
-								return False
-						self._active = None
-
-				self._dbusservice["/State/Status"] = dbus.UInt16(0)
-				self._dbusservice["/Result/ExitCode"] = dbus.Int32(exit_code)
-				self._dbusservice["/Result/ExitStatus"] = dbus.UInt16(exit_status)
-
-				if state and state.cancelled:
-						self._dbusservice["/Result/Error"] = ""
-
-				log.info(
-						"Finished request_id=%s exit_code=%s exit_status=%s error=%s",
-						state.request_id if state else 0,
-						exit_code,
-						exit_status,
-						self._dbusservice["/Result/Error"],
-				)
-
-				self._dbusservice["/Event/FinishedSeq"] = dbus.UInt32(int(self._dbusservice["/Event/FinishedSeq"]) + 1)
-				return False
-
-		def _set_error(self, message: str):
-				self._dbusservice["/Result/Error"] = message
-				log.error("Result error set: %s", message)
-
-		def _finish_start_error(self, message: str):
-				self._reset_result_state()
-				self._set_error(message)
-				self._finish_command(None, 1, 1)
-
-		def _reset_result_state(self):
-				self._dbusservice["/Result/ExitCode"] = dbus.Int32(0)
-				self._dbusservice["/Result/ExitStatus"] = dbus.UInt16(0)
-				self._dbusservice["/Result/Error"] = ""
+	def _wait_for_process(self, process: subprocess.Popen, args):
+		exit_code = process.wait()
+		log.info("gui-executor %s exited with code %s", args[:2], exit_code)
+		with self._lock:
+			if self._process is process:
+				self._process = None

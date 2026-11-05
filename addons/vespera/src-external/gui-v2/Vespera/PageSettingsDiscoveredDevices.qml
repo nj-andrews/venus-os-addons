@@ -7,7 +7,7 @@ Page {
 	title: CommonWords.discovered_devices
 
 	required property Vespera.VesperaManager vesperaManager
-	property string devicesUid: vesperaManager.serviceUid + "/Discovered"
+	property string devicesUid: Global.systemSettings.serviceUid + "/Settings/Vespera/Gui/DiscoveredDevices"
 	property Vespera.ProgressText progressText
 	property var popToPage
 

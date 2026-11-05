@@ -1,4 +1,5 @@
 import os
+import re
 
 
 class VesperaConfig:
@@ -31,6 +32,8 @@ class VesperaConfig:
 						if not line or line.startswith("#") or "=" not in line:
 							continue
 						key, value = line.split("=", 1)
+						# Drop inline comments ("KEY=3 # note"); '#' must be preceded by whitespace
+						value = re.split(r"\s+#", value, maxsplit=1)[0]
 						values[key.strip()] = value.strip()
 			except OSError:
 				return {}

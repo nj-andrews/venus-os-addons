@@ -4,29 +4,29 @@
 <context>
     <name></name>
     <message id="vespera_packages">
-        <location filename="../PageHome.qml" line="24"/>
+        <location filename="../PageHome.qml" line="23"/>
         <location filename="../PageSettingsPackages.qml" line="8"/>
         <source>Packages</source>
         <translation>Paket</translation>
     </message>
     <message id="vespera_feeds">
-        <location filename="../PageHome.qml" line="35"/>
+        <location filename="../PageHome.qml" line="34"/>
         <location filename="../PageSettingsFeeds.qml" line="8"/>
         <source>Feeds</source>
         <translation>Flöden</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="72"/>
+        <location filename="../PageHome.qml" line="71"/>
         <source></source>
         <translation>Dokumentation</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="79"/>
+        <location filename="../PageHome.qml" line="78"/>
         <source>Version</source>
         <translation>Version</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="48"/>
+        <location filename="../PageHome.qml" line="47"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>Anpassade enheter</translation>
@@ -236,7 +236,7 @@ Tjänsten startar snart...</translation>
         <translation>Uppdatera</translation>
     </message>
     <message id="vespera_move_settings_to_top">
-        <location filename="../PageHome.qml" line="14"/>
+        <location filename="../PageHome.qml" line="13"/>
         <source>Move settings to top</source>
         <translation>Flytta inställningar högst upp</translation>
     </message>
@@ -246,13 +246,13 @@ Tjänsten startar snart...</translation>
         <translation>Vänta tills åtgärden är klar</translation>
     </message>
     <message id="vespera_finalize_install">
-        <location filename="../components/VesperaManager.qml" line="91"/>
+        <location filename="../components/VesperaManager.qml" line="88"/>
         <source>Finalizing. The UI will restart shortly</source>
         <oldsource>Finiazing install. The UI will restart shortly</oldsource>
         <translation>Installationen slutförs. Gränssnittet startar om snart</translation>
     </message>
     <message id="vespera_operation_failed">
-        <location filename="../components/VesperaManager.qml" line="111"/>
+        <location filename="../components/VesperaManager.qml" line="108"/>
         <source>Operation failed</source>
         <translation>Åtgärden misslyckades</translation>
     </message>
@@ -267,9 +267,9 @@ Tjänsten startar snart...</translation>
         <translation>Inga USB-enheter hittades</translation>
     </message>
     <message id="vespera_auto_update">
-        <location filename="../PageSettings.qml" line="21"/>
+        <location filename="../PageSettings.qml" line="35"/>
         <source>Auto update packages (Sunday)</source>
-        <oldsource>Auto update packages</oldsource>
+        <oldsource>Auto update packages (weekly)</oldsource>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -45,12 +45,12 @@ __reconcile_overlays() {
 		[[ -f "${VESPERA_DATA_DIR}/info/$app.list" ]] &&
 			awk '{ print $1 }' "${VESPERA_DATA_DIR}/info/$app.list" >> "$owned_files"
 
-		[[ -f "${VESPERA_DATA_DIR}/info/$app.$VESPERA_WHITEOUTS_FILE" ]] &&
+		[[ -f "${VESPERA_DATA_DIR}/info/$app.installer-whiteouts" ]] &&
 			awk '{
 				sub(/[[:space:]]*#.*$/, "", $0)
 				gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
 				if ($0 != "") print
-			}' "${VESPERA_DATA_DIR}/info/$app.$VESPERA_WHITEOUTS_FILE" >> "$whiteouts"
+			}' "${VESPERA_DATA_DIR}/info/$app.installer-whiteouts" >> "$whiteouts"
 	done
 
 	__vespera_overlay overlay-reconcile "$owned_files" "$whiteouts"
@@ -78,7 +78,7 @@ __firmware_changed() {
 	__vespera_lib_initialize
 	VESPERA_VERBOSITY=2
 	: > "${VESPERA_WORKING_DIR}/${VESPERA_VENUS_FIRMWARE_CHANGED_FILE}"
-	echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/$VESPERA_VERBOSITY_FILE"
+	echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/verbosity"
 
 
 	opkg_ensure_combined_conf_file

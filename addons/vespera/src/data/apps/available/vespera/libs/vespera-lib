@@ -21,16 +21,16 @@ vespera_lib_log_verbose3() { [[ "${VESPERA_VERBOSITY}" -gt 2 ]]; }
 vespera_lib_app_enabled() { test -e "/data/apps/enabled/${1}"; }
 
 vespera_lib_index() {
-	if [[ -f "$VESPERA_INDEXER" ]]; then
+	if [[ -f "/data/apps/available/vespera/scripts/indexer" ]]; then
 		opkg_ensure_combined_conf_file
-		"$VESPERA_INDEXER" "$VESPERA_VERBOSITY"
+		"/data/apps/available/vespera/scripts/indexer" "$VESPERA_VERBOSITY"
 	fi
 }
 
 # vespera_lib_set_conf_value() {
 #   local name="$1"
 #   local value="$2"
-#   sed -i "s|^${name}=.*|${name}=${value}|" "$VESPERA_ROOT/conf/vespera.conf"
+#   sed -i "s|^${name}=.*|${name}=${value}|" "$__vespera_path/conf/vespera.conf"
 # 	printf -v "$name" '%s' "$value"
 # }
 
@@ -104,7 +104,7 @@ vespera_lib_pre_install() {
 	echo_lang "$LANG_VESPERA_VERSION" " $VESPERA_VERSION"
 	if vespera_lib_log_verbose2; then
 		echo "Args: $*"
-		echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/$VESPERA_VERBOSITY_FILE"
+		echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/verbosity"
 	fi
 
 }
@@ -144,9 +144,6 @@ __vespera_lib_post_install() {
 	__vespera_lib_send_gui_interrupt_signal
 
 	# 2. enable new apps, remove old apps (symlink)
-	# VESPERA_INSTALL_STATE_FILE contains a list of the apps installed/removed
-	# status=installed|enabled|disabled (enabled=installed and enabled)
-	# Now the gui interrupt signal is sent; remove the gui-v2 json files.
 	local file="$VESPERA_WORKING_DIR/$VESPERA_INSTALL_STATE_FILE"
 	vespera_lib_log_verbose3 && __show_file_contents "$file" "__vespera_lib_post_install: processing file" >&2
 
@@ -154,7 +151,6 @@ __vespera_lib_post_install() {
 		case "${status}" in
 			removed)
 				echo "Disabling ${app}"
-				__vespera_lib_enable_disable refresh_devices venus_services_to_restart "disable" "${app}"
 				rm -f "/data/apps/enabled/$app"
 				rm -f "/data/apps/available/$app/gui-v2/$app.json"
 				rmdir "/data/apps/available/$app/gui-v2" "/data/apps/available/$app" 2>/dev/null # remove if empty
@@ -243,7 +239,6 @@ vespera_lib_enable_disable() {
 	local venus_services_to_restart=()
 
 	__vespera_lib_enable_disable refresh_devices venus_services_to_restart "$@"
-
   __vespera_lib_restart_venus_services venus_services_to_restart
 	[[ $refresh_devices == true ]] && vespera_lib_refresh_devices
 }

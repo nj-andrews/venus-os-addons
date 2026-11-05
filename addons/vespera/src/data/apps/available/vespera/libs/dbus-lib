@@ -43,16 +43,17 @@ dbus_lib_remove_settings () {
 
 	settings="$(cat)"
 
-	paths="$(printf '%s\n' "$settings" | sed -n 's/.*"path":"\([^"]*\)".*/\1/p')"
+	if [[ "${settings:0:1}" == "/" ]]; then
+		settings="'${settings//,/','}'"
+	else
+		settings="$(printf '%s\n' "$settings" |
+				sed -n 's/.*"path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' |
+				sed "s/^/'/; s/$/'/" |
+				tr '\n' ',' |
+				sed 's/,$//')"
+	fi
 
-	[[ -n "$paths" ]] || paths="$settings"
-
-	settings="$(printf '%s\n' "$paths" tr -s '[:space:]' '\n' sed "s/.*/'&'/" sed '$!s/$/, /')"
-
-	[[ -n "$settings" ]] || {
-		echo "ERROR:dbus_lib_remove_settings: No settings supplied" >&2
-		return 1
-	}
+	[[ -z "$settings" ]] && return 0
 
 	dbus -y com.victronenergy.settings / RemoveSettings "%[ $settings ]" &> /dev/null
 }

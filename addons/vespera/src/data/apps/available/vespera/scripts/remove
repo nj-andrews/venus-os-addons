@@ -28,7 +28,7 @@ __process_default_conf_files() {
 __remove_dbus_settings_from_file() {
 	[[ -f "$PACKAGE_DBUS_LIST_FILE" ]] || return 0
 	installer_lib_is_upgrade && return
-	installer_dbus_lib_remove "$PACKAGE_DBUS_LIST_FILE"
+	dbus_lib_remove_settings < "$PACKAGE_DBUS_LIST_FILE"
 }
 
 __remove_patch_files() {
@@ -116,11 +116,14 @@ __unregister_services() {
 
 	[[ -f "$template_services_file" ]] || return 0
 
-	for service_path in $(< "$template_services_file"); do
-		[[ ! -f "$service_path/run" ]] && continue
+	for service_name in $(< "$template_services_file"); do
+		[[ ! -f "/opt/victronenergy/service-templates/$service_name/run" ]] && continue
+
 		# shellcheck disable=SC2034
-		DEVICE_SERVICE_NAME="${service_path##*/}"
+		DEVICE_SERVICE_NAME="${service_name}"
 		addsource "libs/serial-device-installer-lib"
+		installer_lib_log_verbose2 && echo "Unregistering service mapping: $service_name"
+
 		sdi_remove_service_mapping
 	done
 }
@@ -141,7 +144,7 @@ __phase_remove_runtime() {
 	[[ -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE" ]] &&
 		mv "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE" "$VESPERA_WORKING_DIR"
 
-	rm -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_DBUS_FILE"
+	rm -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.installer-dbus-name"
 }
 
 __remove_cleanup() {
@@ -176,12 +179,9 @@ __run_remove() {
 
 	__try_call "pre_remove" || true
 
-	#(
-		#echo_lang "$LANG_UPDATING_DATABASE"
-		"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" _
-		! installer_lib_is_upgrade &&
-			"${PACKAGE_INSTALL_DIR}/vespera/libs/device-lib" remove-all "${PACKAGE_DBUS_NAME}"
-	#)
+	"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" _
+	! installer_lib_is_upgrade &&
+		"${PACKAGE_INSTALL_DIR}/vespera/libs/device-lib" remove-all "${PACKAGE_DBUS_NAME}"
 
 	__process_default_conf_files
 
@@ -190,9 +190,11 @@ __run_remove() {
 
 	# Phase 2: patch and package state cleanup
 	__remove_patch_files || true
+
 	if ! installer_lib_is_upgrade && [[ -n "${PACKAGE_CUSTOM_NAV_PAGES:-}" ]]; then
 		installer_lib_phase_sync_custom_nav_pages "remove" || true
 	fi
+
 	__remove_dbus_settings_from_file || true
 
 	# Phase 3: runtime disable/separate app lifecycle

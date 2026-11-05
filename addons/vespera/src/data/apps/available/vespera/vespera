@@ -28,7 +28,9 @@ Commands:
 	enable [app ...]              Enable matching installed apps (or all when no args)
 	disable [app ...]             Disable matching enabled apps (or all when no args)
 	update                        Update package metadata and regenerate indexes
-
+	auto-update	[time]|[off]			Gets/sets the time every Sunday to automaticaly update packages
+																format is 24hr. no args returns current time, or off
+																set off to turn off auto updates
 Feed family:
 	feed                          Print active feed config name
 	feed list                     Prints a list of available feed configs
@@ -52,7 +54,7 @@ Device family:
 Examples:
 	vespera feed set develop
 	vespera feed add-source myfeed https://example.invalid/feed
-	vespera device bind ttyUSB0 dbus-serialbattery
+	vespera device bind ttyUSB0 dbus-inetbox
 	vespera device unbind 8f9a3c12
 
 Notes:
@@ -133,8 +135,6 @@ set -- "${args[@]}"
 opkg_ensure_combined_conf_file
 
 case "$command" in
-	# update-index)
-	# 	vespera_lib_index; exit;;
 	help)
 		vespera_show_help; exit;;
 	version)
@@ -168,6 +168,8 @@ case "$command" in
 			echo "Invalid sub command: [mount|unmount] expected"
 		fi
 		exit;;
+	auto-update)
+		"$__vespera_path/scripts/auto-update" "$@"; exit;;
 	device)
 		"$__vespera_path/libs/device-lib" "$@"; exit;;
 	status)
@@ -175,7 +177,7 @@ case "$command" in
 	inspect|i)
 		( . "$__vespera_path/scripts/inspect" "$@" ); exit;;
 	list-enabled|le)
-		opkg_lib_list_enabled_packages "all" "$@"; exit;;
+		opkg_lib_list_enabled_packages "$@"; exit;;
 	list-feeds)
 		opkg_lib_list_available_feed_configs; exit;;
 	enable|disable)
