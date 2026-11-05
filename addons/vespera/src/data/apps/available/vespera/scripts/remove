@@ -137,6 +137,8 @@ __phase_remove_runtime() {
 
 	__unregister_services
 
+	__remove_custom_menus
+	
 	# move these as we dynamically added them
 	[[ -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE" ]] &&
 		mv "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE" "$VESPERA_WORKING_DIR"
@@ -171,6 +173,16 @@ __remove_vespera_startup_scripts() {
 	)
 }
 
+__remove_custom_menus() {
+		local sidecar_file_prefix="$VESPERA_DATA_DIR/info/${PACKAGE_NAME}.installer-menus"
+	[[ -f $sidecar_file_prefix ]] && {
+		sed -e '/^[[:space:]]*$/d' \
+				-e '/^[[:space:]]*#/d' \
+				-e 's|^|/Settings/Vespera/CustomMenuPages/|' \
+				"$sidecar_file_prefix" | dbus_lib_remove_settings
+	}
+}
+
 __run_remove() {
 	[[ -z "${PACKAGE_NAME}" ]] && {
 		echo "ERROR: PACKAGE_NAME not set"
@@ -191,7 +203,7 @@ __run_remove() {
 	# Phase 2: patch and package state cleanup
 	__remove_patch_files || true
 
-	if ! installer_lib_is_upgrade && [[ -n "${PACKAGE_CUSTOM_NAV_PAGES:-}" ]]; then
+	if ! installer_lib_is_upgrade; then
 		installer_lib_phase_sync_custom_nav_pages "remove" || true
 	fi
 
@@ -199,6 +211,11 @@ __run_remove() {
 
 	# Phase 3: runtime disable/separate app lifecycle
 	__phase_remove_runtime
+
+
+
+	[[ ${PACKAGE_NAME} == vespera ]] && ! installer_lib_is_upgrade &&
+	 	dbus_lib_delete_tree "Settings/Vespera/Gui/DiscoveredDevices"
 
 	__try_call "post_remove" || true
 

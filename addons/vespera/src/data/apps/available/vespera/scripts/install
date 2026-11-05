@@ -122,8 +122,8 @@ __install() {
 	__add_vespera_startup_scripts
 
 	# Phase 2: patch + settings apply
-
 	__install_patch_files
+
 	echo_lang "$LANG_PROCESSING_DBUS_SETTINGS"
 	__add_dbus_settings_from_dbus_list_file
 

@@ -56,8 +56,6 @@ for app in $(opkg_lib_list_packages); do
 	"$__vespera_path/scripts/set-state-v1-menus" "enable" "${sidecar_file_prefix}.installer-menus"
 	"$__vespera_path/scripts/set-state-nav-pages" "enable" \
 		"${sidecar_file_prefix}.installer-navigation-pages" "/Settings/Vespera/CustomNavPages"
-	# "$__vespera_path/scripts/set-state-nav-pages" "enable" \
-	# 	"${sidecar_file_prefix}.installer-overview-pages" "/Settings/Vespera/CustomOverviewPages"
 
 	__enable_app "$app" _refresh_devices
 

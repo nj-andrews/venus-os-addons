@@ -81,6 +81,8 @@ installer_lib_is_remove() {
 installer_lib_phase_sync_custom_nav_pages() {
 	local action="${1:-}"
 
+	echo "installer_lib_phase_sync_custom_nav_pages in"
+
 	[[ "$action" == "add" || "$action" == "remove" ]] || return 0
 	[[ -z "$PACKAGE_DBUS_NAME" ]] && return 1
 
@@ -96,13 +98,13 @@ installer_lib_phase_sync_custom_nav_pages() {
 
 	pages=()
 	mapfile -t pages < <(read_sidecar_file "overview-pages")
-
+	echo "installer_lib_phase_sync_custom_nav_pages in 2:${#pages[@]}"
 	(( ${#pages[@]} > 0 )) &&
 		dbus_lib_update_csv_items "/Settings/Vespera/CustomOverviewPages" "$action" "${pages[@]}"
 
+
 	return 0
 }
-
 
 installer_lib_update_install_list() {
 	# + installed (not enabled)

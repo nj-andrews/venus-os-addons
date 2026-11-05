@@ -1,4 +1,5 @@
 {"path":"/Settings/Vespera/CustomNavPages", "default":"", "min":0, "max":0}
+{"path":"/Settings/Vespera/CustomNOverviewPages", "default":"", "min":0, "max":0}
 {"path":"/Settings/Vespera/Version", "default": 1, "min":0, "max":0}
 {"path":"/Settings/Vespera/AutoUpdate", "default": "", "min":0, "max":0}
 {"path":"/Settings/Vespera/Version", "default": 1, "min":0, "max":0}
