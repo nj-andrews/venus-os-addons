@@ -1,5 +1,5 @@
 Package: test-install
-Version: 1.1.0
+Version: 0.1.0
 Description: A simple app for testing installs
 Section: utilities
 Priority: optional

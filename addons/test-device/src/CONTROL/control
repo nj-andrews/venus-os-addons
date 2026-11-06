@@ -1,5 +1,5 @@
 Package: test-device
-Version: 1.1.0
+Version: 0.1.0
 Description: A simple service for testing adding and removing a serial device
 Section: utilities
 Priority: optional

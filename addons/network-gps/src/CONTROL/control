@@ -1,5 +1,5 @@
 Package: network-gps
-Version: 1.1.0
+Version: 0.1.0
 Description: Network GPS using NMEA
 Section: utilities
 Priority: optional

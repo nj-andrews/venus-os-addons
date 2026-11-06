@@ -1,5 +1,5 @@
 Package: mount-shares
-Version: 1.1.0
+Version: 0.1.0
 Description: Adds support for nfs and cifs shares to Venus OS
 Section: utilities
 Priority: optional

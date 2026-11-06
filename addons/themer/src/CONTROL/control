@@ -1,5 +1,5 @@
 Package: themer
-Version: 1.1.0
+Version: 0.1.0
 Description: Adds basic theming support to the Venus OS Classic Gui.
 Section: utilities
 Priority: optional

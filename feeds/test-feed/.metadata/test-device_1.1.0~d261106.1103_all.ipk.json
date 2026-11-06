@@ -1,9 +1,0 @@
-{
-  "architecture": "all",
-  "filename": "test-device_1.1.0~d261106.1103_all.ipk",
-  "package": "test-device",
-  "sha256": "d36adbc4045c70fd4491f0cd62d76b006fbd29a0e9914aee6b789c7b43052da1",
-  "source_commit": "dd39ac1f98b6f7adc9dd80b29a5fe6e2e8f2f68b",
-  "source_dirty": false,
-  "source_version": "1.1.0~d261106.1103"
-}
