@@ -527,12 +527,32 @@ def write_build_manifest(package_root, feed_path, source_dirty=None):
         os.replace(temp_path, manifest_path)
 
 
+def write_multi_version_index(path):
+    # opkg-make-index keeps only the newest version of each package, so index each
+    # IPK on its own and concatenate the stanzas to keep every retained version.
+    stanzas = []
+    for ipk in sorted(path.glob("*.ipk")):
+        with tempfile.TemporaryDirectory(prefix="ipk-index-") as temp:
+            temp_path = Path(temp)
+            shutil.copy2(ipk, temp_path / ipk.name)
+            result = run(["opkg-make-index", "./"], cwd=temp_path, stdout=subprocess.PIPE)
+            text = result.stdout.strip()
+        if not text:
+            raise PromotionError(f"no index entry produced for {ipk.name}")
+        stanzas.append(text)
+    for stale in ("Packages", "Packages.gz", "Packages.stamps"):
+        (path / stale).unlink(missing_ok=True)
+    content = "\n\n".join(stanzas) + "\n\n"
+    (path / "Packages").write_text(content, encoding="utf-8")
+    (path / "Packages.gz").write_bytes(gzip.compress(content.encode("utf-8"), mtime=0))
+
+
 def build_indexes(feed_root, feed_names):
     for feed_name in feed_names:
         path = feed_root / feed_name
         if not path.is_dir() or not list(path.glob("*.ipk")):
             continue
-        run(["opkg-make-index", "-p", "Packages", "./"], cwd=path, stdout=subprocess.DEVNULL)
+        write_multi_version_index(path)
         packages_file = path / "Packages"
         compressed_file = path / "Packages.gz"
         if not packages_file.is_file() or not compressed_file.is_file():

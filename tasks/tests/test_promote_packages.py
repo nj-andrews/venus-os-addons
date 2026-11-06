@@ -256,6 +256,17 @@ class PromotePackagesTests(unittest.TestCase):
         promoter.promote("vespera", True)
         self.assertEqual([release_package], list((self.release / "vespera").glob("*.ipk")))
 
+    def test_release_index_lists_every_retained_version(self):
+        self.add_candidate(version="1.2.0~d261106.1007")
+        promoter.promote("vespera", True)
+        self.add_candidate(version="1.3.0~d261107.1007")
+        promoter.promote("vespera", True)
+        feed = self.release / "vespera"
+        index = (feed / "Packages").read_text(encoding="utf-8")
+        self.assertIn("Filename: vespera_1.2.0_all.ipk", index)
+        self.assertIn("Filename: vespera_1.3.0_all.ipk", index)
+        self.assertFalse((feed / "Packages.stamps").exists())
+
     def test_unsatisfied_dependency_prevents_apply(self):
         self.add_candidate("addon", "1.2.0~d261106.1007", "vespera (>= 2.0.0)")
         with self.assertRaises(promoter.PromotionError):
