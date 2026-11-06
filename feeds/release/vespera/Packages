@@ -26,3 +26,17 @@ OE: einstine
 License: MIT
 Priority: optional
 
+Package: vespera
+Version: 0.1.2
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 063492d3508b48ec312d38780ff49b48
+Size: 633624
+Filename: vespera_0.1.2_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  An addon for installing opkg packages on the Venus OS
+OE: einstine
+License: MIT
+Priority: optional
+
