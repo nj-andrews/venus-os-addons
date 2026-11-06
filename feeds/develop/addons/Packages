@@ -1,12 +1,12 @@
 Package: dbus-inetbox
-Version: 1.1.0~d261105.0108
+Version: 1.1.0~d261106.1103
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 9f68e56a514e257b6cbfbdb31f68b0f4
-Size: 84790
-Filename: dbus-inetbox_1.1.0~d261105.0108_all.ipk
+MD5Sum: 1b36dce836ac7e9990df22f43e2343b5
+Size: 84792
+Filename: dbus-inetbox_1.1.0~d261106.1103_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons-addons
 Description:  Adds support for Truma inetbox to Venus-OS
 OE: dbus-inetbox
@@ -14,14 +14,14 @@ License: MIT
 Priority: optional
 
 Package: dbus-ne-shunt
-Version: 1.1.0~d261103.1412
+Version: 1.1.0~d261106.1103
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 89d4fa594a133331399bf88175afa71d
-Size: 28490
-Filename: dbus-ne-shunt_1.1.0~d261103.1412_all.ipk
+MD5Sum: de37de81915086a3aba314e1ca4f5462
+Size: 28492
+Filename: dbus-ne-shunt_1.1.0~d261106.1103_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
@@ -29,13 +29,13 @@ License: MIT
 Priority: optional
 
 Package: mount-shares
-Version: 1.1.0~d261101.1248
+Version: 1.1.0~d261106.1103
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 17db3f7fc472e67817e37d43bb67e216
-Size: 2910
-Filename: mount-shares_1.1.0~d261101.1248_all.ipk
+MD5Sum: 8962d847d93de79ad53246bd4de68b0a
+Size: 2908
+Filename: mount-shares_1.1.0~d261106.1103_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for nfs and cifs shares to Venus OS
 OE: mount-shares
@@ -43,14 +43,14 @@ License: MIT
 Priority: optional
 
 Package: network-gps
-Version: 1.1.0~d261101.0005
+Version: 1.1.0~d261106.1103
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: b19c617604ba0d0181b700bd5100dfcf
+MD5Sum: 63a3b2e4be2b60724c9e5f6aad6fac4d
 Size: 1782
-Filename: network-gps_1.1.0~d261101.0005_all.ipk
+Filename: network-gps_1.1.0~d261106.1103_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Network GPS using NMEA
 OE: network-gps
@@ -58,14 +58,14 @@ License: MIT
 Priority: optional
 
 Package: themer
-Version: 1.1.0~d261101.0005
+Version: 1.1.0~d261106.1103
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: ce815a07f7f145bc221fb45d59c7f3aa
-Size: 4770
-Filename: themer_1.1.0~d261101.0005_all.ipk
+MD5Sum: 844d77f7f154eaba6c65232959aa7e4a
+Size: 4776
+Filename: themer_1.1.0~d261106.1103_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds basic theming support to the Venus OS Classic Gui.
 OE: einstine

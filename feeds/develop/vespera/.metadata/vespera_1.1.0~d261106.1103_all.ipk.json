@@ -1,0 +1,9 @@
+{
+  "architecture": "all",
+  "filename": "vespera_1.1.0~d261106.1103_all.ipk",
+  "package": "vespera",
+  "sha256": "ee2eb5fd6d3e966778c6ba4ff3b8fd1c9b7a43eff76a2eae6f7306db7f5a47aa",
+  "source_commit": "dd39ac1f98b6f7adc9dd80b29a5fe6e2e8f2f68b",
+  "source_dirty": false,
+  "source_version": "1.1.0~d261106.1103"
+}

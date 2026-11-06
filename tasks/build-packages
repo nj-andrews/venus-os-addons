@@ -13,14 +13,16 @@ set -euo pipefail
 #   Arg1:"all" (default): Builds all folders under under services & utils.
 #   Arg[n]: Or a list of folders under services or utils to build
 # Options:
-#   --develop-only             Build and index into develop folders only (stamps version with +~YYMMDD.HHMM)
-#   --promote                  Promote develop feed to release feed
+#   --develop-only             Build and index into develop folders only (stamps version with ~dYYMMDD.HHMM)
+#   --promote [feed]            Preview per-package develop feed promotion
+#   --apply                     Publish a preceding --promote plan
 #   --clean-develop            Remove all contents from the develop feeds folder
 ####################################################################
 
 command -v opkg-build >/dev/null 2>&1 || { echo "ERROR: opkg-build not installed"; exit 1; }
 command -v opkg-make-index >/dev/null 2>&1 || { echo "ERROR: opkg-make-index not installed"; exit 1; }
 command -v rsync >/dev/null 2>&1 || { echo "ERROR: rsync not installed"; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "ERROR: python3 not installed"; exit 1; }
 
 this_path="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -30,10 +32,9 @@ declare -a cli_build_args=()
 declare -a normalized_cli_build_args=()
 declare pwd_old="$PWD"
 declare -A update_feeds=()
-declare promote_target=
-
 declare -i develop_only=0
 declare -i promote_only=0
+declare -i apply_promotion=0
 declare -i clean_develop_only=0
 declare -i all_mode=0
 
@@ -45,7 +46,8 @@ Options:
   --develop-only           Build and index packages in develop only.
                            Version is stamped as MAJOR.MINOR.PATCH~dYYMMDD.HHMM
                            Old develop packages for the same name are removed before placing the new one.
-  --promote                Promote develop feed to release feed
+  --promote [feed]         Preview release promotion (all, vespera, or addons)
+  --apply                  Publish the promotion plan; use with --promote
   --clean-develop          Remove all contents from the develop feeds folder
   -h, --help               Show this help
 EOF
@@ -58,6 +60,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --promote)
       promote_only=1
+      ;;
+    --apply)
+      apply_promotion=1
       ;;
     --clean-develop)
       clean_develop_only=1
@@ -108,12 +113,16 @@ cli_build_args=("${normalized_cli_build_args[@]}")
   exit 1
 }
 
+(( apply_promotion == 0 || promote_only == 1 )) || {
+  echo "ERROR: --apply requires --promote" >&2
+  exit 1
+}
+
 cd "$this_path" || exit 1
 
 this_path="."
 feeds_root="../feeds"
 develop_root="${feeds_root}/develop"
-release_root="${feeds_root}/release"
 test_feed_name="test-feed"
 test_feed_root="${feeds_root}/${test_feed_name}"
 
@@ -135,6 +144,12 @@ feed_path_for_name() {
   else
     echo "${develop_root}/${feed_name}"
   fi
+}
+
+acquire_feed_lock() {
+  command -v flock >/dev/null 2>&1 || { echo "ERROR: flock not installed" >&2; return 1; }
+  exec 9>"${feeds_root}/.package-operations.lock"
+  flock -n 9 || { echo "ERROR: another package build or promotion is in progress" >&2; return 1; }
 }
 
 build_feed_index() {
@@ -186,6 +201,10 @@ build_package_if_needed() {
 
     source_is_newer=0
     run_build_all=0
+    if [[ -n "$newest_ipk" && ! -f "$feed_path/.metadata/$(basename "$newest_ipk").json" ]]; then
+      source_is_newer=1
+      run_build_all=1
+    fi
     for source_path in "$pkg_root/src" "$pkg_root/src-external"; do
       [[ -d "$source_path" ]] || continue
       if [[ -z "$newest_ipk" ]] || folder_has_newer_file_than_ipk "$newest_ipk" "$source_path"; then
@@ -362,6 +381,9 @@ build_package() {
     stamp_develop_version "$develop_path" || return 1
     # Remove superseded develop packages for this package before placing the new one
     find "$feed_path_abs" -maxdepth 1 -name "${name}_*.ipk" -exec rm -f {} +
+    if [[ -d "$feed_path_abs/.metadata" ]]; then
+      find "$feed_path_abs/.metadata" -maxdepth 1 -type f -name "${name}_*.ipk.json" -delete
+    fi
   fi
 
   mkdir -p "${develop_path}/data/apps/available/${name}"
@@ -370,21 +392,10 @@ build_package() {
   echo "$(date)" > "${develop_path}/data/apps/available/${name}/buildtime"
 
   opkg-build -o root -g root "${develop_path}/" "${feed_path_abs}"
+  python3 ./promote-packages --record-build "$pkg_root" "$feed_path_abs"
 
 }
 
-promote_feed() {
-  local feed_name="$1"
-  local src_path="${develop_root}/${feed_name}"
-  local dst_path="${release_root}/${feed_name}"
-
-  [[ -d "$src_path" ]] || { echo "ERROR: develop feed not found: ${src_path}" >&2; return 1; }
-
-  mkdir -p "$dst_path"
-  rsync -a --delete "$src_path/" "$dst_path/"
-
-  echo "promoted ${feed_name} feed"
-}
 function create_latest_feed_package() {
 	local feed="${1}"
 	local feed_path="${feeds_root}/${feed}/vespera"
@@ -399,39 +410,6 @@ function create_latest_feed_package() {
 			echo "No vespera*.ipk package found under ${feed_path}"
 	fi
 }
-promote_release() {
-  local feed_name
-  local -a feeds_to_promote=()
-
-  if [[ -n "$promote_target" ]]; then
-    [[ "$promote_target" == "$test_feed_name" ]] && {
-      echo "ERROR: ${test_feed_name} is a flat custom test feed and is not promotable" >&2
-      return 1
-    }
-
-    [[ "$promote_target" == "addons" || "$promote_target" == "vespera" ]] || {
-      echo "ERROR: invalid promote feed: ${promote_target}" >&2
-      return 1
-    }
-    [[ -d "${develop_root}/${promote_target}" ]] && feeds_to_promote+=("$promote_target")
-  elif [[ ${#update_feeds[@]} -gt 0 ]]; then
-    for feed_name in "${!update_feeds[@]}"; do
-      [[ "$feed_name" == "$test_feed_name" ]] && continue
-      feeds_to_promote+=("$feed_name")
-    done
-  else
-    for feed_name in "addons" "vespera"; do
-      [[ -d "${develop_root}/${feed_name}" ]] && feeds_to_promote+=("$feed_name")
-    done
-  fi
-
-  [[ ${#feeds_to_promote[@]} -gt 0 ]] || { echo "ERROR: no develop feeds available to promote" >&2; return 1; }
-
-  for feed_name in "${feeds_to_promote[@]}"; do
-    promote_feed "$feed_name"
-  done
-}
-
 clean_develop_root() {
   [[ -d "$develop_root" ]] || { mkdir -p "$develop_root"; return 0; }
 
@@ -442,6 +420,7 @@ clean_develop_root() {
 
 
 if (( clean_develop_only == 1 )); then
+  acquire_feed_lock
   clean_develop_root
   cd "$pwd_old" || true
   echo "Completed"
@@ -449,16 +428,24 @@ if (( clean_develop_only == 1 )); then
 fi
 
 if (( promote_only == 1 )); then
+  (( ${#cli_build_args[@]} <= 1 )) || {
+    echo "ERROR: --promote accepts only one feed selection" >&2
+    exit 1
+  }
   if [[ ${#cli_build_args[@]} -gt 0 ]]; then
     promote_target="${cli_build_args[0]}"
-    [[ "$promote_target" == "all" ]] && promote_target=
+  else
+    promote_target="all"
   fi
-  promote_release
+  declare -a promote_args=(--promote "$promote_target")
+  (( apply_promotion == 0 )) || promote_args+=(--apply)
+  python3 ./promote-packages "${promote_args[@]}"
   cd "$pwd_old" || true
   echo "Completed"
   exit 0
 fi
 
+acquire_feed_lock
 resolve_build_items
 
 if [[ ${#cli_build_args[@]} -gt 0 && "${cli_build_args[0]}" == "package" ]]; then
@@ -510,10 +497,6 @@ update_feeds=()
 register_feed_targets
 
 build_feed_indexes
-
-if (( develop_only == 0 )); then
-  promote_release
-fi
 
 if ((develop_only == 1)); then
 	if echo "${build_items[@]}" | grep -q "vespera"; then

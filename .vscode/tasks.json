@@ -69,7 +69,7 @@
 
 		},
 		{
-			"label": "Promote develop feed to release",
+			"label": "Preview develop package promotion",
 			"type": "shell",
 			"command": "${workspaceFolder}/tasks/build-packages",
 			"args": [
@@ -85,7 +85,27 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "Promote develop feeds into release feeds."
+			"detail": "Dry-run package-by-package release promotion. Does not publish changes."
+		},
+		{
+			"label": "Apply develop package promotion",
+			"type": "shell",
+			"command": "${workspaceFolder}/tasks/build-packages",
+			"args": [
+				"--promote",
+				"${input:opkgPromoteFeed}",
+				"--apply"
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true
+			},
+			"problemMatcher": [],
+			"detail": "Validate and publish the selected release promotion plan."
 		},
 		{
 			"label": "cleanup vscode server installs",

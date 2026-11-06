@@ -14,6 +14,9 @@ __pycache__/
 .build/
 tmp/
 vespera-latest.ipk
+feeds/.package-operations.lock
+feeds/.release-staging/
+feeds/.release-previous/
 
 addons/vespera/build/.cmake/api/v1/reply/index-2026-10-23T12-53-22-0016.json
 addons/vespera/build/.cmake/api/v1/reply/index-2026-10-24T19-12-49-0624.json

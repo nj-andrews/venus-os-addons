@@ -1,0 +1,9 @@
+{
+  "architecture": "all",
+  "filename": "network-gps_1.1.0~d261106.1103_all.ipk",
+  "package": "network-gps",
+  "sha256": "fe3299265787554388e63972831469aecfb0cba955136b929d4e73da7e8ca73f",
+  "source_commit": "dd39ac1f98b6f7adc9dd80b29a5fe6e2e8f2f68b",
+  "source_dirty": false,
+  "source_version": "1.1.0~d261106.1103"
+}
