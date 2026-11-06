@@ -13,10 +13,10 @@ Page {
 		id: autoUpdateItem
 		uid: Global.systemSettings.serviceUid + "/Settings/Vespera/AutoUpdate"
 		onValueChanged: {
-		const fields = String(value ?? "").trim().split(/\s+/)
-		root.time = Number(fields[0]) || 0
-		if (fields.length > 1 && fields[1] !== "")
-			root.weekday = Number(fields[1])
+			const fields = String(value ?? "").trim().split(/\s+/)
+			root.time = Number(fields[0]) || 0
+			if (fields.length > 1 && fields[1] !== "")
+				root.weekday = Number(fields[1])
 		}
 	}
 
@@ -50,13 +50,12 @@ Page {
 
 			ListSwitch {
 				id: autoUpdateSwitch
-
 				checkable: true
 				checked: String(autoUpdateItem.value ?? "") !== ""
 				text: CommonWords.enabled
 				showAccessLevel: VenusOS.User_AccessType_User
 				writeAccessLevel: VenusOS.User_AccessType_Installer
-				onClicked: { autoUpdateItem.setValue(checked ? root.time + " " + root.weekday : "") }
+				onClicked: autoUpdateItem.setValue(checked ? root.time + " " + root.weekday : "")
 			}
 
 			ListButton {
