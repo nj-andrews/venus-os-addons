@@ -142,17 +142,18 @@ case "$command" in
 	fs-ro|fs-rw)
 		mount -o remount,"${command:(-2)}" /; exit;;
 	feed)
+		addsource "libs/opkg-feed-lib"
 		case "${1:-}" in
-			set|add) opkg_lib_feed_conf_set_add "${1:-}" "${2:-}";;
-			list) opkg_lib_feed_conf_available;;
-			remove) opkg_lib_feed_conf_remove "${2:-}";;
+			set|add) opkg_feed_lib_conf_set_add "${1:-}" "${2:-}";;
+			list) opkg_feed_lib_conf_available;;
+			remove) opkg_feed_lib_conf_remove "${2:-}";;
 			sources)
-				opkg_lib_show_feed_sources "${2:-}";;
+				opkg_feed_lib_show_sources "${2:-}";;
 			*-source)
 				sub_command="${1%%-source}"
 				shift
-				opkg_lib_feed_crud "$sub_command" "$@" && vespera_lib_index;;
-			*) opkg_lib_show_feed_name "${1:-}";;
+				opkg_feed_lib_crud "$sub_command" "$@" && vespera_lib_index;;
+			*) opkg_feed_lib_show_name "${1:-}";;
 		esac
 		exit
 		;;
@@ -172,8 +173,8 @@ case "$command" in
 		"$__vespera_path/scripts/auto-update" "$@"; exit;;
 	device)
 		"$__vespera_path/libs/device-lib" "$@"; exit;;
-	status)
-		exec opkg -f "${VESPERA_COMBINED_CONF_FILE}" "$command" "$@" | opkg_lib_process_opkg_status "$@"; exit;;
+	# status)
+	# 	exec opkg -f "${VESPERA_COMBINED_CONF_FILE}" "$command" "$@" | opkg_lib_process_opkg_status "$@"; exit;;
 	inspect|i)
 		( . "$__vespera_path/scripts/inspect" "$@" ); exit;;
 	list-enabled|le)

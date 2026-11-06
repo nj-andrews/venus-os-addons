@@ -25,6 +25,7 @@ stage_opkg_lib_runtime() {
 
   ln -sf "$source_root/libs/source-lib" "$app_root/libs/source-lib"
   ln -sf "$source_root/libs/opkg-lib" "$app_root/libs/opkg-lib"
+  ln -sf "$source_root/libs/opkg-feed-lib" "$app_root/libs/opkg-feed-lib"
   ln -sf "$source_root/scripts/create-opkg-feed" "$app_root/scripts/create-opkg-feed"
 
   cp "$source_root/conf-default/vespera.conf" "$app_root/conf/vespera.conf"
@@ -37,6 +38,7 @@ stage_opkg_lib_runtime() {
 
   # shellcheck disable=SC1090
   . "$app_root/libs/opkg-lib"
+  . "$app_root/libs/opkg-feed-lib"
 
   export VESPERA_APP_DIR="$app_root"
   export VESPERA_DATA_DIR="$data_root"
@@ -94,24 +96,24 @@ test_opkg_ensure_combined_conf_file_is_rebuilt_when_feeds_change() {
   assert_file_contains "$VESPERA_COMBINED_CONF_FILE" "src/gz updated http://updated.example.com"
 }
 
-test_opkg_lib_feed_crud_adds_feed() {
+test_opkg_feed_lib_crud_adds_feed() {
   local stderr=
 
   opkg_ensure_feed_symlink
-  stderr="$(opkg_lib_feed_crud add custom_feed http://custom.example.com '' 2>&1)"
+  stderr="$(opkg_feed_lib_crud add custom_feed http://custom.example.com '' 2>&1)"
 
   assert_exitcode 0
   assert_empty "$stderr"
   assert_file_contains "$VESPERA_FEEDS_FILE" "src/gz custom_feed http://custom.example.com"
 }
 
-test_opkg_lib_feed_crud_edits_feed() {
+test_opkg_feed_lib_crud_edits_feed() {
   local stderr=
 
   opkg_ensure_feed_symlink
   printf '%s\n' 'src/gz old_feed http://old.example.com' >> "$VESPERA_FEEDS_FILE"
 
-  stderr="$(opkg_lib_feed_crud edit new_feed http://new.example.com old_feed 2>&1)"
+  stderr="$(opkg_feed_lib_crud edit new_feed http://new.example.com old_feed 2>&1)"
 
   assert_exitcode 0
   assert_empty "$stderr"
@@ -119,14 +121,14 @@ test_opkg_lib_feed_crud_edits_feed() {
   assert_file_contains "$VESPERA_FEEDS_FILE" "src/gz new_feed http://new.example.com"
 }
 
-test_opkg_lib_feed_crud_removes_feed() {
+test_opkg_feed_lib_crud_removes_feed() {
   local stderr=
 
   opkg_ensure_feed_symlink
   printf '%s\n' 'src/gz retain http://keep.example.com' > "$VESPERA_FEEDS_FILE"
   printf '%s\n' 'src/gz removable http://remove.example.com' >> "$VESPERA_FEEDS_FILE"
 
-  stderr="$(opkg_lib_feed_crud remove removable '' '' 2>&1)"
+  stderr="$(opkg_feed_lib_crud remove removable '' '' 2>&1)"
 
   assert_exitcode 0
   assert_empty "$stderr"
@@ -134,10 +136,10 @@ test_opkg_lib_feed_crud_removes_feed() {
   assert_file_contains "$VESPERA_FEEDS_FILE" "src/gz retain http://keep.example.com"
 }
 
-test_opkg_lib_feed_crud_rejects_remove_with_old_feed_name() {
+test_opkg_feed_lib_crud_rejects_remove_with_old_feed_name() {
   local stderr
 
-  stderr="$(opkg_lib_feed_crud remove demo '' oldname 2>&1)"
+  stderr="$(opkg_feed_lib_crud remove demo '' oldname 2>&1)"
 
   assert_exitcode 1
   assert_contains 'remove: old feed name not supported' "$stderr"
@@ -171,19 +173,19 @@ test_opkg_lib_remove_feed_source_rejects_active_feed() {
   assert_file_exists "$active_feed"
 }
 
-test_opkg_lib_feed_crud_rejects_invalid_mode() {
+test_opkg_feed_lib_crud_rejects_invalid_mode() {
   local stderr
 
-  stderr="$(opkg_lib_feed_crud badmode demo http://example.com 2>&1)"
+  stderr="$(opkg_feed_lib_crud badmode demo http://example.com 2>&1)"
 
   assert_exitcode 1
   assert_contains 'Invalid mode: badmode' "$stderr"
 }
 
-test_opkg_lib_feed_crud_rejects_invalid_feed_name() {
+test_opkg_feed_lib_crud_rejects_invalid_feed_name() {
   local stderr
 
-  stderr="$(opkg_lib_feed_crud add 'bad name' http://example.com '' 2>&1)"
+  stderr="$(opkg_feed_lib_crud add 'bad name' http://example.com '' 2>&1)"
 
   assert_exitcode 1
   assert_contains 'Invalid name' "$stderr"

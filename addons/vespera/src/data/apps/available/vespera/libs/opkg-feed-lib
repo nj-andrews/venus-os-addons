@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
+declare VESPERA_DIR; VESPERA_DIR="$(cd "${__this_path}/.." && pwd)"
+
+# shellcheck source=/data/dev/addons/vespera/src/data/apps/available/vespera/libs/source-lib
+source "$VESPERA_DIR/libs/source-lib"
+addsource "conf/vespera.conf"
+
+opkg_feed_lib_show_sources() {
+	local conf_name=${1:-}
+	local conf_file
+	if [[ -z $conf_name ]]; then
+		conf_file="$VESPERA_FEEDS_SYMLINK"
+	else
+		conf_name="${conf_name#feed-}"
+		conf_file="$VESPERA_APP_DIR/conf/feeds-$conf_name.conf"
+	fi
+	sed -e '/./,$!d' -e 's/[[:space:]]*$//' "$conf_file"
+	echo
+}
+opkg_feed_lib_conf_available() {
+	for file in "$VESPERA_APP_DIR/conf/feeds-"*.conf; do
+		file="${file##*/feeds-}"
+		echo "${file%.conf}"
+	done
+}
+
+opkg_feed_lib_conf_set_add() {
+	local action="${1}"
+	local conf_name="${2:-}"
+	local conf_file=""
+
+	conf_name="${conf_name#feed-}"
+	conf_file="$VESPERA_APP_DIR/conf/feeds-$conf_name.conf"
+
+	[[ -n "$conf_name" ]] || { echo "feed name required" >&2; return 1; }
+	[[ "$conf_name" =~ [^a-zA-Z0-9_-] ]] && { echo "Invalid feed name: $conf_file" >&2; return 1; }
+
+	if [[ "$action" == "add" ]]; then
+		[[ ! -f "$conf_file" ]] && : > "$conf_file"
+	elif [[ "$action" != "set" ]]; then
+		echo "invalid command"
+		return
+	fi
+
+	if [[ -f "$conf_file" ]]; then
+		ln -sf "$conf_file" "$VESPERA_FEEDS_SYMLINK"
+		return 0
+	fi
+	echo "feed config not found"
+	return 1
+}
+opkg_feed_lib_conf_remove() {
+	local feed_name="${1:-}"
+	local cur_feed_name=""
+	local cur_feed_file=""
+	local feed_file=""
+
+	feed_name="${feed_name#feed-}"
+
+	[[ -n "$feed_name" ]] || { echo "Invalid name" >&2; return 1; }
+	[[ "$feed_name" =~ [^a-zA-Z0-9_-] ]] && { echo "Invalid name" >&2; return 1; }
+
+	opkg_ensure_feed_symlink || return 1
+	cur_feed_file="$(readlink "${VESPERA_FEEDS_SYMLINK}")"
+	cur_feed_name="${cur_feed_file##*/feeds-}"
+	cur_feed_name="${cur_feed_name%.*}"
+
+	[[ "$feed_name" == "$cur_feed_name" ]] && { echo "cannot remove active feed: $feed_name" >&2; return 1; }
+
+	feed_file="$VESPERA_APP_DIR/conf/feeds-$feed_name.conf"
+	[[ -f "$feed_file" ]] || { echo "Feed not found: $feed_name" >&2; return 1; }
+
+	rm -f "$feed_file" || { echo "Failed to remove feed: $feed_name" >&2; return 1; }
+	return 0
+}
+
+opkg_feed_lib_show_name() {
+	opkg_ensure_feed_symlink
+	local feed_name; feed_name="$(readlink "${VESPERA_FEEDS_SYMLINK}")"
+	feed_name="${feed_name##*/feeds-}"
+	feed_name="${feed_name%.*}"
+	echo "$feed_name"
+}
+
+opkg_feed_lib_crud() {
+
+	local mode="${1:-}"
+	local feed_name="${2:-}"
+	local feed_url="${3:-}"
+	local old_feed_name="${4:-}"
+	local feeds_file="${VESPERA_FEEDS_SYMLINK}"
+	local existing_feed_name="${feed_name}"
+	local feed_line=
+	local tmp_file=
+	local -i exists=0
+	local -i found=0
+
+	feed_name_exists() {
+		grep -qE "^src/gz ${1} " "${feeds_file}" 2>/dev/null
+	}
+
+	# Validate mode
+	case "${mode:-}" in add|edit|remove) ;; *) echo "Invalid mode: $mode"; return 1 ;; esac
+
+	# Validate feed_name
+	[[ -z "${feed_name}" ]] && { echo "Invalid name" >&2; return 1; }
+	[[ "${feed_name}" =~ [^a-zA-Z0-9_-] ]] && { echo "Invalid name" >&2; return 1; }
+	#[[ "${feed_name}" == "vespera" ]] && { echo "The vespera feed cannot be removed/edited"; return 1; }
+
+	if [[ -n "${old_feed_name}" ]] && [[ "${old_feed_name}" =~ [^a-zA-Z0-9_-] ]]; then
+		echo "Invalid old name: '${old_feed_name}'" >&2
+		return 1
+	fi
+	[[ -n "${old_feed_name}" ]] && existing_feed_name="${old_feed_name}"
+
+	: >> "${feeds_file}"
+
+	if [[ "${mode}" == add ]] || [[ "${mode}" == edit ]]; then
+		[[ -z "${feed_url}" ]] && { echo "${mode}: feed url required" >&2; return 1; }
+	fi
+
+	if [[ "${mode}" == remove ]] && [[ -n "${old_feed_name}" ]]; then
+		echo "remove: old feed name not supported" >&2
+		return 1
+	fi
+
+	if feed_name_exists "${existing_feed_name}"; then
+		exists=1
+	fi
+
+	opkg_ensure_feed_symlink || return
+	[[ -L "${feeds_file}" ]] && feeds_file="$(readlink "${VESPERA_FEEDS_SYMLINK}")"
+
+	if [[ "${mode}" == add ]]; then
+		((exists)) && { echo "Feed already exists: ${feed_name}" >&2; return 1; }
+		local nl=
+		[[ -s "${feeds_file}" ]] && [[ $(tail -c1 "${feeds_file}" | wc -l) -eq 0 ]] && nl=$'\n'
+		printf '%ssrc/gz %s %s\n' "$nl" "${feed_name}" "${feed_url}" >> "${feeds_file}" \
+			|| { echo "Error writing to ${feeds_file}" >&2; return 1; }
+		return 0
+	fi
+
+	((!exists)) && { echo "Feed not found: $existing_feed_name" >&2; return 1; }
+
+	if [[ "${mode}" == edit ]] && [[ -n "${old_feed_name}" ]] && [[ "${feed_name}" != "${old_feed_name}" ]]; then
+		if feed_name_exists "${feed_name}"; then
+			echo "Invalid name; feed name already exists: $feed_name" >&2
+			return 1
+		fi
+	fi
+
+	tmp_file=$(mktemp)
+	feed_line="src/gz ${feed_name} ${feed_url}"
+
+	while IFS= read -r line; do
+		if [[ "$line" == src/gz\ ${existing_feed_name}\ * ]]; then
+			[[ "${mode}" != remove ]] && echo "$feed_line"
+			found=1
+			continue
+		fi
+		echo "$line"
+	done < "${feeds_file}" > "$tmp_file"
+
+	if ((!found)); then
+		rm -f "$tmp_file"
+		echo "Feed not found: $existing_feed_name" >&2
+		return 1
+	fi
+
+	mv "$tmp_file" "${feeds_file}" || { echo "Error writing to ${feeds_file}" >&2; return 1; }
+
+	return 0
+}

@@ -33,7 +33,7 @@ opkg_ensure_combined_conf_file() {
   printf '%s\n' "ensure_conf" >> "$VESPERA_TEST_LOG"
 }
 
-opkg_lib_feed_crud() {
+opkg_feed_lib_crud() {
   printf 'feed:%s\n' "$*" >> "$VESPERA_TEST_LOG"
 }
 

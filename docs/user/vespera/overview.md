@@ -14,6 +14,7 @@ Vespera allows end users to install and manage `opkg` packages (add-ons) on the 
 * Keeps the Veuns file system readonly, Does not alter the Venus OS file system, except for /data which is writable.
 * Enable and disable addons without uninstalling
 * Can be installed via a "blind" install (from sdcard, without using ssh), or via ssh using 2 commands.
+* Auto updates
 * Translated to 14 languages
 * Automaticaly restarts services and templated servces on reboot.
 * Detects firmware changes (upgrade and downgrade).

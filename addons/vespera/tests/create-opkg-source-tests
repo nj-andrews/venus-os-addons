@@ -25,6 +25,7 @@ stage_create_opkg_source_runtime() {
 
   ln -sf "$source_root/libs/source-lib" "$app_root/libs/source-lib"
   ln -sf "$source_root/libs/opkg-lib" "$app_root/libs/opkg-lib"
+  ln -sf "$source_root/libs/opkg-feed-lib" "$app_root/libs/opkg-feed-lib"
   ln -sf "$source_root/scripts/create-opkg-feed" "$app_root/scripts/create-opkg-feed"
 
   cat > "$app_root/conf/vespera.conf" <<EOF

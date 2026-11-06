@@ -1,12 +1,12 @@
 Package: dbus-inetbox
-Version: 1.1.0~d261030.1912
+Version: 1.1.0~d261105.0108
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 4c56909e565d2f2acde20cf1c8dd2307
-Size: 84850
-Filename: dbus-inetbox_1.1.0~d261030.1912_all.ipk
+MD5Sum: 9f68e56a514e257b6cbfbdb31f68b0f4
+Size: 84790
+Filename: dbus-inetbox_1.1.0~d261105.0108_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons-addons
 Description:  Adds support for Truma inetbox to Venus-OS
 OE: dbus-inetbox
@@ -14,14 +14,14 @@ License: MIT
 Priority: optional
 
 Package: dbus-ne-shunt
-Version: 1.1.0~d261101.2048
+Version: 1.1.0~d261103.1412
 Depends: vespera
 Section: utilities
 Architecture: all
 Maintainer: nj-andrews@github.com
-MD5Sum: 22eb1f48452b82713bed8dc3b7c0a339
-Size: 28670
-Filename: dbus-ne-shunt_1.1.0~d261101.2048_all.ipk
+MD5Sum: 89d4fa594a133331399bf88175afa71d
+Size: 28490
+Filename: dbus-ne-shunt_1.1.0~d261103.1412_all.ipk
 Source: https://nj-andrews.github.io/venus-os-addons
 Description:  Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 OE: dbus-ne-shunt
