@@ -362,6 +362,9 @@ build_package() {
   feed_path_abs="$(cd "$feed_path" && pwd)"
 
 	local build_path="../.build/${name}"
+  # Captured before build steps that regenerate tracked files (e.g. build-external).
+  local source_dirty
+  source_dirty="$(python3 ./promote-packages --check-dirty "$pkg_root")" || return 1
 
   echo -e "\e[32mbuilding ${name} -> ${feed_path_abs}\e[0m"
 
@@ -392,7 +395,7 @@ build_package() {
   echo "$(date)" > "${develop_path}/data/apps/available/${name}/buildtime"
 
   opkg-build -o root -g root "${develop_path}/" "${feed_path_abs}"
-  python3 ./promote-packages --record-build "$pkg_root" "$feed_path_abs"
+  python3 ./promote-packages --record-build "$pkg_root" "$feed_path_abs" --source-dirty "$source_dirty"
 
 }
 

@@ -458,7 +458,15 @@ def copy_package_to_archive(package):
     shutil.copy2(package["path"], destination)
 
 
-def write_build_manifest(package_root, feed_path):
+def source_is_dirty(package_root):
+    status = run(
+        ["git", "-C", str(package_root), "status", "--porcelain", "--untracked-files=normal", "--", "src", "src-external"],
+        stdout=subprocess.PIPE,
+    ).stdout
+    return bool(status.strip())
+
+
+def write_build_manifest(package_root, feed_path, source_dirty=None):
     package_root = Path(package_root).resolve()
     feed_path = Path(feed_path).resolve()
     package_name = package_root.name
@@ -475,10 +483,8 @@ def write_build_manifest(package_root, feed_path):
         ["git", "-C", str(package_root), "rev-parse", "HEAD"],
         stdout=subprocess.PIPE,
     ).stdout.strip()
-    dirty_result = run(
-        ["git", "-C", str(package_root), "status", "--porcelain", "--untracked-files=normal", "--", "src", "src-external"],
-        stdout=subprocess.PIPE,
-    ).stdout
+    if source_dirty is None:
+        source_dirty = source_is_dirty(package_root)
     metadata_dir = feed_path / ".metadata"
     metadata_dir.mkdir(parents=True, exist_ok=True)
 
@@ -489,7 +495,7 @@ def write_build_manifest(package_root, feed_path):
             "package": fields["Package"],
             "sha256": sha256(ipk),
             "source_commit": source_commit,
-            "source_dirty": bool(dirty_result.strip()),
+            "source_dirty": source_dirty,
             "source_version": fields["Version"],
         }
         manifest_path = metadata_dir / f"{ipk.name}.json"
@@ -691,15 +697,21 @@ def promote(feed_selection, apply):
 def main():
     parser = argparse.ArgumentParser(description="Build provenance and promote IPKs into release feeds.")
     parser.add_argument("--record-build", nargs=2, metavar=("PACKAGE_ROOT", "FEED_PATH"))
+    parser.add_argument("--source-dirty", choices=("true", "false"), help="Dirty state captured before the build ran.")
+    parser.add_argument("--check-dirty", metavar="PACKAGE_ROOT", help="Print true/false for package source dirtiness.")
     parser.add_argument("--promote", choices=("all", "vespera", "addons"))
     parser.add_argument("--apply", action="store_true", help="Publish the promotion plan.")
     args = parser.parse_args()
 
     try:
+        if args.check_dirty:
+            print("true" if source_is_dirty(args.check_dirty) else "false")
+            return 0
         if args.record_build:
             if args.promote or args.apply:
                 raise PromotionError("--record-build cannot be combined with promotion options")
-            write_build_manifest(*args.record_build)
+            dirty = None if args.source_dirty is None else args.source_dirty == "true"
+            write_build_manifest(*args.record_build, source_dirty=dirty)
             return 0
         if not args.promote:
             raise PromotionError("specify --record-build or --promote")
