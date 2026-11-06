@@ -201,7 +201,7 @@ build_package_if_needed() {
 
     source_is_newer=0
     run_build_all=0
-    if [[ -n "$newest_ipk" && ! -f "$feed_path/.metadata/$(basename "$newest_ipk").json" ]]; then
+    if [[ -n "$newest_ipk" ]] && python3 ./promote-packages --needs-refresh "$pkg_root" "$feed_path" "$(basename "$newest_ipk")"; then
       source_is_newer=1
       run_build_all=1
     fi

@@ -1,9 +1,0 @@
-{
-  "architecture": "all",
-  "filename": "dbus-ne-shunt_0.1.0~d261106.1157_all.ipk",
-  "package": "dbus-ne-shunt",
-  "sha256": "4d680d705b4371408a5c171f0432b494b3b67a45bd2a6867042ba2d5a3c5b34d",
-  "source_commit": "6e5227687ad98773030f99c9b963f310de183d37",
-  "source_dirty": true,
-  "source_version": "0.1.0~d261106.1157"
-}

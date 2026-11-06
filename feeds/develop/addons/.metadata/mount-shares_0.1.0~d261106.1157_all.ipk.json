@@ -1,9 +1,0 @@
-{
-  "architecture": "all",
-  "filename": "mount-shares_0.1.0~d261106.1157_all.ipk",
-  "package": "mount-shares",
-  "sha256": "27a6c47de97af813a7645fc6ee91ba6f12655f7ee635dbfad7b5e2ac28c1de53",
-  "source_commit": "6e5227687ad98773030f99c9b963f310de183d37",
-  "source_dirty": true,
-  "source_version": "0.1.0~d261106.1157"
-}

@@ -466,6 +466,29 @@ def source_is_dirty(package_root):
     return bool(status.strip())
 
 
+def build_needs_refresh(package_root, feed_path, ipk_name):
+    """True if the IPK's provenance is missing, dirty, or predates the latest source commit."""
+    manifest_path = Path(feed_path) / ".metadata" / f"{ipk_name}.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("source_dirty") is not False:
+            return True
+        built_commit = manifest["source_commit"]
+    except (OSError, KeyError, json.JSONDecodeError):
+        return True
+    last = run(
+        ["git", "-C", str(package_root), "log", "-1", "--format=%H", "--", "src", "src-external"],
+        stdout=subprocess.PIPE,
+    ).stdout.strip()
+    if not last:
+        return False
+    result = subprocess.run(
+        ["git", "-C", str(package_root), "merge-base", "--is-ancestor", last, built_commit],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    return result.returncode != 0
+
+
 def write_build_manifest(package_root, feed_path, source_dirty=None):
     package_root = Path(package_root).resolve()
     feed_path = Path(feed_path).resolve()
@@ -699,6 +722,7 @@ def main():
     parser.add_argument("--record-build", nargs=2, metavar=("PACKAGE_ROOT", "FEED_PATH"))
     parser.add_argument("--source-dirty", choices=("true", "false"), help="Dirty state captured before the build ran.")
     parser.add_argument("--check-dirty", metavar="PACKAGE_ROOT", help="Print true/false for package source dirtiness.")
+    parser.add_argument("--needs-refresh", nargs=3, metavar=("PACKAGE_ROOT", "FEED_PATH", "IPK_NAME"))
     parser.add_argument("--promote", choices=("all", "vespera", "addons"))
     parser.add_argument("--apply", action="store_true", help="Publish the promotion plan.")
     args = parser.parse_args()
@@ -707,6 +731,8 @@ def main():
         if args.check_dirty:
             print("true" if source_is_dirty(args.check_dirty) else "false")
             return 0
+        if args.needs_refresh:
+            return 0 if build_needs_refresh(*args.needs_refresh) else 1
         if args.record_build:
             if args.promote or args.apply:
                 raise PromotionError("--record-build cannot be combined with promotion options")

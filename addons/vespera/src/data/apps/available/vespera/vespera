@@ -37,8 +37,8 @@ Feed family:
 	feed set                      Sets the active feed
 	feed add                      Adds a new feed config
 	feed remove                   Removes a feed config
+  feed sources                  Show a list of the feed sources feom the active feed.
 
-  feed sources                         Show a list of the feed sources feom the active feed.
 	feed add-source <name> <url>         Add a feed entry to the active feed
 	feed edit-source <name> <url> [old]  Edit feed URL, optionally rename from [old]
 	feed remove-source <name>            Remove a feed entry from the active feed

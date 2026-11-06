@@ -56,6 +56,7 @@ opkg -f "${OPKG_CONF}" "$@" install "$FEED/vespera-latest.ipk" || exit
 retval=$?
 
 # shellcheck disable=SC1091
+
 ( . "/data/apps/available/vespera/libs/vespera-lib"; vespera_lib_bootstrap; )
 
 __cleanup
