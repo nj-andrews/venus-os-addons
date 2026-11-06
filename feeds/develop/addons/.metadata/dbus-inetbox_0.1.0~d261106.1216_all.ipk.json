@@ -1,9 +1,0 @@
-{
-  "architecture": "all",
-  "filename": "dbus-inetbox_0.1.0~d261106.1216_all.ipk",
-  "package": "dbus-inetbox",
-  "sha256": "681c54dc9e32b36f60a139c02bede3ea52053f4776c7296032e6c26072af3eef",
-  "source_commit": "5e3c47361211a757d5aaae4ef1cf403e56129d53",
-  "source_dirty": false,
-  "source_version": "0.1.0~d261106.1216"
-}
