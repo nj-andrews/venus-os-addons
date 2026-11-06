@@ -4,24 +4,24 @@
 <context>
     <name></name>
     <message id="vespera_feeds">
-        <location filename="../PageHome.qml" line="34"/>
         <location filename="../PageSettingsFeeds.qml" line="8"/>
+        <location filename="../PageSettings.qml" line="35"/>
         <source>Feeds</source>
         <translation>Feed</translation>
     </message>
     <message id="vespera_custom_devices">
-        <location filename="../PageHome.qml" line="47"/>
+        <location filename="../PageHome.qml" line="35"/>
         <location filename="../PageSettingsDevicesList.qml" line="8"/>
         <source>Custom Devices</source>
         <translation>Dispositivi personalizzati</translation>
     </message>
     <message id="pagecontrollableloads_documentation">
-        <location filename="../PageHome.qml" line="71"/>
+        <location filename="../PageHome.qml" line="59"/>
         <source></source>
         <translation>Documentazione</translation>
     </message>
     <message id="vespera_version">
-        <location filename="../PageHome.qml" line="78"/>
+        <location filename="../PageHome.qml" line="66"/>
         <source>Version</source>
         <translation>Versione</translation>
     </message>
@@ -36,7 +36,7 @@
         <translation></translation>
     </message>
     <message id="vespera_packages">
-        <location filename="../PageHome.qml" line="23"/>
+        <location filename="../PageHome.qml" line="22"/>
         <location filename="../PageSettingsPackages.qml" line="8"/>
         <source>Packages</source>
         <translation>Pacchetti</translation>
@@ -267,10 +267,10 @@ Il servizio partirà a breve...</translation>
         <translation>Nessun dispositivo USB rilevato</translation>
     </message>
     <message id="vespera_auto_update">
-        <location filename="../PageSettings.qml" line="35"/>
-        <source>Auto update packages (Sunday)</source>
-        <oldsource>Auto update packages (weekly)</oldsource>
-        <translation type="unfinished"></translation>
+        <location filename="../PageSettings.qml" line="48"/>
+        <source>Auto update packages (weekly)</source>
+        <oldsource>Auto update packages (Weekly)</oldsource>
+        <translation>Aggiorna automaticamente i pacchetti (ogni settimana)</translation>
     </message>
 </context>
 </TS>

@@ -13,7 +13,6 @@ Page {
 		_ = qsTrId("vespera_move_settings_to_top")
 	}
 
-
 	GradientListView {
 		id: settingsListView
 
@@ -26,17 +25,6 @@ Page {
 				onClicked: {
 					if (!vesperaManager.installerAccess()) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsPackages.qml", {
-						title: text, vesperaManager: vesperaManager })
-				}
-			}
-			ListNavigation {
-				//% "Feeds"
-				text: qsTrId("vespera_feeds")
-				showAccessLevel: VenusOS.User_AccessType_User
-				writeAccessLevel: VenusOS.User_AccessType_Installer
-				onClicked: {
-					if (!vesperaManager.installerAccess()) return
-					Global.pageManager.pushPage("qrc:/Vespera/PageSettingsFeeds.qml", {
 						title: text, vesperaManager: vesperaManager })
 				}
 			}
@@ -62,7 +50,7 @@ Page {
 				onClicked: {
 					if (!vesperaManager.installerAccess()) return
 					Global.pageManager.pushPage("qrc:/Vespera/PageSettings.qml", {
-						title: text })
+						title: text, vesperaManager: vesperaManager })
 				}
 			}
 
