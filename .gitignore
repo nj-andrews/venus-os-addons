@@ -15,7 +15,4 @@ __pycache__/
 tmp/
 output/
 .cmake/
-vespera-latest.ipk
-feeds/.package-operations.lock
-feeds/.release-staging/
-feeds/.release-previous/
+feeds/
