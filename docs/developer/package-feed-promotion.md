@@ -23,15 +23,18 @@ The release build:
   that version is newer than the corresponding package version in
   `feeds/release/{addons,vespera}/Packages`, using opkg version comparison.
 - Skips test packages and leaves existing release package versions untouched.
-- Rebuilds the selected packages, regenerates their feed indexes, commits only
-  `feeds/release`, and creates annotated tags locally on that commit.
+- Rebuilds the selected packages, regenerates their feed indexes, stages only
+  `feeds/release`, and creates annotated tags locally on the current `release`
+  commit. It does not create a commit.
 
 The tags are the existing release snapshot tag, `release-YYYY.MM` in UTC
 (adding `.2`, `.3`, etc. if needed), and one `<package>/v<version>` tag for
-each newly built package. Existing or conflicting tags stop the operation.
-Nothing is pushed; review the resulting commit and tags and push them through
+each newly built package. Existing package-version tags are left unchanged;
+other conflicting tags stop the operation. Because tags point to commits,
+they identify the current source commit, not the staged feed changes. Review
+the staged feed and tags, commit the staged feed when ready, then push through
 your normal release process.
 
-If no package version is newer, the task makes no commit and creates no tags.
+If no package version is newer, the task stages nothing and creates no tags.
 If the build changes files outside `feeds/release`, it stops instead of
-including those changes in the release commit.
+staging those changes.

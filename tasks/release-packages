@@ -192,6 +192,9 @@ def release_tags(packages):
     for name, version in sorted(set(packages)):
         tag = f"{name}/v{version}"
         run(git + ["check-ref-format", f"refs/tags/{tag}"])
+        if tag in existing:
+            print(f"Package tag already exists, leaving it unchanged: {tag}")
+            continue
         if conflicts(tag):
             raise ReleaseBuildError(f"release tag {tag} already exists or conflicts with an existing tag")
         existing.add(tag)
@@ -215,7 +218,7 @@ def finish_release(package_roots):
     ).stdout
     if outside_release:
         raise ReleaseBuildError(
-            "package build changed files outside feeds/release; inspect the worktree before committing"
+        "package build changed files outside feeds/release; inspect the worktree before staging"
         )
 
     package_versions = []
@@ -223,9 +226,6 @@ def finish_release(package_roots):
         fields = read_package_control(Path(package_root) / "src" / "CONTROL" / "control")
         package_versions.append((fields["Package"], fields["Version"]))
     tags = release_tags(package_versions)
-
-    for identity in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
-        run(git + ["var", identity])
 
     run(git + ["add", "-A", "--", "feeds/release"])
     staged = run(git + ["diff", "--cached", "--name-only", "--", "feeds/release"]).stdout
@@ -235,29 +235,19 @@ def finish_release(package_roots):
         )
 
     try:
-        run(
-            git
-            + [
-                "commit",
-                "-m",
-                f"Build release packages: {tags[0][0]}",
-                "-m",
-                "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
-            ]
-        )
         for name, message in tags:
             run(git + ["tag", "-a", name, "-m", message])
     except ReleaseBuildError as error:
         raise ReleaseBuildError(
-            f"{error}. Release files may be staged or committed locally; inspect git status "
+            f"{error}. Release files are staged locally; inspect git status "
             f"and create any missing tags manually. Intended tags: "
             f"{', '.join(name for name, _ in tags)}. Nothing was pushed."
         ) from error
 
     commit = run(git + ["rev-parse", "HEAD"]).stdout.strip()
-    print(f"Committed release feed at {commit}")
-    print(f"Created local tags: {', '.join(name for name, _ in tags)}")
-    print("Nothing was pushed.")
+    print(f"Staged release feed changes ({len(staged.splitlines())} paths).")
+    print(f"Created local tags on existing commit {commit}: {', '.join(name for name, _ in tags)}")
+    print("No commit was created and nothing was pushed.")
 
 
 def main():
