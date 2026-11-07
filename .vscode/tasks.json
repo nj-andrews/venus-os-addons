@@ -7,13 +7,6 @@
       "description": "Package(s) (all or vespera mount-shares themer etc)",
       "default": ""
     },
-    {
-      "id": "opkgPromoteFeed",
-      "type":"pickString",
-      "description": "Packages to promote (addons or vespera)",
-      "options": ["all", "vespera", "addons"],
-      "default": "all"
-		},
 		{
 			"id": "bashCountPath",
 			"type": "promptString",
@@ -68,12 +61,12 @@
 			"detail": "Build all packages (develop) without prompting."
 		},
 		{
-			"label": "Preview develop package promotion",
+			"label": "Build packages (release)",
 			"type": "shell",
 			"command": "${workspaceFolder}/tasks/build-packages",
 			"args": [
-				"--promote",
-				"${input:opkgPromoteFeed}"
+				"--release-only",
+				"all"
 			],
 			"presentation": {
 				"echo": true,
@@ -84,27 +77,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "Dry-run package-by-package release promotion. Does not publish changes."
-		},
-		{
-			"label": "Apply develop package promotion",
-			"type": "shell",
-			"command": "${workspaceFolder}/tasks/build-packages",
-			"args": [
-				"--promote",
-				"${input:opkgPromoteFeed}",
-				"--apply"
-			],
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": true,
-				"panel": "shared",
-				"showReuseMessage": false,
-				"clear": true
-			},
-			"problemMatcher": [],
-			"detail": "Validate, commit, tag and push the selected release promotion plan to origin/release."
+			"detail": "Build changed package versions on release, commit feeds/release, and create release tags locally."
 		},
 		{
 			"label": "cleanup vscode server installs",

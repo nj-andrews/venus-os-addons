@@ -14,8 +14,7 @@ set -euo pipefail
 #   Arg[n]: Or a list of folders under services or utils to build
 # Options:
 #   --develop-only             Build and index into develop folders only (stamps version with ~dYYMMDD.HHMM)
-#   --promote [feed]            Preview per-package develop feed promotion
-#   --apply                     Publish a preceding --promote plan
+#   --release-only             Build newer package versions into release feeds and tag the release
 #   --clean-develop            Remove all contents from the develop feeds folder
 ####################################################################
 
@@ -33,8 +32,7 @@ declare -a normalized_cli_build_args=()
 declare pwd_old="$PWD"
 declare -A update_feeds=()
 declare -i develop_only=0
-declare -i promote_only=0
-declare -i apply_promotion=0
+declare -i release_only=0
 declare -i clean_develop_only=0
 declare -i all_mode=0
 
@@ -46,8 +44,7 @@ Options:
   --develop-only           Build and index packages in develop only.
                            Version is stamped as MAJOR.MINOR.PATCH~dYYMMDD.HHMM
                            Old develop packages for the same name are removed before placing the new one.
-  --promote [feed]         Preview release promotion (all, vespera, or addons)
-  --apply                  Publish the promotion plan; use with --promote
+  --release-only           Build versions newer than feeds/release/Packages, then commit and tag them locally.
   --clean-develop          Remove all contents from the develop feeds folder
   -h, --help               Show this help
 EOF
@@ -58,11 +55,8 @@ while [[ $# -gt 0 ]]; do
     --develop-only)
       develop_only=1
       ;;
-    --promote)
-      promote_only=1
-      ;;
-    --apply)
-      apply_promotion=1
+    --release-only)
+      release_only=1
       ;;
     --clean-develop)
       clean_develop_only=1
@@ -98,8 +92,8 @@ done
 
 cli_build_args=("${normalized_cli_build_args[@]}")
 
-(( develop_only == 0 || promote_only == 0 )) || {
-  echo "ERROR: --develop-only and --promote cannot be combined" >&2
+(( develop_only == 0 || release_only == 0 )) || {
+  echo "ERROR: --develop-only and --release-only cannot be combined" >&2
   exit 1
 }
 
@@ -108,13 +102,8 @@ cli_build_args=("${normalized_cli_build_args[@]}")
   exit 1
 }
 
-(( clean_develop_only == 0 || promote_only == 0 )) || {
-  echo "ERROR: --clean-develop cannot be combined with --promote" >&2
-  exit 1
-}
-
-(( apply_promotion == 0 || promote_only == 1 )) || {
-  echo "ERROR: --apply requires --promote" >&2
+(( clean_develop_only == 0 || release_only == 0 )) || {
+  echo "ERROR: --clean-develop cannot be combined with --release-only" >&2
   exit 1
 }
 
@@ -141,6 +130,8 @@ feed_path_for_name() {
   local feed_name="$1"
   if [[ "$feed_name" == "$test_feed_name" ]]; then
     echo "$test_feed_root"
+  elif (( release_only == 1 )); then
+    echo "${feeds_root}/release/${feed_name}"
   else
     echo "${develop_root}/${feed_name}"
   fi
@@ -148,8 +139,9 @@ feed_path_for_name() {
 
 acquire_feed_lock() {
   command -v flock >/dev/null 2>&1 || { echo "ERROR: flock not installed" >&2; return 1; }
+  mkdir -p "$feeds_root"
   exec 9>"${feeds_root}/.package-operations.lock"
-  flock -n 9 || { echo "ERROR: another package build or promotion is in progress" >&2; return 1; }
+  flock -n 9 || { echo "ERROR: another package build is in progress" >&2; return 1; }
 }
 
 build_feed_index() {
@@ -194,16 +186,38 @@ build_package_if_needed() {
   name="$(basename "$pkg_root")"
   run_build_all=1
 
-  if (( all_mode == 1 )); then
+  if (( release_only == 1 )); then
+    if [[ "$name" == test-* ]]; then
+      echo "skipping ${name}: test packages are not built for release"
+      return 10
+    fi
+    feed_name="$(feed_name_for_package "$name")"
+    feed_path="$(feed_path_for_name "$feed_name")"
+    if python3 ./release-packages --is-newer "$pkg_root" "$feed_path"; then
+      :
+    else
+      local status=$?
+      if (( status == 1 )); then
+        echo "skipping ${name}: control-file version is not newer than release"
+        return 10
+      fi
+      return "$status"
+    fi
+  elif (( all_mode == 1 )); then
     feed_name="$(feed_name_for_package "$name")"
     feed_path="$(feed_path_for_name "$feed_name")"
     newest_ipk="$(newest_ipk_for_package "$feed_path" "$name")"
 
     source_is_newer=0
     run_build_all=0
-    if [[ -n "$newest_ipk" ]] && python3 ./promote-packages --needs-refresh "$pkg_root" "$feed_path" "$(basename "$newest_ipk")"; then
-      source_is_newer=1
-      run_build_all=1
+    if [[ -n "$newest_ipk" ]]; then
+      local last_source_commit ipk_time
+      last_source_commit="$(git -C "$pkg_root" log -1 --format=%ct -- src src-external || true)"
+      ipk_time="$(stat -c %Y "$newest_ipk")"
+      if [[ -n "$last_source_commit" && "$last_source_commit" -gt "$ipk_time" ]]; then
+        source_is_newer=1
+        run_build_all=1
+      fi
     fi
     for source_path in "$pkg_root/src" "$pkg_root/src-external"; do
       [[ -d "$source_path" ]] || continue
@@ -272,6 +286,9 @@ register_feed_targets() {
 
   for pkg in "${build_items[@]}"; do
     name="$(basename "$pkg")"
+    if (( release_only == 1 )) && [[ "$name" == test-* ]]; then
+      continue
+    fi
     feed_name="$(feed_name_for_package "$name")"
     update_feeds["$feed_name"]="$(feed_path_for_name "$feed_name")"
   done
@@ -362,9 +379,6 @@ build_package() {
   feed_path_abs="$(cd "$feed_path" && pwd)"
 
 	local build_path="../.build/${name}"
-  # Captured before build steps that regenerate tracked files (e.g. build-external).
-  local source_dirty
-  source_dirty="$(python3 ./promote-packages --check-dirty "$pkg_root")" || return 1
 
   echo -e "\e[32mbuilding ${name} -> ${feed_path_abs}\e[0m"
 
@@ -395,7 +409,6 @@ build_package() {
   echo "$(date)" > "${develop_path}/data/apps/available/${name}/buildtime"
 
   opkg-build -o root -g root "${develop_path}/" "${feed_path_abs}"
-  python3 ./promote-packages --record-build "$pkg_root" "$feed_path_abs" --source-dirty "$source_dirty"
 
 }
 
@@ -430,22 +443,12 @@ if (( clean_develop_only == 1 )); then
   exit 0
 fi
 
-if (( promote_only == 1 )); then
-  (( ${#cli_build_args[@]} <= 1 )) || {
-    echo "ERROR: --promote accepts only one feed selection" >&2
+if (( release_only == 1 )); then
+  command -v opkg-compare-versions >/dev/null 2>&1 || {
+    echo "ERROR: opkg-compare-versions not installed" >&2
     exit 1
   }
-  if [[ ${#cli_build_args[@]} -gt 0 ]]; then
-    promote_target="${cli_build_args[0]}"
-  else
-    promote_target="all"
-  fi
-  declare -a promote_args=(--promote "$promote_target")
-  (( apply_promotion == 0 )) || promote_args+=(--apply)
-  python3 ./promote-packages "${promote_args[@]}"
-  cd "$pwd_old" || true
-  echo "Completed"
-  exit 0
+  python3 ./release-packages --check-state
 fi
 
 acquire_feed_lock
@@ -506,6 +509,10 @@ if ((develop_only == 1)); then
 	  #NOTE not part of feed indexes, this is a direct opkg download.
 		create_latest_feed_package develop
 	fi
+fi
+
+if (( release_only == 1 )); then
+  python3 ./release-packages --finish "${build_items[@]}"
 fi
 
 cd "$pwd_old" || true

@@ -3,11 +3,10 @@
 set -o nounset
 
 this_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=./scripts/libs/test-lib
 . "$this_path/../../scripts/libs/test-lib"
 
-test_package_promotion_python_suite_runs_successfully() {
-  python3 "$this_path/test_promote_packages.py"
+test_release_packages_python_suite_runs_successfully() {
+  python3 "$this_path/test_release_packages.py"
   local status=$?
   assert_eq 0 "$status"
 }

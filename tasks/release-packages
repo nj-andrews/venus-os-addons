@@ -1,0 +1,286 @@
+#!/usr/bin/env python3
+
+import argparse
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent.parent
+RELEASE = ROOT / "feeds" / "release"
+CONTROL_FIELD_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9-]*):[ \t]*(.*)$")
+PACKAGE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+_.-]*$")
+
+
+class ReleaseBuildError(RuntimeError):
+    pass
+
+
+def run(command, *, check=True):
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as error:
+        raise ReleaseBuildError(
+            f"could not run {' '.join(map(str, command))}: {error}"
+        ) from error
+    if check and result.returncode:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise ReleaseBuildError(
+            f"command failed ({result.returncode}): {' '.join(map(str, command))}"
+            + (f": {detail}" if detail else "")
+        )
+    return result
+
+
+def parse_control(text, path):
+    fields = {}
+    current_field = None
+    for line in text.splitlines():
+        if line.startswith((" ", "\t")) and current_field:
+            fields[current_field] += "\n" + line[1:]
+            continue
+        match = CONTROL_FIELD_RE.match(line)
+        if match:
+            current_field = match.group(1)
+            if current_field in fields:
+                raise ReleaseBuildError(f"duplicate {current_field} field in {path}")
+            fields[current_field] = match.group(2)
+        else:
+            current_field = None
+    return fields
+
+
+def read_package_control(path):
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise ReleaseBuildError(f"cannot read package control file {path}: {error}") from error
+    fields = parse_control(text, path)
+    for name in ("Package", "Version"):
+        if not fields.get(name):
+            raise ReleaseBuildError(f"{path} has no {name} field")
+    if not PACKAGE_NAME_RE.fullmatch(fields["Package"]):
+        raise ReleaseBuildError(f"{path} has an invalid Package field")
+    return fields
+
+
+def compare_versions(left, operator, right):
+    result = run(
+        ["opkg-compare-versions", left, operator, right],
+        check=False,
+    )
+    if result.returncode in (0, 1):
+        return result.returncode == 0
+    detail = result.stderr.strip() or result.stdout.strip()
+    raise ReleaseBuildError(
+        f"opkg-compare-versions failed for {left} {operator} {right}"
+        + (f": {detail}" if detail else "")
+    )
+
+
+def release_versions(packages_file):
+    try:
+        text = packages_file.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {}
+    except OSError as error:
+        raise ReleaseBuildError(f"cannot read release package index {packages_file}: {error}") from error
+
+    versions = {}
+    for block in re.split(r"\n[ \t]*\n", text.strip()):
+        if not block:
+            continue
+        fields = parse_control(block, packages_file)
+        if not fields.get("Package") or not fields.get("Version"):
+            raise ReleaseBuildError(f"package index entry in {packages_file} lacks Package or Version")
+        name = fields["Package"]
+        version = fields["Version"]
+        previous = versions.get(name)
+        if previous is None or compare_versions(version, ">>", previous):
+            versions[name] = version
+    return versions
+
+
+def package_is_newer(package_root, feed_path):
+    control_file = Path(package_root) / "src" / "CONTROL" / "control"
+    fields = read_package_control(control_file)
+    released = release_versions(Path(feed_path) / "Packages").get(fields["Package"])
+    return released is None or compare_versions(fields["Version"], ">>", released)
+
+
+def validate_release_state(require_clean):
+    git = ["git", "-C", str(ROOT)]
+    branch = run(git + ["branch", "--show-current"]).stdout.strip()
+    if branch != "release":
+        raise ReleaseBuildError(
+            f"release build requires the release branch (current: {branch or 'detached HEAD'})"
+        )
+
+    run(
+        git
+        + [
+            "fetch",
+            "--no-tags",
+            "--no-write-fetch-head",
+            "origin",
+            "+refs/heads/develop:refs/remotes/origin/develop",
+        ]
+    )
+    develop = run(git + ["rev-parse", "--verify", "refs/heads/develop^{commit}"]).stdout.strip()
+    remote_develop = run(
+        git + ["rev-parse", "--verify", "refs/remotes/origin/develop^{commit}"]
+    ).stdout.strip()
+    if develop != remote_develop:
+        raise ReleaseBuildError(
+            "local develop does not match origin/develop; synchronize and push develop first"
+        )
+
+    ancestry = run(
+        git + ["merge-base", "--is-ancestor", "refs/heads/develop", "HEAD"],
+        check=False,
+    )
+    if ancestry.returncode == 1:
+        raise ReleaseBuildError(
+            "release does not include the current develop branch; merge develop into release first"
+        )
+    if ancestry.returncode:
+        raise ReleaseBuildError("could not compare release with develop")
+
+    if require_clean:
+        status = run(git + ["status", "--porcelain", "--untracked-files=normal"]).stdout
+        if status:
+            raise ReleaseBuildError(
+                "release build requires a clean working tree; commit or otherwise resolve "
+                "changes before building"
+            )
+
+
+def release_tags(packages):
+    git = ["git", "-C", str(ROOT)]
+    local_tags = set(run(git + ["tag", "--list"]).stdout.splitlines())
+    remote_output = run(git + ["ls-remote", "--refs", "--tags", "origin"]).stdout
+    remote_tags = {
+        line.split("\t", 1)[1].removeprefix("refs/tags/")
+        for line in remote_output.splitlines()
+        if "\t" in line
+    }
+    existing = local_tags | remote_tags
+
+    def conflicts(name):
+        return any(
+            tag == name or tag.startswith(name + "/") or name.startswith(tag + "/")
+            for tag in existing
+        )
+
+    base = time.strftime("release-%Y.%m", time.gmtime())
+    snapshot = base
+    suffix = 2
+    while conflicts(snapshot):
+        snapshot = f"{base}.{suffix}"
+        suffix += 1
+
+    tags = [(snapshot, f"Release {snapshot.removeprefix('release-')}")]
+    existing.add(snapshot)
+    for name, version in sorted(set(packages)):
+        tag = f"{name}/v{version}"
+        run(git + ["check-ref-format", f"refs/tags/{tag}"])
+        if conflicts(tag):
+            raise ReleaseBuildError(f"release tag {tag} already exists or conflicts with an existing tag")
+        existing.add(tag)
+        tags.append((tag, f"{name} v{version}"))
+    return tags
+
+
+def finish_release(package_roots):
+    validate_release_state(require_clean=False)
+    git = ["git", "-C", str(ROOT)]
+    outside_release = run(
+        git
+        + [
+            "status",
+            "--porcelain",
+            "--untracked-files=normal",
+            "--",
+            ".",
+            ":(exclude)feeds/release",
+        ]
+    ).stdout
+    if outside_release:
+        raise ReleaseBuildError(
+            "package build changed files outside feeds/release; inspect the worktree before committing"
+        )
+
+    package_versions = []
+    for package_root in package_roots:
+        fields = read_package_control(Path(package_root) / "src" / "CONTROL" / "control")
+        package_versions.append((fields["Package"], fields["Version"]))
+    tags = release_tags(package_versions)
+
+    for identity in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
+        run(git + ["var", identity])
+
+    run(git + ["add", "-A", "--", "feeds/release"])
+    staged = run(git + ["diff", "--cached", "--name-only", "--", "feeds/release"]).stdout
+    if not staged.strip():
+        raise ReleaseBuildError(
+            "no release feed changes were staged; verify feeds/release is not ignored"
+        )
+
+    try:
+        run(
+            git
+            + [
+                "commit",
+                "-m",
+                f"Build release packages: {tags[0][0]}",
+                "-m",
+                "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+            ]
+        )
+        for name, message in tags:
+            run(git + ["tag", "-a", name, "-m", message])
+    except ReleaseBuildError as error:
+        raise ReleaseBuildError(
+            f"{error}. Release files may be staged or committed locally; inspect git status "
+            f"and create any missing tags manually. Intended tags: "
+            f"{', '.join(name for name, _ in tags)}. Nothing was pushed."
+        ) from error
+
+    commit = run(git + ["rev-parse", "HEAD"]).stdout.strip()
+    print(f"Committed release feed at {commit}")
+    print(f"Created local tags: {', '.join(name for name, _ in tags)}")
+    print("Nothing was pushed.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Build and tag release package feeds.")
+    parser.add_argument("--check-state", action="store_true")
+    parser.add_argument("--is-newer", nargs=2, metavar=("PACKAGE_ROOT", "FEED_PATH"))
+    parser.add_argument("--finish", nargs="+", metavar="PACKAGE_ROOT")
+    args = parser.parse_args()
+
+    try:
+        if args.check_state:
+            validate_release_state(require_clean=True)
+            return 0
+        if args.is_newer:
+            return 0 if package_is_newer(*args.is_newer) else 1
+        if args.finish:
+            finish_release(args.finish)
+            return 0
+        parser.error("specify --check-state, --is-newer or --finish")
+    except (OSError, ReleaseBuildError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
