@@ -223,6 +223,41 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         self.assertEqual(self.git("status", "--porcelain", "--", "addons"), "")
 
 
+class LocaleLoaderBuildTests(unittest.TestCase):
+    @unittest.skipUnless(
+        Path("/opt/venus/scarthgap-arm-cortexa8hf-neon/environment-setup-cortexa8hf-neon-ve-linux-gnueabi").is_file()
+        and shutil.which("cmake"),
+        "Venus ARM SDK and CMake required",
+    )
+    def test_locale_loader_builds_into_staged_package(self):
+        with tempfile.TemporaryDirectory() as temp:
+            package = Path(temp) / "vespera"
+            loader = package / "src-external" / "vespera-locale-loader"
+            shutil.copytree(
+                ROOT / "addons" / "vespera" / "src-external" / "vespera-locale-loader",
+                loader,
+                ignore=shutil.ignore_patterns("build"),
+            )
+            translations = package / "src-external" / "gui-v2" / "Vespera" / "translations"
+            translations.mkdir(parents=True)
+            (translations / "Vespera_en.qm").write_bytes(b"test translation")
+            output = package / "src" / "opt" / "victronenergy" / "gui" / "qml" / "Vespera"
+            output.mkdir(parents=True)
+            (output / "libvesperalocale.so").write_bytes(b"old library")
+
+            result = subprocess.run(
+                [str(loader / "build-locale-loader")],
+                cwd=package,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout)
+            self.assertEqual((output / "libvesperalocale.so").read_bytes()[:4], b"\x7fELF")
+            self.assertEqual((output / "qmldir").read_text(), (loader / "qmldir").read_text())
+            self.assertEqual((output / "lang" / "Vespera_en.qm").read_bytes(), b"test translation")
+
+
 class PluginBuildTests(unittest.TestCase):
     def test_both_plugins_keep_version_and_copy_compiler_output(self):
         for package, plugin, folder in (
