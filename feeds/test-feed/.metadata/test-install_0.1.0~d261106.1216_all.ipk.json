@@ -1,9 +1,0 @@
-{
-  "architecture": "all",
-  "filename": "test-install_0.1.0~d261106.1216_all.ipk",
-  "package": "test-install",
-  "sha256": "400f89fe15161ca1c4ee31e7cd7986f7119b7f564c9c7e1aeb450aff087afe1b",
-  "source_commit": "5e3c47361211a757d5aaae4ef1cf403e56129d53",
-  "source_dirty": false,
-  "source_version": "0.1.0~d261106.1216"
-}
