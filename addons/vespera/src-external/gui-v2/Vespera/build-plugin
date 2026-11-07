@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -o nounset
+set -euo pipefail
 
 #compiler_script=~/dev-local/gui-v2/tools/gui-v2-plugin-compiler.py
-compiler_script=../../../../../tooling/gui-v2-plugin-compiler.py
+compiler_script="${GUI_V2_PLUGIN_COMPILER:-../../../../../tooling/gui-v2-plugin-compiler.py}"
 
 if [[ ! -f "$compiler_script" ]]; then
   echo "$compiler_script not found" >&2
@@ -15,8 +15,7 @@ PLUGIN_NAME=Vespera
 PLUGIN_FOLDER_NAME=vespera
 #MINIFY="--minify"
 #PRE_COMPILE="--pre-compile"
-PLUGIN_VERSION=$(cat version 2>/dev/null || echo v1.0.0);
-PLUGIN_VERSION=$(echo "${PLUGIN_VERSION%.*}.$((${PLUGIN_VERSION##*.}+1))" | tee version)
+PLUGIN_VERSION="$(cat version)"
 [[ -n ${PRE_COMPILE:-} ]] && MINIFY=
 
 declare DEVICE_IP_ADDRESS="${1:-}"
@@ -27,7 +26,7 @@ export PATH="/usr/lib/qt6/bin:/usr/lib/qt6/libexec:${PATH}"
 [[ -n ${PRE_COMPILE:-} ]] && MINIFY=
 
 # force delete so file size reporting is not using cache (when mounting/zfs etc)
-rm -f $OUTPUT_PATH/${PLUGIN_NAME}.json
+rm -f "$OUTPUT_PATH/${PLUGIN_NAME}.json" "${PLUGIN_NAME}.rcc"
 #--min-required-version v1.2.13 \
 python3 "$compiler_script" \
     --name ${PLUGIN_NAME} \

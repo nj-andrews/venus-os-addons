@@ -11,6 +11,12 @@ test_release_packages_python_suite_runs_successfully() {
   assert_eq 0 "$status"
 }
 
+test_package_build_integration_suite_runs_successfully() {
+  python3 "$this_path/test_build_packages.py"
+  local status=$?
+  assert_eq 0 "$status"
+}
+
 if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
   test_runner_all --summary "$0" ""
 fi

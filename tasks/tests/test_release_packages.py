@@ -43,7 +43,7 @@ class ReleasePackagesTests(unittest.TestCase):
         self.run_git("config", "user.name", "Release Test")
         self.run_git("config", "user.email", "release@example.invalid")
         (self.root / ".gitignore").write_text(
-            "/feeds/*\n!/feeds/release/\n", encoding="utf-8"
+            "/.build/\n/feeds/*\n!/feeds/release/\n", encoding="utf-8"
         )
         control = self.root / "addons" / "vespera" / "src" / "CONTROL" / "control"
         control.parent.mkdir(parents=True)
@@ -93,7 +93,8 @@ class ReleasePackagesTests(unittest.TestCase):
 
     def test_release_changes_are_staged_and_package_tags_point_to_head(self):
         control = self.make_git_repo()
-        feed = release_packages.RELEASE / "vespera"
+        staged_feed = self.root / ".build" / "release" / "feed"
+        feed = staged_feed / "vespera"
         feed.mkdir(parents=True)
         (feed / "Packages").write_text(
             "Package: vespera\nVersion: 1.2.0\nArchitecture: all\n",
@@ -101,7 +102,7 @@ class ReleasePackagesTests(unittest.TestCase):
         )
         (feed / "vespera_1.2.0_all.ipk").write_bytes(b"package bytes")
 
-        release_packages.finish_release([control.parents[2]])
+        release_packages.finish_release(staged_feed, [control.parents[2]])
 
         head = self.run_git("rev-parse", "HEAD")
         self.assertIn("feeds/release/vespera/Packages", self.run_git("diff", "--cached", "--name-only"))
@@ -128,23 +129,24 @@ class ReleasePackagesTests(unittest.TestCase):
         )
         self.run_git("add", "addons/dbus-inetbox")
         self.run_git("commit", "-qm", "add dbus-inetbox source")
-        feed = release_packages.RELEASE / "addons"
+        staged_feed = self.root / ".build" / "release" / "feed"
+        feed = staged_feed / "addons"
         feed.mkdir(parents=True)
         (feed / "Packages").write_text(
             "Package: dbus-inetbox\nVersion: 0.1.0\nArchitecture: all\n",
             encoding="utf-8",
         )
         (feed / "dbus-inetbox_0.1.0_all.ipk").write_bytes(b"package bytes")
-        (release_packages.RELEASE / "vespera").mkdir(parents=True)
-        (release_packages.RELEASE / "vespera" / "Packages").write_text(
+        (staged_feed / "vespera").mkdir(parents=True)
+        (staged_feed / "vespera" / "Packages").write_text(
             "Package: vespera\nVersion: 1.2.0\nArchitecture: all\n",
             encoding="utf-8",
         )
-        (release_packages.RELEASE / "vespera" / "vespera_1.2.0_all.ipk").write_bytes(
+        (staged_feed / "vespera" / "vespera_1.2.0_all.ipk").write_bytes(
             b"package bytes"
         )
 
-        release_packages.finish_release([vespera_control.parents[2], inetbox_control.parents[2]])
+        release_packages.finish_release(staged_feed, [vespera_control.parents[2], inetbox_control.parents[2]])
 
         head = self.run_git("rev-parse", "HEAD")
         for tag in ("vespera/v1.2.0", "dbus-inetbox/v0.1.0"):
@@ -168,11 +170,20 @@ class ReleasePackagesTests(unittest.TestCase):
         with self.assertRaisesRegex(release_packages.ReleaseBuildError, "does not include"):
             release_packages.validate_release_state(require_clean=True)
 
+    def test_release_build_rejects_ignored_feed_before_building(self):
+        self.make_git_repo()
+        (self.root / ".gitignore").write_text("/feeds/\n/.build/\n", encoding="utf-8")
+        self.run_git("add", ".gitignore")
+        self.run_git("commit", "-qm", "ignore release feed")
+        with self.assertRaisesRegex(release_packages.ReleaseBuildError, "feeds/release is ignored"):
+            release_packages.validate_release_state(require_clean=True)
+
     def test_existing_package_tag_is_preserved_and_feed_still_staged(self):
         control = self.make_git_repo()
         self.run_git("tag", "-a", "vespera/v1.2.0", "-m", "already released")
         original_tag_commit = self.run_git("rev-parse", "vespera/v1.2.0^{commit}")
-        feed = release_packages.RELEASE / "vespera"
+        staged_feed = self.root / ".build" / "release" / "feed"
+        feed = staged_feed / "vespera"
         feed.mkdir(parents=True)
         (feed / "Packages").write_text(
             "Package: vespera\nVersion: 1.2.0\nArchitecture: all\n",
@@ -180,10 +191,28 @@ class ReleasePackagesTests(unittest.TestCase):
         )
         (feed / "vespera_1.2.0_all.ipk").write_bytes(b"package bytes")
 
-        release_packages.finish_release([control.parents[2]])
+        release_packages.finish_release(staged_feed, [control.parents[2]])
         self.assertEqual(self.run_git("rev-parse", "HEAD"), self.run_git("rev-parse", "release"))
         self.assertEqual(self.run_git("rev-parse", "vespera/v1.2.0^{commit}"), original_tag_commit)
         self.assertIn("feeds/release/vespera/Packages", self.run_git("diff", "--cached", "--name-only"))
+
+    def test_unexpected_changes_leave_release_feed_unchanged(self):
+        control = self.make_git_repo()
+        release = release_packages.RELEASE / "vespera"
+        release.mkdir(parents=True)
+        (release / "Packages").write_text("original feed\n", encoding="utf-8")
+        self.run_git("add", "feeds/release")
+        self.run_git("commit", "-qm", "old release")
+        staged_feed = self.root / ".build" / "release" / "feed"
+        (staged_feed / "vespera").mkdir(parents=True)
+        (staged_feed / "vespera" / "Packages").write_text("new feed\n", encoding="utf-8")
+        (self.root / "unexpected").write_text("unexpected\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(release_packages.ReleaseBuildError, "unexpected"):
+            release_packages.finish_release(staged_feed, [control.parents[2]])
+        self.assertEqual((release / "Packages").read_text(encoding="utf-8"), "original feed\n")
+        self.assertTrue(staged_feed.is_dir())
+        self.assertEqual(self.run_git("tag", "--list"), "")
 
 
 if __name__ == "__main__":

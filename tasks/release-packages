@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -116,6 +117,18 @@ def package_is_newer(package_root, feed_path):
     return released is None or compare_versions(fields["Version"], ">>", released)
 
 
+def validate_release_ignore_rules():
+    git = ["git", "-C", str(ROOT)]
+    ignored = run(
+        git + ["check-ignore", "--no-index", "-q", "--", "feeds/release/release-build-check"],
+        check=False,
+    )
+    if ignored.returncode == 0:
+        raise ReleaseBuildError("feeds/release is ignored; allow it in .gitignore on release")
+    if ignored.returncode != 1:
+        raise ReleaseBuildError(f"could not check whether feeds/release is ignored: {ignored.stderr.strip()}")
+
+
 def validate_release_state(require_clean):
     git = ["git", "-C", str(ROOT)]
     branch = run(git + ["branch", "--show-current"]).stdout.strip()
@@ -161,6 +174,7 @@ def validate_release_state(require_clean):
                 "release build requires a clean working tree; commit or otherwise resolve "
                 "changes before building"
             )
+        validate_release_ignore_rules()
 
 
 def release_tags(packages):
@@ -202,24 +216,26 @@ def release_tags(packages):
     return tags
 
 
-def finish_release(package_roots):
+def finish_release(staged_feed, package_roots):
     validate_release_state(require_clean=False)
     git = ["git", "-C", str(ROOT)]
-    outside_release = run(
+    status = run(
         git
         + [
             "status",
             "--porcelain",
             "--untracked-files=normal",
-            "--",
-            ".",
-            ":(exclude)feeds/release",
         ]
     ).stdout
-    if outside_release:
+    if status:
         raise ReleaseBuildError(
-        "package build changed files outside feeds/release; inspect the worktree before staging"
+            "package build changed the working tree; inspect these paths before staging:\n"
+            + status.rstrip()
         )
+
+    staged_feed = Path(staged_feed).resolve()
+    if not staged_feed.is_dir():
+        raise ReleaseBuildError(f"release build feed not found: {staged_feed}")
 
     package_versions = []
     for package_root in package_roots:
@@ -227,7 +243,28 @@ def finish_release(package_roots):
         package_versions.append((fields["Package"], fields["Version"]))
     tags = release_tags(package_versions)
 
-    run(git + ["add", "-A", "--", "feeds/release"])
+    validate_release_ignore_rules()
+    run(git + ["var", "GIT_COMMITTER_IDENT"])
+
+    backup = staged_feed.parent / "previous-release"
+    if backup.exists():
+        raise ReleaseBuildError(f"release backup path already exists: {backup}")
+    RELEASE.parent.mkdir(parents=True, exist_ok=True)
+    if RELEASE.exists():
+        os.replace(RELEASE, backup)
+    try:
+        os.replace(staged_feed, RELEASE)
+    except OSError:
+        if backup.exists():
+            os.replace(backup, RELEASE)
+        raise
+
+    try:
+        run(git + ["add", "-A", "--", "feeds/release"])
+    except ReleaseBuildError as error:
+        raise ReleaseBuildError(
+            f"{error}. Release files were updated locally; inspect git status before retrying."
+        ) from error
     staged = run(git + ["diff", "--cached", "--name-only", "--", "feeds/release"]).stdout
     if not staged.strip():
         raise ReleaseBuildError(
@@ -254,7 +291,7 @@ def main():
     parser = argparse.ArgumentParser(description="Build and tag release package feeds.")
     parser.add_argument("--check-state", action="store_true")
     parser.add_argument("--is-newer", nargs=2, metavar=("PACKAGE_ROOT", "FEED_PATH"))
-    parser.add_argument("--finish", nargs="+", metavar="PACKAGE_ROOT")
+    parser.add_argument("--finish", nargs="+", metavar="PATH")
     args = parser.parse_args()
 
     try:
@@ -264,12 +301,14 @@ def main():
         if args.is_newer:
             return 0 if package_is_newer(*args.is_newer) else 1
         if args.finish:
-            finish_release(args.finish)
+            if len(args.finish) < 2:
+                parser.error("--finish requires a staged feed and at least one package root")
+            finish_release(args.finish[0], args.finish[1:])
             return 0
         parser.error("specify --check-state, --is-newer or --finish")
     except (OSError, ReleaseBuildError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
-        return 1
+        return 2 if args.is_newer else 1
 
 
 if __name__ == "__main__":

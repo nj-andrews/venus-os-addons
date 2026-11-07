@@ -112,6 +112,7 @@ cd "$this_path" || exit 1
 this_path="."
 feeds_root="../feeds"
 develop_root="${feeds_root}/develop"
+release_root="${feeds_root}/release"
 test_feed_name="test-feed"
 test_feed_root="${feeds_root}/${test_feed_name}"
 
@@ -131,7 +132,7 @@ feed_path_for_name() {
   if [[ "$feed_name" == "$test_feed_name" ]]; then
     echo "$test_feed_root"
   elif (( release_only == 1 )); then
-    echo "${feeds_root}/release/${feed_name}"
+    echo "${release_root}/${feed_name}"
   else
     echo "${develop_root}/${feed_name}"
   fi
@@ -181,10 +182,7 @@ build_package_if_needed() {
   local newest_ipk
   local source_path
   local source_is_newer
-  local run_build_all
-
   name="$(basename "$pkg_root")"
-  run_build_all=1
 
   if (( release_only == 1 )); then
     if [[ "$name" == test-* ]]; then
@@ -209,21 +207,18 @@ build_package_if_needed() {
     newest_ipk="$(newest_ipk_for_package "$feed_path" "$name")"
 
     source_is_newer=0
-    run_build_all=0
     if [[ -n "$newest_ipk" ]]; then
       local last_source_commit ipk_time
       last_source_commit="$(git -C "$pkg_root" log -1 --format=%ct -- src src-external || true)"
       ipk_time="$(stat -c %Y "$newest_ipk")"
       if [[ -n "$last_source_commit" && "$last_source_commit" -gt "$ipk_time" ]]; then
         source_is_newer=1
-        run_build_all=1
       fi
     fi
     for source_path in "$pkg_root/src" "$pkg_root/src-external"; do
       [[ -d "$source_path" ]] || continue
       if [[ -z "$newest_ipk" ]] || folder_has_newer_file_than_ipk "$newest_ipk" "$source_path"; then
         source_is_newer=1
-        [[ "$source_path" == "$pkg_root/src-external" ]] && run_build_all=1
         break
       fi
     done
@@ -234,7 +229,7 @@ build_package_if_needed() {
     fi
   fi
 
-  build_package "$pkg_root" "$run_build_all"
+  build_package "$pkg_root"
 }
 
 resolve_build_items() {
@@ -309,6 +304,7 @@ develop_source_byref() {
   local dest_path
   local -n _develop_path="${3}"
   local -a options=()
+  shift 3
 
   if [[ "$src_path" =~ ^(\.\./)+(.*)$ ]]; then
     rel_src_path="${BASH_REMATCH[2]}"
@@ -342,7 +338,7 @@ develop_source_byref() {
   # `--mkpath` creates the destination path if it does not already exist.
   # `--delete` keeps the cached staging dir in sync with the source tree.
   echo "  rsync staging: ${src_path} -> ${dest_path}"
-	rsync -a --delete --mkpath "$src_path/" "$dest_path" "${options[@]}" || return 1
+	rsync -a --delete --delete-excluded --mkpath "$src_path/" "$dest_path" "${options[@]}" "$@" || return 1
   _develop_path="$dest_path"
 
   return 0
@@ -366,7 +362,6 @@ stamp_develop_version() {
 build_package() {
 
   local pkg_root="${1}"
-  local run_build_all="${2:-1}"
   local path="${pkg_root}/src"
   local name; name="$(basename "${pkg_root}")"
   local feed_name
@@ -382,17 +377,19 @@ build_package() {
 
   echo -e "\e[32mbuilding ${name} -> ${feed_path_abs}\e[0m"
 
-	if [[ -f "${pkg_root}/src-external/build-external" ]]; then
-    if (( all_mode == 0 )) || [[ "$run_build_all" == "1" ]]; then
-      echo "  executing ${pkg_root}/src-external/build-external" "$build_path"
-      "${pkg_root}/src-external/build-external" 3>&1 1>/dev/null || return 1
-    fi
-	fi
-
   [[ -d "${path}" ]] || { echo "invalid path: ${path}" >&2 ; return 1; }
 
-  local develop_path;
+  local develop_path external_path
   develop_source_byref "$build_path" "$path" develop_path || return 1
+
+	if [[ -f "${pkg_root}/src-external/build-external" ]]; then
+      develop_source_byref "$build_path" "${pkg_root}/src-external" external_path \
+        --exclude=output/ --exclude=build/ || return 1
+      echo "  executing ${external_path}/build-external"
+      GUI_V2_PLUGIN_COMPILER="$(realpath ../tooling/gui-v2-plugin-compiler.py)" \
+        PACKAGE_RELEASE_BUILD="$release_only" \
+        "${external_path}/build-external" 3>&1 1>/dev/null || return 1
+	fi
 
   if (( develop_only == 1 )); then
     stamp_develop_version "$develop_path" || return 1
@@ -460,14 +457,31 @@ if [[ ${#cli_build_args[@]} -gt 0 && "${cli_build_args[0]}" == "package" ]]; the
   exit 0
 fi
 
-register_feed_targets
-
 declare -a build_pids=()
 declare -i build_failed=0
 declare -i wait_status=0
 declare built_items_file
 built_items_file="$(mktemp)"
-trap 'rm -f "$built_items_file"' EXIT
+release_workspace=""
+cleanup_build() {
+  rm -f -- "$built_items_file"
+  if [[ -n "$release_workspace" ]]; then
+    rm -rf -- "$release_workspace"
+  fi
+}
+trap cleanup_build EXIT
+
+if (( release_only == 1 )); then
+  mkdir -p ../.build
+  release_workspace="$(mktemp -d ../.build/release-feed.XXXXXX)"
+  mkdir -p "$release_workspace/feed"
+  if [[ -d "$release_root" ]]; then
+    rsync -a "$release_root/" "$release_workspace/feed/"
+  fi
+  release_root="$release_workspace/feed"
+fi
+
+register_feed_targets
 
 for pkg in "${build_items[@]}"; do
   (
@@ -512,7 +526,7 @@ if ((develop_only == 1)); then
 fi
 
 if (( release_only == 1 )); then
-  python3 ./release-packages --finish "${build_items[@]}"
+  python3 ./release-packages --finish "$release_root" "${build_items[@]}"
 fi
 
 cd "$pwd_old" || true

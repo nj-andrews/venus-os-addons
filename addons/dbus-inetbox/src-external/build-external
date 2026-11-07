@@ -1,12 +1,9 @@
 #!/bin/env bash
 
-declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
+set -euo pipefail
+
+declare __this_path; __this_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$__this_path/gui-v2/Inetbox"
 
-if [[ ! -d "$HOME/dev-local" ]]; then
-	echo "dbus-inetbox/build: dev-local not available"
-else
-	cd "$BUILD_DIR" || exit
-
-	./build-plugin # 192.168.10.24
-fi
+cd "$BUILD_DIR"
+./build-plugin # 192.168.10.24
