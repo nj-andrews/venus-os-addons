@@ -16,7 +16,10 @@ tmp/
 output/
 .cmake/
 vespera-latest.ipk
+
+feeds/*
+!/feeds/release/
+feeds/release/.promotion-manifest.jsonl
 feeds/.package-operations.lock
 feeds/.release-staging/
 feeds/.release-previous/
-feeds/
