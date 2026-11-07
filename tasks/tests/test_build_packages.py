@@ -42,6 +42,16 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         output = self.package / "src" / "data" / "plugin.json.install"
         output.parent.mkdir(parents=True)
         output.write_text("original\n", encoding="utf-8")
+        for path, target in (
+            ("bin/vespera", "/data/apps/available/vespera/vespera"),
+            (
+                "etc/udev/rules.d/serial-starter.rules-50-vespera.rules",
+                "/data/apps/available/vespera/conf/serial-starter.rules",
+            ),
+        ):
+            link = self.package / "src" / path
+            link.parent.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(target)
         external = self.package / "src-external"
         external.mkdir()
         builder = external / "build-external"
@@ -97,6 +107,16 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
             member = next(item for item in archive.getmembers() if item.name.endswith("data/plugin.json.install"))
             self.assertEqual(archive.extractfile(member).read(), b"rebuilt\n")
+            for path, target in (
+                ("bin/vespera", "/data/apps/available/vespera/vespera"),
+                (
+                    "etc/udev/rules.d/serial-starter.rules-50-vespera.rules",
+                    "/data/apps/available/vespera/conf/serial-starter.rules",
+                ),
+            ):
+                member = next(item for item in archive.getmembers() if item.name == f"./{path}")
+                self.assertTrue(member.issym())
+                self.assertEqual(member.linkname, target)
         self.assertEqual(
             (self.package / "src" / "data" / "plugin.json.install").read_text(encoding="utf-8"),
             "original\n",
@@ -154,7 +174,10 @@ class PackageBuildIntegrationTests(unittest.TestCase):
 
     def test_release_all_builds_multiple_packages_from_separate_workspaces(self):
         second = self.repo / "addons" / "dbus-inetbox"
-        shutil.copytree(self.package, second)
+        shutil.copytree(
+            self.package, second,
+            ignore=shutil.ignore_patterns("vespera", "serial-starter.rules-50-vespera.rules"),
+        )
         control = second / "src" / "CONTROL" / "control"
         control.write_text(
             control.read_text(encoding="utf-8").replace("Package: vespera", "Package: dbus-inetbox"),
@@ -165,7 +188,10 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         self.git("push", "-q", "origin", "develop")
         self.git("switch", "-q", "-c", "release")
         result = self.build("--release-only", "all")
-        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(
+            result.returncode, 0,
+            result.stdout + "\nDiff:\n" + self.git("diff", "--", "addons/vespera"),
+        )
         self.assert_package_contains_rebuilt_plugin(
             self.repo / "feeds" / "release" / "vespera" / "vespera_1.2.0_all.ipk"
         )
