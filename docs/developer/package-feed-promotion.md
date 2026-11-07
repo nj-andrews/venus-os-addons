@@ -47,6 +47,8 @@ your normal release process.
 
 If no package version is newer, the task stages nothing and creates no tags.
 If the build changes files outside `feeds/release`, it stops instead of
-staging those changes and reports the affected paths. If staging or tagging
+staging those changes and reports the affected paths. It rechecks a reported
+worktree change once before stopping, because network filesystems can report
+transient changes. If staging or tagging
 fails after the release feed has been updated, inspect Git's status and the
 reported error before completing the operation manually.

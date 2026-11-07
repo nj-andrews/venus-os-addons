@@ -219,14 +219,14 @@ def release_tags(packages):
 def finish_release(staged_feed, package_roots):
     validate_release_state(require_clean=False)
     git = ["git", "-C", str(ROOT)]
-    status = run(
-        git
-        + [
-            "status",
-            "--porcelain",
-            "--untracked-files=normal",
-        ]
-    ).stdout
+    status_command = git + ["status", "--porcelain", "--untracked-files=normal"]
+    status = run(status_command).stdout
+    if status:
+        print(
+            "Worktree changes detected; checking again before staging:\n" + status.rstrip(),
+            file=sys.stderr,
+        )
+        status = run(status_command).stdout
     if status:
         raise ReleaseBuildError(
             "package build changed the working tree; inspect these paths before staging:\n"

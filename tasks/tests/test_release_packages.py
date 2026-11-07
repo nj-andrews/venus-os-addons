@@ -227,6 +227,49 @@ class ReleasePackagesTests(unittest.TestCase):
         self.assertTrue(staged_feed.is_dir())
         self.assertEqual(self.run_git("tag", "--list"), "")
 
+    def test_transient_worktree_status_is_rechecked_before_staging(self):
+        control = self.make_git_repo()
+        staged_feed = self.root / ".build" / "release" / "feed"
+        feed = staged_feed / "vespera"
+        feed.mkdir(parents=True)
+        (feed / "Packages").write_text("Package: vespera\nVersion: 1.2.0\n", encoding="utf-8")
+        real_run = release_packages.run
+        status_calls = 0
+
+        def run_with_transient_status(command, **kwargs):
+            nonlocal status_calls
+            if "status" in command:
+                status_calls += 1
+                if status_calls == 1:
+                    return subprocess.CompletedProcess(command, 0, " M addons/vespera/src/bin/vespera\n", "")
+            return real_run(command, **kwargs)
+
+        output = io.StringIO()
+        with patch.object(release_packages, "run", side_effect=run_with_transient_status):
+            with contextlib.redirect_stderr(output):
+                release_packages.finish_release(staged_feed, [control.parents[2]])
+        self.assertEqual(status_calls, 2)
+        self.assertIn("checking again", output.getvalue())
+        self.assertIn("feeds/release/vespera/Packages", self.run_git("diff", "--cached", "--name-only"))
+
+    def test_modified_symlink_still_blocks_staging(self):
+        control = self.make_git_repo()
+        link = self.root / "addons" / "vespera" / "src" / "link"
+        link.symlink_to("/original")
+        self.run_git("add", "addons/vespera/src/link")
+        self.run_git("commit", "-qm", "add symlink")
+        link.unlink()
+        link.symlink_to("/changed")
+        staged_feed = self.root / ".build" / "release" / "feed"
+        staged_feed.mkdir(parents=True)
+
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(release_packages.ReleaseBuildError, "addons/vespera/src/link"):
+                release_packages.finish_release(staged_feed, [control.parents[2]])
+        self.assertTrue(staged_feed.is_dir())
+        self.assertEqual(self.run_git("diff", "--cached", "--name-only"), "")
+        self.assertEqual(self.run_git("tag", "--list"), "")
+
 
 if __name__ == "__main__":
     unittest.main()
