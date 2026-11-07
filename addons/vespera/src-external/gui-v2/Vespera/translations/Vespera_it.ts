@@ -269,7 +269,6 @@ Il servizio partirà a breve...</translation>
     <message id="vespera_auto_update">
         <location filename="../PageSettings.qml" line="48"/>
         <source>Auto update packages (weekly)</source>
-        <oldsource>Auto update packages (Weekly)</oldsource>
         <translation>Aggiorna automaticamente i pacchetti (ogni settimana)</translation>
     </message>
 </context>
