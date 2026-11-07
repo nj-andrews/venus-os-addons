@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "promote-packages"
@@ -57,6 +58,15 @@ def archive_member(ipk, member):
 
 class PromotePackagesTests(unittest.TestCase):
     def setUp(self):
+        git_check = patch.object(promoter, "validate_promotion_git_state")
+        git_check.start()
+        self.addCleanup(git_check.stop)
+        tags = patch.object(promoter, "prepare_release_tags", return_value=[("release-test", "Release")])
+        tags.start()
+        self.addCleanup(tags.stop)
+        publish_git = patch.object(promoter, "commit_and_push_release")
+        publish_git.start()
+        self.addCleanup(publish_git.stop)
         self.temp = tempfile.TemporaryDirectory(prefix="promote-packages-tests-")
         self.root = Path(self.temp.name)
         self.feeds = self.root / "feeds"
@@ -284,6 +294,246 @@ class PromotePackagesTests(unittest.TestCase):
 
         self.assertEqual(existing_bytes, existing.read_bytes())
         self.assertFalse(self.staging.exists())
+
+
+class PromotionGitStateTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="promotion-git-tests-")
+        self.addCleanup(self.temp.cleanup)
+        base = Path(self.temp.name)
+        self.repo = base / "repo"
+        self.remote = base / "origin.git"
+        self.repo.mkdir()
+        subprocess.run(["git", "init", "--bare", "-q", str(self.remote)], check=True)
+        self.git("init", "-q")
+        self.git("config", "user.email", "test@example.invalid")
+        self.git("config", "user.name", "Test")
+        (self.repo / "source").write_text("initial\n", encoding="utf-8")
+        self.git("add", "source")
+        self.git("commit", "-qm", "initial")
+        self.git("branch", "develop")
+        self.git("checkout", "-qb", "release")
+        self.git("remote", "add", "origin", str(self.remote))
+        self.git("push", "-q", "origin", "develop", "release")
+        root_patch = patch.object(promoter, "ROOT", self.repo)
+        root_patch.start()
+        self.addCleanup(root_patch.stop)
+
+    def git(self, *args):
+        return subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.strip()
+
+    def commit_change(self):
+        (self.repo / "source").write_text("changed\n", encoding="utf-8")
+        self.git("add", "source")
+        self.git("commit", "-qm", "change")
+
+    def test_matching_clean_branches_are_accepted(self):
+        promoter.validate_promotion_git_state()
+
+    def test_wrong_branch_and_detached_head_are_rejected(self):
+        self.git("checkout", "-q", "develop")
+        with self.assertRaisesRegex(promoter.PromotionError, "requires the release branch"):
+            promoter.validate_promotion_git_state()
+        self.git("checkout", "-q", "--detach")
+        with self.assertRaisesRegex(promoter.PromotionError, "detached HEAD"):
+            promoter.validate_promotion_git_state()
+
+    def test_dirty_tracked_staged_and_untracked_changes_are_rejected(self):
+        source = self.repo / "source"
+        source.write_text("changed\n", encoding="utf-8")
+        with self.assertRaisesRegex(promoter.PromotionError, "clean working tree"):
+            promoter.validate_promotion_git_state()
+        self.git("add", "source")
+        with self.assertRaisesRegex(promoter.PromotionError, "clean working tree"):
+            promoter.validate_promotion_git_state()
+        self.git("restore", "--staged", "--worktree", "source")
+        (self.repo / "untracked").write_text("new\n", encoding="utf-8")
+        with self.assertRaisesRegex(promoter.PromotionError, "clean working tree"):
+            promoter.validate_promotion_git_state()
+
+    def test_remote_develop_is_fetched_and_must_match_local_develop(self):
+        self.commit_change()
+        self.git("push", "-q", "origin", "HEAD:develop")
+        self.git("checkout", "-q", "develop")
+        self.git("branch", "-f", "release", "develop")
+        self.git("checkout", "-q", "release")
+        with self.assertRaisesRegex(promoter.PromotionError, "local develop does not match"):
+            promoter.validate_promotion_git_state()
+        self.assertNotEqual(
+            self.git("rev-parse", "develop"), self.git("rev-parse", "origin/develop")
+        )
+
+    def test_local_develop_ahead_of_remote_is_rejected(self):
+        self.git("checkout", "-q", "develop")
+        self.commit_change()
+        self.git("checkout", "-q", "release")
+        with self.assertRaisesRegex(promoter.PromotionError, "local develop does not match"):
+            promoter.validate_promotion_git_state()
+
+    def test_release_must_be_exactly_develop(self):
+        self.commit_change()
+        with self.assertRaisesRegex(promoter.PromotionError, "same commit"):
+            promoter.validate_promotion_git_state()
+
+    def test_fetch_failure_is_reported(self):
+        self.git("remote", "set-url", "origin", str(self.repo / "missing-remote"))
+        with self.assertRaisesRegex(promoter.PromotionError, "command failed:.*fetch"):
+            promoter.validate_promotion_git_state()
+
+    def test_missing_local_develop_is_rejected(self):
+        self.git("branch", "-D", "develop")
+        with self.assertRaisesRegex(promoter.PromotionError, "refs/heads/develop"):
+            promoter.validate_promotion_git_state()
+
+    def test_apply_commits_and_pushes_annotated_tags(self):
+        feeds = self.repo / "feeds"
+        develop = feeds / "develop"
+        release = feeds / "release"
+        feed = develop / "vespera"
+        feed.mkdir(parents=True)
+        source = build_ipk(Path(self.temp.name) / "build", "vespera", "1.2.0~d261106.1007")
+        ipk = feed / source.name
+        ipk.write_bytes(source.read_bytes())
+        metadata = feed / ".metadata"
+        metadata.mkdir()
+        (metadata / f"{ipk.name}.json").write_text(json.dumps({
+            "architecture": "all",
+            "filename": ipk.name,
+            "package": "vespera",
+            "sha256": promoter.sha256(ipk),
+            "source_commit": self.git("rev-parse", "HEAD"),
+            "source_dirty": False,
+            "source_version": "1.2.0~d261106.1007",
+        }), encoding="utf-8")
+        (self.repo / ".gitignore").write_text(
+            "feeds/.package-operations.lock\nfeeds/.release-staging/\nfeeds/.release-previous/\n",
+            encoding="utf-8",
+        )
+        self.git("add", "feeds/develop", ".gitignore")
+        self.git("commit", "-qm", "add development package")
+        self.git("branch", "-f", "develop", "HEAD")
+        self.git("push", "-q", "origin", "develop")
+        monthly = "release-" + promoter.time.strftime("%Y.%m", promoter.time.gmtime())
+        self.git("tag", "-a", monthly, "-m", "existing")
+        self.git("push", "-q", "origin", f"refs/tags/{monthly}")
+        self.git("tag", "unrelated-local")
+
+        with patch.multiple(
+            promoter,
+            FEEDS=feeds,
+            LOCK=feeds / ".package-operations.lock",
+            DEVELOP=develop,
+            RELEASE=release,
+            BACKUP=feeds / ".release-previous",
+            STAGING=feeds / ".release-staging",
+            ARCHIVE=feeds / ".release-archive",
+        ):
+            promoter.promote("vespera", True)
+
+        commit = self.git("rev-parse", "HEAD")
+        snapshot = monthly + ".2"
+        for tag in (snapshot, "vespera/v1.2.0"):
+            self.assertEqual(self.git("cat-file", "-t", f"refs/tags/{tag}"), "tag")
+            self.assertEqual(self.git("rev-parse", f"{tag}^{{commit}}"), commit)
+            remote_commit = subprocess.run(
+                ["git", "--git-dir", str(self.remote), "rev-parse", f"refs/tags/{tag}^{{commit}}"],
+                check=True, text=True, stdout=subprocess.PIPE,
+            ).stdout.strip()
+            self.assertEqual(remote_commit, commit)
+        self.assertEqual(
+            subprocess.run(
+                ["git", "--git-dir", str(self.remote), "rev-parse", "refs/heads/release"],
+                check=True, text=True, stdout=subprocess.PIPE,
+            ).stdout.strip(), commit,
+        )
+        self.assertEqual(self.git("status", "--porcelain"), "")
+        self.assertIn("Co-authored-by: Copilot", self.git("show", "-s", "--format=%B", "HEAD"))
+        remote_tags = subprocess.run(
+            ["git", "--git-dir", str(self.remote), "tag", "--list"],
+            check=True, text=True, stdout=subprocess.PIPE,
+        ).stdout.splitlines()
+        self.assertNotIn("unrelated-local", remote_tags)
+
+    def test_existing_package_tag_blocks_before_release_is_published(self):
+        self.git("tag", "-a", "vespera/v1.2.0", "-m", "already released")
+        self.git("push", "-q", "origin", "refs/tags/vespera/v1.2.0")
+        self.git("tag", "-d", "vespera/v1.2.0")
+        candidate = {"fields": {"Package": "vespera"}, "version": "1.2.0"}
+        with self.assertRaisesRegex(promoter.PromotionError, "already exists"):
+            promoter.prepare_release_tags([candidate])
+
+    def test_push_failure_keeps_commit_and_tags_local_with_retry_instructions(self):
+        release = self.repo / "feeds" / "release"
+        release.mkdir(parents=True)
+        (release / "example").write_text("new release\n", encoding="utf-8")
+        hook = self.remote / "hooks" / "pre-receive"
+        hook.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        hook.chmod(0o755)
+        remote_before = self.git("rev-parse", "origin/release")
+        tags = [("release-test", "Release test"), ("vespera/v1.2.0", "vespera v1.2.0")]
+        with patch.multiple(promoter, RELEASE=release, ARCHIVE=self.repo / "feeds" / ".release-archive"):
+            with self.assertRaisesRegex(promoter.PromotionError, "retry.*git push --atomic"):
+                promoter.commit_and_push_release(tags)
+        self.assertNotEqual(self.git("rev-parse", "HEAD"), remote_before)
+        self.assertEqual(self.git("rev-parse", "release-test^{commit}"), self.git("rev-parse", "HEAD"))
+        self.assertEqual(self.git("rev-parse", "origin/release"), remote_before)
+        self.assertEqual(
+            subprocess.run(
+                ["git", "--git-dir", str(self.remote), "tag", "--list"],
+                check=True, text=True, stdout=subprocess.PIPE,
+            ).stdout, "",
+        )
+
+    def test_release_remote_divergence_is_rejected(self):
+        self.commit_change()
+        self.git("push", "-q", "origin", "release")
+        self.git("checkout", "-q", "develop")
+        self.git("branch", "-f", "release", "develop")
+        self.git("checkout", "-q", "release")
+        with self.assertRaisesRegex(promoter.PromotionError, "not an ancestor"):
+            promoter.prepare_release_tags([])
+
+    def test_preview_and_apply_accept_matching_clean_branches(self):
+        feeds = Path(self.temp.name) / "feeds"
+        feeds.mkdir()
+        with patch.multiple(
+            promoter,
+            LOCK=feeds / ".lock",
+            DEVELOP=feeds / "develop",
+            RELEASE=feeds / "release",
+            BACKUP=feeds / ".release-previous",
+            STAGING=feeds / ".release-staging",
+            ARCHIVE=feeds / ".release-archive",
+        ):
+            for apply in (False, True):
+                with self.subTest(apply=apply):
+                    promoter.promote("all", apply)
+                    self.assertFalse((feeds / "release").exists())
+
+    def test_preview_and_apply_check_before_recovering_or_publishing(self):
+        feeds = Path(self.temp.name) / "feeds"
+        feeds.mkdir()
+        release = feeds / "release"
+        backup = feeds / ".release-previous"
+        staging = feeds / ".release-staging"
+        backup.mkdir()
+        self.git("checkout", "-q", "develop")
+        with (
+            patch.object(promoter, "LOCK", feeds / ".lock"),
+            patch.object(promoter, "RELEASE", release),
+            patch.object(promoter, "BACKUP", backup),
+            patch.object(promoter, "STAGING", staging),
+        ):
+            for apply in (False, True):
+                with self.subTest(apply=apply):
+                    with self.assertRaisesRegex(promoter.PromotionError, "requires the release branch"):
+                        promoter.promote("all", apply)
+                    self.assertTrue(backup.is_dir())
+                    self.assertFalse(release.exists())
+                    self.assertFalse(staging.exists())
 
 
 if __name__ == "__main__":

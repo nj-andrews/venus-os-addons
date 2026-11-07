@@ -104,7 +104,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "Validate and publish the selected release promotion plan."
+			"detail": "Validate, commit, tag and push the selected release promotion plan to origin/release."
 		},
 		{
 			"label": "cleanup vscode server installs",
