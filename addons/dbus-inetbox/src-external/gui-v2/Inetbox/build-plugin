@@ -3,7 +3,7 @@
 set -o nounset
 
 #compiler_script=~/dev-local/gui-v2/tools/gui-v2-plugin-compiler.py
-compiler_script=../../../../../../tooling/gui-v2-plugin-compiler.py
+compiler_script=../../../../../tooling/gui-v2-plugin-compiler.py
 
 if [[ ! -f "$compiler_script" ]]; then
   echo "/opt/victronenergy/gui-v2/gui-v2-plugin-compiler.py not found" >&2
@@ -62,8 +62,8 @@ print_summary_line() {
 }
 
 # copy orgional output name (PLUGIN_NAME) to final name (PLUGIN_FOLDER_NAME)
-mkdir -p ../../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2
-cp $OUTPUT_PATH/${PLUGIN_NAME}.json ../../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json
+mkdir -p ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2
+cp $OUTPUT_PATH/${PLUGIN_NAME}.json ../../../src/data/apps/available/${PLUGIN_FOLDER_NAME}/gui-v2/${PLUGIN_FOLDER_NAME}.json.install
 
 declare bytes;bytes="$(wc -c < "$OUTPUT_PATH/${PLUGIN_NAME}.json")"
 declare human;human="$(numfmt --to=iec "$bytes")"

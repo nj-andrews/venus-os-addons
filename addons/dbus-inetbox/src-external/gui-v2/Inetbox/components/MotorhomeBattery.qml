@@ -160,11 +160,11 @@ OverviewWidget {
 			spacing: Theme.geometry_overviewPage_widget_content_horizontalMargin
 
 			CP.ColorImage {
-				sourceSize.height: 44
+				sourceSize.height: Theme.screenSize === Theme.Portrait ? 30 : 44
 				source: Global.system.battery.icon
 				fillMode: Image.PreserveAspectCrop
 				color: Theme.color_font_primary
-				Layout.preferredWidth: 24
+				Layout.preferredWidth: Theme.screenSize === Theme.Portrait ? 18 : 24
 			}
 
 			// Battery %
@@ -174,7 +174,7 @@ OverviewWidget {
 
 				ElectricalQuantityLabel {
 					// font.pixelSize: Theme.font_overviewPage_widget_quantityLabel_maximumSize ? Theme.font_overviewPage_widget_quantityLabel_maximumSize : 0
-					font.pixelSize: 36
+					font.pixelSize: Theme.screenSize === Theme.Portrait ? 30 : 36
 					alignment: Qt.AlignLeft
 					value: Global && Global.system && Global.system.battery && Global.system.battery.stateOfCharge ? Global.system.battery.stateOfCharge : 0
 					unit: VenusOS.Units_Percentage

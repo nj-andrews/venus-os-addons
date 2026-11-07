@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 declare __this_path; __this_path="$(dirname "${BASH_SOURCE[0]}")"
-BUILD_DIR="$__this_path/gui-v2/v2/Inetbox"
+BUILD_DIR="$__this_path/gui-v2/Inetbox"
 
 if [[ ! -d "$HOME/dev-local" ]]; then
 	echo "dbus-inetbox/build: dev-local not available"

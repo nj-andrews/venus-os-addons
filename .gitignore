@@ -3,7 +3,7 @@
 archive/
 .build/**/
 tooling/**/
-**/tests/output/
+
 # Python virtual environments (global)
 .venv/
 venv/
@@ -13,13 +13,9 @@ env/
 __pycache__/
 .build/
 tmp/
+output/
+.cmake/
 vespera-latest.ipk
 feeds/.package-operations.lock
 feeds/.release-staging/
 feeds/.release-previous/
-
-addons/vespera/build/.cmake/api/v1/reply/index-2026-10-23T12-53-22-0016.json
-addons/vespera/build/.cmake/api/v1/reply/index-2026-10-24T19-12-49-0624.json
-addons/vespera/build/CMakeFiles/vesperalocale_autogen_timestamp_deps.dir/build.make
-addons/vespera/build/.cmake/api/v1/reply/index-2026-11-04T08-27-05-0892.json
-addons/vespera/build/.cmake/api/v1/reply/index-2026-11-06T20-58-36-0422.json
