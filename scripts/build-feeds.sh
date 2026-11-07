@@ -53,14 +53,53 @@ html_head='
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Index</title>
 <style>
-body { font-family: monospace; }
-ul { list-style: none; padding: 0; }
-li { padding: 4px 0; }
-.name { display:inline-block; width:60ch; }
-.mtime { display:inline-block; width:20ch; }
-.size { display:inline-block; width:10ch; text-align:right; }
+:root {
+  color-scheme: light dark;
+  --background: #ffffff;
+  --foreground: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --hover: #f6f8fa;
+  --link: #0969da;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0d1117;
+    --foreground: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --hover: #161b22;
+    --link: #58a6ff;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--background);
+  color: var(--foreground);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+h1 { margin: 0 0 20px; font-size: 24px; overflow-wrap: anywhere; }
+ul { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border); border-radius: 6px; }
+li { display: grid; grid-template-columns: minmax(0, 1fr) 20ch 10ch; gap: 16px; padding: 10px 16px; }
+li + li { border-top: 1px solid var(--border); }
+li:hover { background: var(--hover); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+.name { min-width: 0; overflow-wrap: anywhere; }
+.mtime, .size { color: var(--muted); font-variant-numeric: tabular-nums; }
+.size { text-align: right; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+  .name { grid-column: 1 / -1; }
+}
 </style>
 </head>
 <body>

@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -586,6 +587,143 @@ def publish_staging():
         shutil.rmtree(BACKUP)
 
 
+def validate_promotion_git_state():
+    git = ["git", "-C", str(ROOT)]
+    branch = run(
+        git + ["branch", "--show-current"], stdout=subprocess.PIPE
+    ).stdout.strip()
+    if branch != "release":
+        raise PromotionError(
+            f"promotion requires the release branch (current: {branch or 'detached HEAD'})"
+        )
+
+    status = run(
+        git + ["status", "--porcelain", "--untracked-files=normal"],
+        stdout=subprocess.PIPE,
+    ).stdout
+    if status:
+        raise PromotionError(
+            "promotion requires a clean working tree; commit or otherwise resolve "
+            "tracked and untracked changes before continuing"
+        )
+
+    run(
+        git + [
+            "fetch", "--no-tags", "--no-write-fetch-head", "origin",
+            "+refs/heads/develop:refs/remotes/origin/develop",
+        ],
+        stdout=subprocess.PIPE,
+    )
+    commits = {}
+    for label, ref in (
+        ("release", "refs/heads/release"),
+        ("develop", "refs/heads/develop"),
+        ("origin/develop", "refs/remotes/origin/develop"),
+    ):
+        commits[label] = run(
+            git + ["rev-parse", "--verify", f"{ref}^{{commit}}"],
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+
+    if commits["develop"] != commits["origin/develop"]:
+        raise PromotionError(
+            "local develop does not match origin/develop; synchronize and push "
+            "develop before promoting"
+        )
+    if commits["release"] != commits["develop"]:
+        raise PromotionError(
+            "release and develop must point to the same commit; synchronize "
+            "the branches before promoting"
+        )
+
+
+def prepare_release_tags(promote_items):
+    git = ["git", "-C", str(ROOT)]
+    run(
+        git + [
+            "fetch", "--no-tags", "--no-write-fetch-head", "origin",
+            "+refs/heads/release:refs/remotes/origin/release",
+        ],
+        stdout=subprocess.PIPE,
+    )
+    ancestry = subprocess.run(
+        git + ["merge-base", "--is-ancestor", "refs/remotes/origin/release", "HEAD"]
+    )
+    if ancestry.returncode == 1:
+        raise PromotionError("origin/release is not an ancestor of release; synchronize it before applying")
+    if ancestry.returncode != 0:
+        raise PromotionError("could not compare origin/release with release")
+
+    for identity in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
+        run(git + ["var", identity], stdout=subprocess.PIPE)
+
+    remote = run(
+        git + ["ls-remote", "--refs", "--tags", "origin"], stdout=subprocess.PIPE
+    ).stdout
+    remote_tags = {line.split("\t", 1)[1].removeprefix("refs/tags/") for line in remote.splitlines()}
+    local_tags = set(run(git + ["tag", "--list"], stdout=subprocess.PIPE).stdout.splitlines())
+    existing = local_tags | remote_tags
+
+    def conflicts(name):
+        return any(
+            tag == name or tag.startswith(name + "/") or name.startswith(tag + "/")
+            for tag in existing
+        )
+
+    base = time.strftime("release-%Y.%m", time.gmtime())
+    snapshot = base
+    suffix = 2
+    while conflicts(snapshot):
+        snapshot = f"{base}.{suffix}"
+        suffix += 1
+
+    tags = [(snapshot, f"Release {snapshot.removeprefix('release-')}")]
+    existing.add(snapshot)
+    packages = sorted({(item["fields"]["Package"], item["version"]) for item in promote_items})
+    for name, version in packages:
+        tag = f"{name}/v{version}"
+        run(git + ["check-ref-format", f"refs/tags/{tag}"], stdout=subprocess.PIPE)
+        if conflicts(tag):
+            raise PromotionError(f"release tag {tag} already exists or conflicts with an existing tag")
+        existing.add(tag)
+        tags.append((tag, f"{name} v{version}"))
+    return tags
+
+
+def commit_and_push_release(tags):
+    git = ["git", "-C", str(ROOT)]
+    paths = [str(path.relative_to(ROOT)) for path in (RELEASE, ARCHIVE) if path.exists()]
+    try:
+        run(git + ["add", "-A", "--", *paths])
+        run(git + [
+            "commit", "-m", f"Promote packages: {tags[0][0]}",
+            "-m", "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+        ])
+        for name, message in tags:
+            run(git + ["tag", "-a", name, "-m", message])
+    except PromotionError as error:
+        tag_list = ", ".join(name for name, _ in tags)
+        raise PromotionError(
+            f"{error}. Release files may have been published locally, staged or committed. "
+            f"Inspect git status and HEAD; intended tags: {tag_list}. "
+            "Resolve the error before creating any missing tags and pushing."
+        ) from error
+
+    refspecs = ["refs/heads/release:refs/heads/release"] + [
+        f"refs/tags/{name}:refs/tags/{name}" for name, _ in tags
+    ]
+    command = git + ["push", "--atomic", "origin", *refspecs]
+    try:
+        run(command)
+    except PromotionError as error:
+        retry = shlex.join(["git", "push", "--atomic", "origin", *refspecs])
+        raise PromotionError(
+            f"{error}. The release commit and tags remain local. Verify the remote "
+            f"state, then retry from the repository root with: {retry}"
+        ) from error
+    print(f"Pushed release and tags: {', '.join(name for name, _ in tags)}")
+
+
 def promote(feed_selection, apply):
     feed_names = ("vespera", "addons") if feed_selection == "all" else (feed_selection,)
     retention = int(os.environ.get("VESPERA_RELEASE_RETENTION", "3"))
@@ -597,6 +735,7 @@ def promote(feed_selection, apply):
 
     with LOCK.open("a") as lock_file:
         fcntl.flock(lock_file, fcntl.LOCK_EX)
+        validate_promotion_git_state()
         recover_previous_publish()
         candidates, skipped = get_candidates(feed_names)
         current_packages = get_feed_packages(RELEASE)
@@ -676,6 +815,7 @@ def promote(feed_selection, apply):
                     copy_package_to_archive(package)
                 return
 
+            tags = prepare_release_tags(promote_items)
             for package in pruned:
                 if package["path"].exists():
                     copy_package_to_archive(package)
@@ -727,9 +867,16 @@ def promote(feed_selection, apply):
                     )
             validate_dependencies(final_packages)
             publish_staging()
-            for package in get_feed_packages(RELEASE):
-                copy_package_to_archive(package)
+            try:
+                for package in get_feed_packages(RELEASE):
+                    copy_package_to_archive(package)
+            except (PromotionError, OSError) as error:
+                raise PromotionError(
+                    f"release feeds were published locally, but archiving failed: {error}. "
+                    "Inspect the release and archive before completing the operation."
+                ) from error
             print("Published staged release feeds.")
+            commit_and_push_release(tags)
         finally:
             if not apply and staged_root.exists():
                 shutil.rmtree(staged_root)
