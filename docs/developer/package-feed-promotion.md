@@ -34,6 +34,8 @@ The release build:
 - Rebuilds the selected packages, regenerates their feed indexes, stages only
   `feeds/release`, and creates annotated tags locally on the current `release`
   commit. It does not create a commit.
+- Prints a suggested commit message containing the snapshot and package tags
+  for copying into VS Code's Source Control message box.
 
 The tags are the existing release snapshot tag, `release-YYYY.MM` in UTC
 (adding `.2`, `.3`, etc. if needed), and one `<package>/v<version>` tag for

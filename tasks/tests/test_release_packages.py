@@ -1,4 +1,6 @@
+import contextlib
 import importlib.util
+import io
 import subprocess
 import tempfile
 import unittest
@@ -146,12 +148,20 @@ class ReleasePackagesTests(unittest.TestCase):
             b"package bytes"
         )
 
-        release_packages.finish_release(staged_feed, [vespera_control.parents[2], inetbox_control.parents[2]])
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            release_packages.finish_release(staged_feed, [vespera_control.parents[2], inetbox_control.parents[2]])
 
         head = self.run_git("rev-parse", "HEAD")
         for tag in ("vespera/v1.2.0", "dbus-inetbox/v0.1.0"):
             self.assertEqual(self.run_git("rev-parse", f"{tag}^{{commit}}"), head)
         self.assertEqual(len(self.run_git("diff", "--cached", "--name-only").splitlines()), 4)
+        snapshot = self.run_git("tag", "--list", "release-*")
+        self.assertIn(
+            f"Suggested commit message:\nBuild release packages: {snapshot}\n\n"
+            "- dbus-inetbox/v0.1.0\n- vespera/v1.2.0\n",
+            output.getvalue(),
+        )
 
     def test_release_build_requires_release_branch(self):
         self.make_git_repo()
@@ -191,10 +201,13 @@ class ReleasePackagesTests(unittest.TestCase):
         )
         (feed / "vespera_1.2.0_all.ipk").write_bytes(b"package bytes")
 
-        release_packages.finish_release(staged_feed, [control.parents[2]])
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            release_packages.finish_release(staged_feed, [control.parents[2]])
         self.assertEqual(self.run_git("rev-parse", "HEAD"), self.run_git("rev-parse", "release"))
         self.assertEqual(self.run_git("rev-parse", "vespera/v1.2.0^{commit}"), original_tag_commit)
         self.assertIn("feeds/release/vespera/Packages", self.run_git("diff", "--cached", "--name-only"))
+        self.assertIn("- vespera/v1.2.0\n", output.getvalue())
 
     def test_unexpected_changes_leave_release_feed_unchanged(self):
         control = self.make_git_repo()
