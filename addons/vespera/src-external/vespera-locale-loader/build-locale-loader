@@ -98,7 +98,10 @@ cmake "${CMAKE_ARGS[@]}"
 cmake --build "${BUILD_DIR}"
 
 mkdir -p "${TARGET_DIR}/lang"
-cp -f "${BUILD_DIR}/libvesperalocale.so" "${TARGET_DIR}/"
+if [[ ! -f "${TARGET_DIR}/libvesperalocale.so" ]]; then
+  echo "Locale loader library not found: ${TARGET_DIR}/libvesperalocale.so" >&2
+  exit 1
+fi
 cp -f "${SCRIPT_DIR}/qmldir" "${TARGET_DIR}/qmldir"
 find "${TRANSLATION_SOURCE_DIR}" -maxdepth 1 -name '*.qm' -exec cp -f {} "${TARGET_DIR}/lang/" \;
 
