@@ -14,7 +14,7 @@ set -euo pipefail
 #   Arg[n]: Or a list of folders under services or utils to build
 # Options:
 #   --develop-only             Build and index into develop folders only (stamps version with ~dYYMMDD.HHMM)
-#   --release-only             Build newer package versions into release feeds and tag the release
+#   --release-only             Build newer package versions into release feeds, stage, and tag
 #   --clean-develop            Remove all contents from the develop feeds folder
 ####################################################################
 
@@ -44,7 +44,7 @@ Options:
   --develop-only           Build and index packages in develop only.
                            Version is stamped as MAJOR.MINOR.PATCH~dYYMMDD.HHMM
                            Old develop packages for the same name are removed before placing the new one.
-  --release-only           Build versions newer than feeds/release/Packages, then commit and tag them locally.
+  --release-only           Build newer versions, stage feeds/release, and create local tags.
   --clean-develop          Remove all contents from the develop feeds folder
   -h, --help               Show this help
 EOF
