@@ -2,7 +2,7 @@ name: Build and Deploy (Jekyll + Feeds)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["release"]
   workflow_dispatch:
 
 env:
