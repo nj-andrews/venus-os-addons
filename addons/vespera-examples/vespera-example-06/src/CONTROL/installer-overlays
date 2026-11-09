@@ -1,0 +1,5 @@
+/opt/victronenergy
+
+# required for service templates
+/etc/udev/rules.d
+/etc/venus

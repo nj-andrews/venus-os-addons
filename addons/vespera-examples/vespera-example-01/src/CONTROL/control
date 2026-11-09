@@ -1,0 +1,11 @@
+Package: vespera-example-01
+Version: 0.0.1
+Description: Vespera Example 1. Adding custom menus to the classic gui
+Section: utilities
+Priority: optional
+Maintainer: nj-andrews@github.com
+License: MIT
+Architecture: all
+OE: dbus-inetbox
+Source: https://nj-andrews.github.io/venus-os-addons
+Depends: vespera

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RCC>
+<qresource prefix="/VesperaExample04">
+<file>Example04NavigationPage.qml</file>
+<file>Example04PageSettings.qml</file>
+<file>VesperaExample04_en.qm</file>
+<file>images/button_icon.svg</file>
+</qresource>
+</RCC>

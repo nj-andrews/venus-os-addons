@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "*** starting Vespera Example 7 D-Bus service ***"
+exec 2>&1
+. /etc/profile.d/profile.sh
+exec /data/apps/available/vespera-example-07/services/vespera-example-07/main.py

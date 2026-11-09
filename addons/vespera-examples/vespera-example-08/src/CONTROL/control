@@ -1,0 +1,11 @@
+Package: vespera-example-08
+Version: 0.1.0
+Description: Vespera Example 8. Demonstrates an addon overlay
+Section: utilities
+Priority: optional
+Maintainer: nj-andrews@github.com
+License: MIT
+Architecture: all
+OE: vespera-examples
+Source: https://nj-andrews.github.io/venus-os-addons
+Depends: vespera

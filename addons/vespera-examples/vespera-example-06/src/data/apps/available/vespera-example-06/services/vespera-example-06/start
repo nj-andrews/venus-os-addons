@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. /opt/victronenergy/serial-starter/run-service.sh
+
+app=/data/apps/available/vespera-example-06/services/vespera-example-06/main.py
+
+sid=$(udevadm info --query=property --name="/dev/$tty" | sed -n "s/^SERIAL_DEVICE_ID=//p")
+
+if [[ -n "$sid" ]]; then
+	start -s "/dev/$tty" -i "$sid"
+else
+	start -s "/dev/$tty"
+fi

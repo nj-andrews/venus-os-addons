@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+compiler_script="${GUI_V2_PLUGIN_COMPILER:-../../../../../../tooling/gui-v2-plugin-compiler.py}"
+if [[ ! -f "$compiler_script" ]]; then
+	echo "$compiler_script not found" >&2
+	exit 1
+fi
+
+export PATH="/usr/lib/qt6/bin:/usr/lib/qt6/libexec:${PATH}"
+python3 "$compiler_script" \
+	--name VesperaExample03 \
+	--version 1.0 \
+	--min-required-version v1.2.13 \
+	--settings Example03PageSettings.qml
+
+install_dir="../../../src/data/apps/available/vespera-example-03/gui-v2"
+mkdir -p "$install_dir"
+cp output/VesperaExample03.json "$install_dir/vespera-example-03.json.install"

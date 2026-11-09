@@ -1,0 +1,3 @@
+# in order for the new overview pages to load
+# we need to restart the gui service
+/service/gui
