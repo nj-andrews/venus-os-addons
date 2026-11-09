@@ -1,0 +1,150 @@
+Package: vespera-example-01
+Version: 0.0.1
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 4fd7bba221277e23be4261081737acda
+Size: 1616
+Filename: vespera-example-01_0.0.1_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 1. Adding custom menus to the classic gui
+OE: dbus-inetbox
+License: MIT
+Priority: optional
+
+Package: vespera-example-02
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 4adfc76e078be37d7f02309dc001d233
+Size: 1486
+Filename: vespera-example-02_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 2. Adds an overview page to the classic GUI
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-03
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 3b0fdb1c7246e3911b3cb044b53816aa
+Size: 1890
+Filename: vespera-example-03_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 3. Uses a custom gui-v2 plugin
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-04
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: e25a4cc4a692318ad94d4fbc0a24eb9c
+Size: 2628
+Filename: vespera-example-04_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 4. Adds a navigation page to gui-v2
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-05
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: ad4c1d8a63e3ec20a498ff54656e52b0
+Size: 1174
+Filename: vespera-example-05_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 5. Demonstrates a regular service
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-06
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 073536380568224aa143f1293148733f
+Size: 1888
+Filename: vespera-example-06_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 6. Demonstrates a USB serial templated service
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-07
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: f7a9d7bbb406c2707a57f69927026c18
+Size: 1834
+Filename: vespera-example-07_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 7. Demonstrates a D-Bus service
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-08
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 1605c1eb2a680ecc95d5e0f0ef15d2dd
+Size: 1168
+Filename: vespera-example-08_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 8. Demonstrates an addon overlay
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-09
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 4c7a3308b06afc4d98ab0133c9112901
+Size: 1114
+Filename: vespera-example-09_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 9. Demonstrates enable and disable callbacks
+OE: vespera-examples
+License: MIT
+Priority: optional
+
+Package: vespera-example-10
+Version: 0.1.0
+Depends: vespera
+Section: utilities
+Architecture: all
+Maintainer: nj-andrews@github.com
+MD5Sum: 7e83ee5b3ad137d2ea6a228cfbe0f3b7
+Size: 1078
+Filename: vespera-example-10_0.1.0_all.ipk
+Source: https://nj-andrews.github.io/venus-os-addons
+Description:  Vespera Example 10. Runs code using both boot hooks
+OE: vespera-examples
+License: MIT
+Priority: optional
+
