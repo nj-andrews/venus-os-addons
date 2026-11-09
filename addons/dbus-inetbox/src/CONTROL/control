@@ -1,5 +1,5 @@
 Package: dbus-inetbox
-Version: 0.1.0
+Version: 0.1.1
 Description: Adds support for Truma inetbox to Venus-OS
 Section: utilities
 Priority: optional
@@ -7,5 +7,5 @@ Maintainer: nj-andrews@github.com
 License: MIT
 Architecture: all
 OE: dbus-inetbox
-Source: https://nj-andrews.github.io/venus-os-addons-addons
+Source: https://nj-andrews.github.io/venus-os-addons
 Depends: vespera
