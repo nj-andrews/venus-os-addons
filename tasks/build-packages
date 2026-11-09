@@ -116,8 +116,12 @@ release_root="${feeds_root}/release"
 test_feed_name="test-feed"
 test_feed_root="${feeds_root}/${test_feed_name}"
 examples_feed_name="examples"
-examples_feed_root="${feeds_root}/develop/${examples_feed_name}"
-
+if ((develop_only==1)); then
+	examples_feed_root="${develop_root}/${examples_feed_name}"
+elif ((release_only==1)); then
+	examples_feed_root="${release_root}/${examples_feed_name}"
+fi
+echo "examples_feed_root=$examples_feed_root"
 feed_name_for_package() {
   local name="$1"
   if [[ "$name" == test-* ]]; then
@@ -229,6 +233,7 @@ build_package_if_needed() {
     newest_ipk="$(newest_ipk_for_package "$feed_path" "$name")"
 
     source_is_newer=0
+		echo "newest_ipk=$newest_ipk"
     if [[ -n "$newest_ipk" ]]; then
       local last_source_commit ipk_time
       last_source_commit="$(git -C "$pkg_root" log -1 --format=%ct -- src src-external || true)"
