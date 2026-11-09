@@ -1,5 +1,11 @@
 # Set up the Venus Os for Debugging Python/C++ using Visual Studio Code
 
+## GUI v2 plugin versions
+
+The Vespera and dbus-inetbox GUI v2 plugins use the version from their addon's
+`src/CONTROL/control` file for both debug and release builds. Plugin builds
+do not increment a separate version number.
+
 ## Setup
 
 Use a RaspberryPi 4B
@@ -55,9 +61,6 @@ root@192.xxx.xxx.xxx
 open remote folder in /data/dev/projects  
 may need to remove .env folder from project  
 debug code...  
-
-
-
 
 
 

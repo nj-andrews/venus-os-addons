@@ -18,7 +18,7 @@ needs_rebuild() {
 src_dir="$__this_path/gui-v2/Vespera"
 output_bin="$repo_root/src/data/apps/available/vespera/gui-v2/vespera.json.install"
 
-if [[ "${PACKAGE_RELEASE_BUILD:-0}" == 1 ]] || needs_rebuild "$src_dir" "$output_bin"; then
+if [[ "${PACKAGE_RELEASE_BUILD:-0}" == 1 || "$repo_root/src/CONTROL/control" -nt "$output_bin" ]] || needs_rebuild "$src_dir" "$output_bin"; then
 	echo "  building plugin..." >&3
 	cd "$src_dir" || exit
 	./build-plugin 2>&3 # 192.168.10.24

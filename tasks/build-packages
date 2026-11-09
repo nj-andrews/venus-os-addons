@@ -424,11 +424,6 @@ build_package() {
 
   if (( develop_only == 1 )); then
     stamp_develop_version "$develop_path" || return 1
-    # Remove superseded develop packages for this package before placing the new one
-    find "$feed_path_abs" -maxdepth 1 -name "${name}_*.ipk" -exec rm -f {} +
-    if [[ -d "$feed_path_abs/.metadata" ]]; then
-      find "$feed_path_abs/.metadata" -maxdepth 1 -type f -name "${name}_*.ipk.json" -delete
-    fi
   fi
 
   mkdir -p "${develop_path}/data/apps/available/${name}"

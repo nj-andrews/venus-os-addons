@@ -15,7 +15,7 @@ PLUGIN_NAME=Vespera
 PLUGIN_FOLDER_NAME=vespera
 #MINIFY="--minify"
 #PRE_COMPILE="--pre-compile"
-PLUGIN_VERSION="$(cat version)"
+PLUGIN_VERSION="$(awk '/Version:/ {print $2}' ../../../src/CONTROL/control 2>/dev/null)"
 [[ -n ${PRE_COMPILE:-} ]] && MINIFY=
 
 declare DEVICE_IP_ADDRESS="${1:-}"
@@ -32,7 +32,7 @@ python3 "$compiler_script" \
     --name ${PLUGIN_NAME} \
     --min-required-version v1.0.0 \
     --settings PageHome.qml \
-		--version ${PLUGIN_VERSION} \
+		--version "${PLUGIN_VERSION}" \
 		${MINIFY:-} \
 		${PRE_COMPILE:-}
 
