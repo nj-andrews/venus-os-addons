@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo "*** starting Vespera Example 5 service ***"
+exec 2>&1
+
+while :; do
+	echo "$(date '+%Y-%m-%d %H:%M:%S') Vespera Example 5 service is running"
+	sleep 10
+done

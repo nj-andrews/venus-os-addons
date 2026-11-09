@@ -115,11 +115,15 @@ develop_root="${feeds_root}/develop"
 release_root="${feeds_root}/release"
 test_feed_name="test-feed"
 test_feed_root="${feeds_root}/${test_feed_name}"
+examples_feed_name="examples"
+examples_feed_root="${feeds_root}/develop/${examples_feed_name}"
 
 feed_name_for_package() {
   local name="$1"
   if [[ "$name" == test-* ]]; then
     echo "$test_feed_name"
+	elif [[ "$name" == *-example-* ]]; then
+		echo "$examples_feed_name"
   elif [[ "$name" == "vespera" ]]; then
     echo "vespera"
   else
@@ -131,6 +135,8 @@ feed_path_for_name() {
   local feed_name="$1"
   if [[ "$feed_name" == "$test_feed_name" ]]; then
     echo "$test_feed_root"
+	elif [[ "$feed_name" == "$examples_feed_name" ]]; then
+		echo "$examples_feed_root"
   elif (( release_only == 1 )); then
     echo "${release_root}/${feed_name}"
   else
@@ -145,9 +151,25 @@ acquire_feed_lock() {
   flock -n 9 || { echo "ERROR: another package build is in progress" >&2; return 1; }
 }
 
+# Drop Packages.stamps entries ("<epoch> <file>.ipk") whose ipk no longer exists in the feed.
+trim_feed_stamps() {
+  local feed_path="${1}"
+  local stamps="$feed_path/Packages.stamps"
+  local tmp stamp file
+
+  [[ -f "$stamps" ]] || return 0
+  tmp="$(mktemp)"
+  while read -r stamp file; do
+    [[ -n "$file" && -f "$feed_path/$file" ]] && echo "$stamp $file"
+  done < "$stamps" > "$tmp"
+  cat "$tmp" > "$stamps"
+  rm -f "$tmp"
+}
+
 build_feed_index() {
   local feed_path="${1}"
   (cd "$feed_path" && opkg-make-index -p Packages ./ 1>/dev/null)
+  trim_feed_stamps "$feed_path"
   echo "feed ${feed_path} updated"
 }
 
@@ -161,7 +183,6 @@ build_feed_indexes() {
 folder_has_newer_file_than_ipk() {
   local ipk_path="$1"
   local base_folder="$2"
-
   find "$base_folder" -type f -newer "$ipk_path" -print -quit | grep -q .
 }
 
@@ -202,6 +223,7 @@ build_package_if_needed() {
       return "$status"
     fi
   elif (( all_mode == 1 )); then
+
     feed_name="$(feed_name_for_package "$name")"
     feed_path="$(feed_path_for_name "$feed_name")"
     newest_ipk="$(newest_ipk_for_package "$feed_path" "$name")"
@@ -242,14 +264,16 @@ resolve_build_items() {
     echo "cur dir: $PWD"
     mapfile -t build_items < <(
       for folder in "${folders[@]}"; do
-        find "$folder" -mindepth 1 -maxdepth 1 ! -name '*.old' -type d -exec realpath {} +
+        # A package folder (depth 1 or 2) has a sub folder with Control/control, e.g. pkg/src/CONTROL/control
+        find "$folder" -mindepth 4 -maxdepth 5 -type f -name control -ipath '*/control/control' \
+          -not -path '*.old/*' -printf '%h/../..\n' | xargs -r -d '\n' realpath | sort -u
       done
     )
 
-	if [[ ${#build_items[@]} -eq 0 ]]; then
-		echo "nothing to build"
-		exit 0
-	fi
+		if [[ ${#build_items[@]} -eq 0 ]]; then
+			echo "nothing to build"
+			exit 0
+		fi
 		return 0
   fi
 
@@ -272,6 +296,7 @@ resolve_build_items() {
     (( found == 1 )) || { echo "invalid package:${build_items[$i]}" >&2; return 1; }
     found=0
   done
+
 }
 
 register_feed_targets() {
@@ -380,7 +405,13 @@ build_package() {
   [[ -d "${path}" ]] || { echo "invalid path: ${path}" >&2 ; return 1; }
 
   local develop_path external_path
-  develop_source_byref "$build_path" "$path" develop_path || return 1
+  # --update keeps generated outputs (built by build-external in the staging dir)
+  # that are newer than the stale copies in the source tree, so they are not rebuilt every run.
+  develop_source_byref "$build_path" "$path" develop_path --update || return 1
+  # --update could keep a previously stamped control file; always restore it from source.
+  if [[ -f "${path}/CONTROL/control" ]]; then
+    cp -p "${path}/CONTROL/control" "${develop_path}/CONTROL/control" || return 1
+  fi
 
 	if [[ -f "${pkg_root}/src-external/build-external" ]]; then
       develop_source_byref "$build_path" "${pkg_root}/src-external" external_path \

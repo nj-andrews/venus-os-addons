@@ -101,10 +101,9 @@ __add_vespera_startup_scripts() {
 }
 
 # ensure the dbus sidecar file exists even when not provided
-# dbus name taked from package name
 __ensure_dbus_sidecar_file() {
 	[[ -f "$PACKAGE_DATA_INFO_DIR/$PACKAGE_NAME.installer-dbus-name" ]] ||
-		"$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.installer-dbus-name"
+		echo "$PACKAGE_DBUS_NAME" > "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.installer-dbus-name"
 }
 
 __install() {

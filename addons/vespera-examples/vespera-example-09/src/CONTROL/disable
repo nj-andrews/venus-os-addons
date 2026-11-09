@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "vespera-example-09 disable callback ran"
+printf '%s vespera-example-09 disable callback ran\n' "$(date '+%Y-%m-%d %H:%M:%S')" >> /data/var/log/vespera-examples.log

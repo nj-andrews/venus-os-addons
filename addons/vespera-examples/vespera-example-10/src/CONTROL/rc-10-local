@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "vespera-example-10 rc.local boot hook ran"

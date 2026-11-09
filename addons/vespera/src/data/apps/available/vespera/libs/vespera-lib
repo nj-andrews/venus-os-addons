@@ -251,7 +251,7 @@ __vespera_lib_enable_disable() {
 
 	local output_vars; output_vars="$("$__vespera_path/scripts/$action" "$@")"
 	if [[ "$output_vars" != "declare "* ]]; then
-		echo "${output_vars%%declare*}" # print everything before the declare part
+		printf '%s' "${output_vars%%declare*}" # print everything before the declare part
 		output_vars="declare ${output_vars#*declare }" # grab only the declare part
 	fi
 	[[ -n "$output_vars" ]] && eval "$output_vars"

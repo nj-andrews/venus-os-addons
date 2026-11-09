@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "*** starting Vespera Example 6 templated service ***"
+exec 2>&1
+. /etc/profile.d/profile.sh
+exec /data/apps/enabled/vespera-example-06/services/vespera-example-06/start TTY

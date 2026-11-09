@@ -29,6 +29,7 @@ read_sidecar_file() { "$PACKAGE_INSTALL_DIR/vespera/scripts/read-sidecar-file" "
 PACKAGE_DATA_INFO_DIR="$(dirname "$(realpath "${PACKAGE_INSTALLER_FILE}")")"
 PACKAGE_SIDECAR_PREFIX="$PACKAGE_DATA_INFO_DIR/$PACKAGE_NAME.installer"
 PACKAGE_DBUS_NAME="$(read_sidecar_file dbus-name)"
+PACKAGE_DBUS_NAME=${PACKAGE_DBUS_NAME:-"$PACKAGE_NAME"}
 PACKAGE_DBUS_NAME="$(IFS='-+.' read -ra words <<< "$PACKAGE_DBUS_NAME"; printf '%s' "${words[@]^}")"
 PACKAGE_DEVICES="$(read_sidecar_file devices)"
 PACKAGE_DBUS_SETTINGS="$(read_sidecar_file dbus-settings)"
