@@ -156,6 +156,53 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         self.assertEqual(len(packages), 1, result.stdout)
         self.assert_package_contains_rebuilt_plugin(packages[0])
 
+    def test_staged_debug_plugin_builds_use_control_version(self):
+        compiler = self.repo / "tooling" / "gui-v2-plugin-compiler.py"
+        compiler.write_text(
+            "import json, pathlib, sys\n"
+            "args = sys.argv\n"
+            "name = args[args.index('--name') + 1]\n"
+            "version = args[args.index('--version') + 1]\n"
+            "pathlib.Path('output').mkdir(exist_ok=True)\n"
+            "pathlib.Path('output', name + '.json').write_text(json.dumps({'version': version}))\n",
+            encoding="utf-8",
+        )
+        for package_name, plugin_name in (("vespera", "Vespera"), ("dbus-inetbox", "Inetbox")):
+            with self.subTest(package=package_name):
+                package = self.repo / "addons" / package_name
+                if package_name != "vespera":
+                    control = package / "src" / "CONTROL" / "control"
+                    control.parent.mkdir(parents=True)
+                    control.write_text(
+                        (self.package / "src" / "CONTROL" / "control").read_text(encoding="utf-8")
+                        .replace("Package: vespera", "Package: dbus-inetbox")
+                        .replace("Version: 1.2.1", "Version: 1.2.0"), encoding="utf-8",
+                    )
+                plugin = package / "src-external" / "gui-v2" / plugin_name
+                plugin.mkdir(parents=True)
+                shutil.copy2(
+                    ROOT / "addons" / package_name / "src-external" / "gui-v2" / plugin_name / "build-plugin",
+                    plugin / "build-plugin",
+                )
+                builder = package / "src-external" / "build-external"
+                builder.write_text(
+                    f'#!/usr/bin/env bash\nset -eu\ncd "$(dirname "$0")/gui-v2/{plugin_name}"\n./build-plugin\n',
+                    encoding="utf-8",
+                )
+                builder.chmod(0o755)
+                for version in ("1.2.0", "1.2.1"):
+                    control = package / "src" / "CONTROL" / "control"
+                    control.write_text(
+                        control.read_text(encoding="utf-8").replace("Version: 1.2.0", f"Version: {version}"),
+                        encoding="utf-8",
+                    )
+                    result = self.build("--develop-only", package_name)
+                    self.assertEqual(result.returncode, 0, result.stdout)
+                    self.assertFalse((plugin / "version").exists())
+                    staged = (self.repo / ".build" / package_name / "addons" / package_name / "src" /
+                              "data" / "apps" / "available" / package_name / "gui-v2" / f"{package_name}.json.install")
+                    self.assertEqual(json.loads(staged.read_text(encoding="utf-8"))["version"], version)
+
     def test_index_failure_does_not_publish_release_feed(self):
         self.git("switch", "-q", "-c", "release")
         fake_bin = self.base / "bin"
@@ -243,7 +290,7 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
             member = next(item for item in archive.getmembers() if item.name.endswith("/gui-v2/vespera.json.install"))
             data = json.load(archive.extractfile(member))
-        self.assertEqual(data["version"], (plugin / "version").read_text(encoding="utf-8").strip())
+        self.assertEqual(data["version"], "1.2.0")
         self.assertTrue(data["resource"])
         self.assertEqual(installed.read_text(encoding="utf-8"), "original\n")
         self.assertEqual(self.git("status", "--porcelain", "--", "addons"), "")
@@ -285,7 +332,7 @@ class LocaleLoaderBuildTests(unittest.TestCase):
 
 
 class PluginBuildTests(unittest.TestCase):
-    def test_both_plugins_keep_version_and_copy_compiler_output(self):
+    def test_both_plugins_use_control_version_for_all_builds(self):
         for package, plugin, folder in (
             ("vespera", "Vespera", "vespera"),
             ("dbus-inetbox", "Inetbox", "dbus-inetbox"),
@@ -298,7 +345,9 @@ class PluginBuildTests(unittest.TestCase):
                     ROOT / "addons" / package / "src-external" / "gui-v2" / plugin / "build-plugin",
                     plugin_dir / "build-plugin",
                 )
-                (plugin_dir / "version").write_text("v1.2.3\n", encoding="utf-8")
+                control = root / "addons" / package / "src" / "CONTROL" / "control"
+                control.parent.mkdir(parents=True)
+                control.write_text("Package: test\nVersion: 0.1.7\n", encoding="utf-8")
                 compiler = root / "compiler.py"
                 compiler.write_text(
                     "import json, pathlib, sys\n"
@@ -312,18 +361,32 @@ class PluginBuildTests(unittest.TestCase):
                 )
                 env = os.environ.copy()
                 env["GUI_V2_PLUGIN_COMPILER"] = str(compiler)
+                env.pop("BUILD_TYPE", None)
+                installed = root / "addons" / package / "src" / "data" / "apps" / "available" / folder / "gui-v2" / f"{folder}.json.install"
+                for build_type in ("release", None, "debug", "release"):
+                    if build_type is None:
+                        env.pop("BUILD_TYPE", None)
+                    else:
+                        env["BUILD_TYPE"] = build_type
+                    result = subprocess.run(
+                        [str(plugin_dir / "build-plugin")],
+                        cwd=plugin_dir,
+                        env=env,
+                        text=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stdout)
+                    self.assertFalse((plugin_dir / "version").exists())
+                    self.assertEqual(json.loads(installed.read_text(encoding="utf-8"))["version"], "0.1.7")
+                control.write_text("Package: test\nVersion: 0.1.8\n", encoding="utf-8")
                 result = subprocess.run(
-                    [str(plugin_dir / "build-plugin")],
-                    cwd=plugin_dir,
-                    env=env,
-                    text=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
+                    [str(plugin_dir / "build-plugin")], cwd=plugin_dir, env=env,
+                    text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 )
                 self.assertEqual(result.returncode, 0, result.stdout)
-                self.assertEqual((plugin_dir / "version").read_text(encoding="utf-8"), "v1.2.3\n")
-                installed = root / "addons" / package / "src" / "data" / "apps" / "available" / folder / "gui-v2" / f"{folder}.json.install"
-                self.assertEqual(json.loads(installed.read_text(encoding="utf-8"))["version"], "v1.2.3")
+                self.assertEqual(json.loads(installed.read_text(encoding="utf-8"))["version"], "0.1.8")
+                self.assertFalse((plugin_dir / "version").exists())
 
     @unittest.skipUnless(
         (ROOT / "tooling" / "gui-v2-plugin-compiler.py").is_file()
@@ -341,7 +404,9 @@ class PluginBuildTests(unittest.TestCase):
                 plugin,
                 ignore=shutil.ignore_patterns("output", "build", "*.rcc", "*.qm"),
             )
-            version = (plugin / "version").read_text(encoding="utf-8").strip()
+            control = package / "src" / "CONTROL" / "control"
+            control.parent.mkdir(parents=True)
+            control.write_text("Version: 0.1.7\n", encoding="utf-8")
             env = os.environ.copy()
             env["GUI_V2_PLUGIN_COMPILER"] = str(ROOT / "tooling" / "gui-v2-plugin-compiler.py")
             result = subprocess.run(
@@ -355,9 +420,8 @@ class PluginBuildTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout)
             installed = package / "src" / "data" / "apps" / "available" / "vespera" / "gui-v2" / "vespera.json.install"
             data = json.loads(installed.read_text(encoding="utf-8"))
-            self.assertEqual(data["version"], version)
+            self.assertEqual(data["version"], "0.1.7")
             self.assertTrue(data["resource"])
-            self.assertEqual((plugin / "version").read_text(encoding="utf-8").strip(), version)
 
 
 if __name__ == "__main__":

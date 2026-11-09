@@ -139,6 +139,15 @@ __phase_remove_runtime() {
 
 	__remove_custom_menus
 
+
+}
+
+__remove_cleanup() {
+	__remove_file_if_empty() {
+		local file="${1}"
+		[[ -f "$file" ]] && [[ -z "$(sed 's/[[:space:]]//g' "$file")" ]] && rm -f "$file"
+	}
+
 	# move these as we dynamically added them
 	[[ -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE" ]] &&
 		mv "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_SERVICES_FILE" "$VESPERA_WORKING_DIR"
@@ -147,13 +156,6 @@ __phase_remove_runtime() {
 		mv "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.$VESPERA_APP_TEMPLATE_SERVICES_FILE" "$VESPERA_WORKING_DIR"
 
 	rm -f "$VESPERA_DATA_DIR/info/$PACKAGE_NAME.installer-dbus-name"
-}
-
-__remove_cleanup() {
-	__remove_file_if_empty() {
-		local file="${1}"
-		[[ -f "$file" ]] && [[ -z "$(sed 's/[[:space:]]//g' "$file")" ]] && rm -f "$file"
-	}
 
 	# 1. patch list /data/var/vespera/patch.list
 	__remove_file_if_empty "$VESPERA_DATA_DIR/patch.list"
@@ -202,7 +204,7 @@ __run_remove() {
 
 	# Phase 2: patch and package state cleanup
 	__remove_patch_files || true
- 
+
 	if ! installer_lib_is_upgrade; then
 		installer_lib_phase_sync_custom_nav_pages "remove" || true
 	fi

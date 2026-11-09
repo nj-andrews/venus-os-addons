@@ -16,7 +16,8 @@ PLUGIN_FOLDER_NAME=dbus-inetbox
 
 #MINIFY="--minify"
 #PRE_COMPILE="--pre-compile"
-PLUGIN_VERSION="$(cat version)"
+PLUGIN_VERSION="$(awk '/Version:/ {print $2}' ../../../src/CONTROL/control 2>/dev/null)"
+
 [[ -n ${PRE_COMPILE:-} ]] && MINIFY=
 
 declare DEVICE_IP_ADDRESS="${1:-}"
