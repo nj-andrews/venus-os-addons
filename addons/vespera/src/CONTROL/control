@@ -1,5 +1,5 @@
 Package: vespera
-Version: 0.1.10
+Version: 0.1.11
 Description: An addon for installing opkg packages on the Venus OS
 Section: utilities
 Priority: optional

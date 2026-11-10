@@ -215,6 +215,7 @@ __vespera_lib_restart_venus_services() {
 vespera_lib_refresh_devices() {
 	local serial_starter_up=false
 
+
 	svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
 
 	rm -f /dev/serial-starter/*
@@ -233,7 +234,7 @@ vespera_lib_refresh_devices() {
 
 vespera_lib_enable_disable() {
 
-	local refresh_devices=
+	local refresh_devices=false
 	# shellcheck disable=SC2034
 	local venus_services_to_restart=()
 
@@ -241,6 +242,8 @@ vespera_lib_enable_disable() {
 
 	__vespera_lib_enable_disable refresh_devices venus_services_to_restart "$@"
   __vespera_lib_restart_venus_services venus_services_to_restart
+
+	vespera_lib_log_verbose2 && echo "vespera_lib_enable_disable: refresh_devices=$refresh_devices"
 	[[ $refresh_devices == true ]] && vespera_lib_refresh_devices
 }
 
@@ -255,10 +258,14 @@ __vespera_lib_enable_disable() {
 		printf '%s' "${output_vars%%declare*}" # print everything before the declare part
 		output_vars="declare ${output_vars#*declare }" # grab only the declare part
 	fi
+	# _refresh_devices & _venus_services_to_restart
 	[[ -n "$output_vars" ]] && eval "$output_vars"
 
-	# shellcheck disable=SC2154 # vars are set by eval call
+	# shellcheck disable=SC2154 # _refresh_devices set by eval call
+	vespera_lib_log_verbose2 && echo "__vespera_lib_enable_disable: refresh_devices=$_refresh_devices"
+
+	# shellcheck disable=SC2154 # _venus_services_to_restart set by eval call
 	__venus_services_to_restart+=("${_venus_services_to_restart[@]}")
-	# shellcheck disable=SC2154
-	[[ $__refresh_devices == false ]] && __refresh_devices="$_refresh_devices"
+
+	[[ $_refresh_devices == true ]] && __refresh_devices="$_refresh_devices"
 }
