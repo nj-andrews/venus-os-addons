@@ -286,10 +286,9 @@ def finish_release(staged_feed, package_roots):
     print(f"Created local tags on existing commit {commit}: {', '.join(name for name, _ in tags)}")
     print("No commit was created and nothing was pushed.")
     print("\nSuggested commit message:")
-    print(f"Build release packages: {tags[0][0]}")
-    print()
+    print(f"Release: {tags[0][0]}")
     for name, version in sorted(set(package_versions)):
-        print(f"- {name}/v{version}")
+        print(f"  - {name}/v{version}")
 
 
 def main():
