@@ -1,5 +1,5 @@
 Package: vespera
-Version: 0.1.9
+Version: 0.1.10
 Description: An addon for installing opkg packages on the Venus OS
 Section: utilities
 Priority: optional
@@ -10,4 +10,3 @@ OE: einstine
 Source: https://nj-andrews.github.io/venus-os-addons
 # This package requires gui-v2-webassembly 1.2.40 or newer (v3.80~44)
 # Depends: gui-v2-webassembly (>= 1.2.40)
-#Depends: gui-v2-webassembly (>= 1.2.40)

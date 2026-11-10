@@ -227,7 +227,7 @@ vespera_lib_refresh_devices() {
 	udevadm trigger --action=add --subsystem-match=tty --property-match=ID_BUS=usb >/dev/null
 	udevadm settle >/dev/null
 
-	[[ $serial_starter_up == true ]]
+	[[ $serial_starter_up == true ]] &&
 		svc -u /service/serial-starter
 }
 
