@@ -24,6 +24,7 @@ __start_template_services() {
 	# shellcheck source="../libs/service-lib"
 	source "$__vespera_path/libs/serial-device-installer-lib"
 
+	#TODO: look at replacing list-device-bindings with tty loop
 	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do
 		DEVICE_SID="${sid}"
 		echo "Starting device: $DEVICE_SID ($dbus_name)"
@@ -50,11 +51,8 @@ done
 
 for service in $(cat "${templated_services_file}" 2>/dev/null); do
 	[[ -z $service ]] && continue
-	echo "creating template service symlink for: $service"
-	# ln -fs "$available_app_path/service-templates/$service" \
-	#  			"${service_templates_root}/$service"
-	# cp -a "$available_app_path/service-templates/$service" "${service_templates_root}/$service"
 	has_templated_devices=true
+	break
 done
 
 #echo "has_templated_devices: $has_templated_devices"
@@ -62,14 +60,14 @@ done
 
 if [[ $has_templated_devices == true ]]; then
 	demo_mode="$(dbus -y com.victronenergy.settings "/Settings/Gui/DemoMode" GetValue 2>/dev/null)"
-	[[ -z $demo_mode ]] && serial_starter_up=true || serial_starter_up=false
+	[[ ${demo_mode:-0} == 0 ]] && serial_starter_up=true || serial_starter_up=false
 	echo "serial_starter_up: $serial_starter_up"
 	if [[ $serial_starter_up == false ]]; then
 		if [[ $VESPERA_ALWAYS_START_SERVICES == true ]]; then
 			echo "Starting template device services (serial-starter service down)"
 			__start_template_services
 		else
-			echo "Warning serial-starter down; Template services will not be started"
+			echo "Warning serial-starter down (demo mode); Template services will not be started"
 		fi
 	else
 		refresh_devices=true

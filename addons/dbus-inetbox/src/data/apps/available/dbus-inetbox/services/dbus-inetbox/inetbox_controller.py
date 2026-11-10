@@ -328,6 +328,7 @@ class InetboxController:
 				'/Sid' : [f'{self._settingsPath}/Sid', sid, 0, 0],
 				'/Sid2' : [f'{self._settingsPath}/Sid2', sid, 0, 0],
 				'/ProductName' : [f'{self._settingsPath}/ProductName', dbus_constants.PRODUCT_NAME, "", ""],
+				'/DeviceKey' : [f'{self._settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY_NAME, "", ""],
 				'/CustomName' : [f'{self._settingsPath}/CustomName', "", "", ""],
 				'/LastHeatingTemp' : [f'{self._settingsPath}/LastHeatingTemp', 16, 4, 31],
 				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1],

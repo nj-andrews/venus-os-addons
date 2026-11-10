@@ -125,21 +125,8 @@ __unregister_services() {
 		installer_lib_log_verbose2 && echo "Unregistering service mapping: $service_name"
 
 		sdi_remove_service_mapping
+		INSTALLER_REFRESH_DEVICES=true
 	done
-}
-
-__phase_remove_runtime() {
-	if ! installer_lib_is_upgrade && [[ -f "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" ]]; then
-		cp "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" "$VESPERA_WORKING_DIR"
-	fi
-
-	installer_lib_update_install_list
-
-	__unregister_services
-
-	__remove_custom_menus
-
-
 }
 
 __remove_cleanup() {
@@ -193,7 +180,7 @@ __run_remove() {
 
 	__try_call "pre_remove" || true
 
-	"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" _
+	"${PACKAGE_INSTALL_DIR}/vespera/scripts/remove-services" "${PACKAGE_NAME}" INSTALLER_REFRESH_DEVICES
 	! installer_lib_is_upgrade &&
 		"${PACKAGE_INSTALL_DIR}/vespera/libs/device-lib" remove-all "${PACKAGE_DBUS_NAME}"
 
@@ -212,7 +199,15 @@ __run_remove() {
 	__remove_dbus_settings_from_file || true
 
 	# Phase 3: runtime disable/separate app lifecycle
-	__phase_remove_runtime
+	if ! installer_lib_is_upgrade && [[ -f "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" ]]; then
+		cp "${VESPERA_DATA_DIR}/info/$PACKAGE_NAME.installer-services" "$VESPERA_WORKING_DIR"
+	fi
+
+	installer_lib_update_install_list
+	installer_lib_update_refresh_devices
+	__unregister_services
+
+	__remove_custom_menus
 
 	[[ ${PACKAGE_NAME} == vespera ]] && ! installer_lib_is_upgrade && {
 		local std_path

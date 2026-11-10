@@ -166,6 +166,7 @@ __vespera_lib_post_install() {
 	done < "$file"
 
 	# 4. refresh devices
+	[[ -f "$VESPERA_WORKING_DIR/refresh-devices" ]] && refresh_devices=true
 	[[ $refresh_devices == true ]] && vespera_lib_refresh_devices;
 
 	# 5. restart venus services
@@ -187,7 +188,7 @@ __show_file_contents() {
 }
 
 __vespera_lib_restart_venus_services() {
-	local -n _app_venus_service_files="$1" # array of files containing services
+	local -n _app_venus_service_files="$1" # array of files containing services to restart
 	local service file
 	local -a existing_files=()
 
@@ -219,7 +220,7 @@ vespera_lib_refresh_devices() {
 	rm -f /dev/serial-starter/*
 	svc -d /service/serial-starter
 
-	# clear stale locks, (causes lots of issues)
+	# clear stale locks
 	rm -f /var/lock/serial-starter/tty*
 
 	udevadm control --reload-rules >/dev/null;
@@ -232,11 +233,11 @@ vespera_lib_refresh_devices() {
 
 vespera_lib_enable_disable() {
 
-	__vespera_lib_send_gui_interrupt_signal
-
 	local refresh_devices=
 	# shellcheck disable=SC2034
 	local venus_services_to_restart=()
+
+	__vespera_lib_send_gui_interrupt_signal
 
 	__vespera_lib_enable_disable refresh_devices venus_services_to_restart "$@"
   __vespera_lib_restart_venus_services venus_services_to_restart
