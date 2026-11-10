@@ -13,6 +13,7 @@ VESPERA_WORKING_DIR="${3}"
 VESPERA_VERBOSITY="${4}"
 PACKAGE_NAME="${PACKAGE_INSTALLER_FILE##*/}"
 PACKAGE_NAME="${PACKAGE_NAME%.*}"
+INSTALLER_REFRESH_DEVICES=false
 
 set --
 
@@ -104,13 +105,20 @@ installer_lib_phase_sync_custom_nav_pages() {
 	return 0
 }
 
+installer_lib_update_refresh_devices() {
+	[[ ! -f "$VESPERA_WORKING_DIR/refresh-devices" && $INSTALLER_REFRESH_DEVICES == true ]] &&
+		: > "$VESPERA_WORKING_DIR/refresh-devices"
+}
+
 installer_lib_update_install_list() {
 	# + installed (not enabled)
 	# * enabled
 	local flag
 
 	if installer_lib_is_remove; then
-		installer_lib_is_upgrade && return
+		if installer_lib_is_upgrade; then
+			return
+		fi
 		flag="removed"
 	elif installer_lib_is_upgrade; then
 		[[ -L "/data/apps/enabled/$PACKAGE_NAME" ]] && flag="enabled" || flag="disabled"
@@ -118,8 +126,8 @@ installer_lib_update_install_list() {
 		flag="enabled"
 	fi
 
+	installer_lib_log_verbose2 && echo "Appending $PACKAGE_NAME $flag -> $VESPERA_WORKING_DIR/$VESPERA_INSTALL_STATE_FILE"
 	echo "$PACKAGE_NAME $flag" >> "$VESPERA_WORKING_DIR/$VESPERA_INSTALL_STATE_FILE"
-	installer_lib_log_verbose2 && echo "Appending $PACKAGE_NAME $flag-> $VESPERA_WORKING_DIR/$VESPERA_INSTALL_STATE_FILE"
 }
 
 installer_lib_initialize() {
@@ -153,6 +161,8 @@ installer_lib_initialize() {
 		[[ -f "$PACKAGE_DBUS_LIST_FILE" ]] &&
 		cp "$PACKAGE_DBUS_LIST_FILE" "$VESPERA_WORKING_DIR/${PACKAGE_DBUS_LIST_FILE##*/}.prev"
 	fi
+
+	[[ -f "$VESPERA_WORKING_DIR/refresh-devices" ]] && INSTALLER_REFRESH_DEVICES=true
 
 	installer_lib_log_verbose2 && {
 		echo "PACKAGE_ACTION=$PACKAGE_ACTION"

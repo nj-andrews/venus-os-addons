@@ -19,14 +19,16 @@ declare DEFAULT_USB_PROPS="ID_MODEL,ID_VENDOR,ID_SERIAL,ID_PATH"
 
 device_remove_all() {
 	local dbus_name="${1}"
+	local remove_all="${2:-1}"
 
 	for sid in $("$VESPERA_DIR/scripts/list-device-bindings" "$dbus_name"); do
-		device_remove "$sid";
+		device_remove "$sid" "$remove_all";
 	done
 }
 
 device_remove() {
 	local sid_or_tty="${1:-}"
+	local remove_all="${2:-1}"
 	local sid=
 
 	[[ -n "${sid_or_tty}" ]] \
@@ -47,7 +49,7 @@ device_remove() {
 		sdi_remove_rule
 	fi
 
-	[[ -n ${DEVICE_SID} ]] &&
+	[[ -n ${DEVICE_SID} && ${remove_all} == 1 ]] &&
 		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null 2>&1
 
 	return 0
@@ -117,7 +119,7 @@ device_bind() {
 	local demo_mode=
 	dbus_lib_get_value "/Settings/Gui/DemoMode" demo_mode
 
-	if [[ -n $demo_mode ]]; then
+	if [[ ${demo_mode:-0} != 0 ]]; then
 		#echo "vespera: Venus OS in demo mode, manualy starting service"
 		service_lib_start_templated_service "${tty}" "${service_name}"
 		rm -f "/dev/serial-starter/${tty}"
@@ -137,7 +139,7 @@ case "${1:-}" in
 		device_remove "${1:-}";;
 	unbind-all|remove-all)
 		shift
-		device_remove_all "${1}";;
+		device_remove_all "$@";;
 	start-all-device-services)
 		device_start_all_device_services "${2}";;
 	*)
