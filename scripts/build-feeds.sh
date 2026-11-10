@@ -105,6 +105,12 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 <body>
 '
 
+# GitHub Pages serves extensionless files (Packages) as application/octet-stream,
+# which browsers download. Publish a .txt copy so it displays inline.
+find feeds -type f -name Packages | while read -r pkg; do
+    cp -f "$pkg" "$pkg.txt"
+done
+
 # Generate index pages inside feeds
 find feeds -type d | while read -r dir; do
 {
@@ -121,6 +127,10 @@ find feeds -type d | while read -r dir; do
         [ -e "$f" ] || continue
         name=$(basename "$f")
         [ "$name" = "index.html" ] && continue
+        [ "$name" = "Packages.txt" ] && continue
+
+        href="$name"
+        [ "$name" = "Packages" ] && [ -f "$f.txt" ] && href="Packages.txt"
 
         if [ -f "$f" ]; then
             size=$(stat -c %s "$f")
@@ -133,7 +143,7 @@ find feeds -type d | while read -r dir; do
 
         mtime=$(stat -c %y "$f" | cut -d'.' -f1)
 
-        echo "<li><span class=\"name\"><a href=\"$name\">$name$folder</a></span> \
+        echo "<li><span class=\"name\"><a href=\"$href\">$name$folder</a></span> \
 <span class=\"mtime\">$mtime</span> \
 <span class=\"size\">$size</span></li>"
     done
