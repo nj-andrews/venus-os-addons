@@ -201,72 +201,6 @@
 			"detail": "Runs the matching test file for the active file, or the active test file itself."
 		},
 		{
-			"label": "build qmlplugin",
-			"type": "shell",
-			"problemMatcher": [],
-			"command": "${workspaceFolder}/tasks/build-qmlplugin",
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "always",
-				"focus": true,
-				"showReuseMessage": false,
-				"clear": true,
-				"close": false
-			}
-		},
-		{
-			"label": "build qmlplugin qt6",
-			"type": "shell",
-			"problemMatcher": [],
-			"command": "${workspaceFolder}/tasks/build-qmlplugin",
-			"args": [
-				"qt6"
-			],
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "always",
-				"focus": true,
-				"showReuseMessage": false,
-				"clear": true,
-				"close": false
-			}
-		},
-		{
-			"label": "build qmlplugin armhf rpi4",
-			"type": "shell",
-			"problemMatcher": [],
-			"command": "${workspaceFolder}/tasks/build-qmlplugin",
-			"args": [
-				"armhf"
-			],
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "always",
-				"focus": true,
-				"showReuseMessage": false,
-				"clear": true,
-				"close": false
-			}
-		},
-		{
-			"label": "build qmlplugin armhf qt6",
-			"type": "shell",
-			"problemMatcher": [],
-			"command": "${workspaceFolder}/tasks/build-qmlplugin",
-			"args": [
-				"armhf",
-				"qt6"
-			],
-			"presentation": {
-				"panel": "dedicated",
-				"reveal": "always",
-				"focus": true,
-				"showReuseMessage": false,
-				"clear": true,
-				"close": false
-			}
-		},
-		{
 			"label": "build opkg-json-indexer armhf",
 			"type": "shell",
 			"problemMatcher": [],
@@ -285,9 +219,10 @@
 			"detail": "Compile opkg-json-indexer with armhf toolchain and write output to service-commands/opkg-json-indexer"
 		},
 		{
-			"label": "cleanup opkg develop feed",
+			"label": "cleanup develop feed",
 			"type": "shell",
-			"command": "bash ${workspaceFolder}/tasks/build-packages",
+			"command": "${workspaceFolder}/tasks/build-packages",
+
 			"args": [
 				"--clean-develop"
 			],
@@ -300,7 +235,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "Clears the opkg develop feeds folder used by package builds."
+			"detail": "Clears the develop feeds folder used by package builds."
 		},
 		{
 			"label": "run all venus-os tests",
