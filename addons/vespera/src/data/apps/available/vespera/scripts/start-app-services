@@ -24,7 +24,7 @@ __start_template_services() {
 	# shellcheck source="../libs/service-lib"
 	source "$__vespera_path/libs/serial-device-installer-lib"
 
-	#TODO: look at replacing list-device-bindings with tty loop
+	#TODO: look at replacing list-device-bindings with a tty loop
 	for sid in $("$__vespera_path/scripts/list-device-bindings" "$dbus_name"); do
 		DEVICE_SID="${sid}"
 		vespera_lib_log_verbose2 && echo "Starting device: $DEVICE_SID ($dbus_name)"
@@ -57,13 +57,13 @@ if [[ -n $dbus_name ]]; then
 	done
 
 	vespera_lib_log_verbose2 && echo "has_templated_devices: $has_templated_devices"
-	vespera_lib_log_verbose2 && echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
 
 	if [[ $has_templated_devices == true ]]; then
 
 		svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
 		vespera_lib_log_verbose2 && echo "serial_starter_up: $serial_starter_up"
 		if [[ $serial_starter_up == false ]]; then
+			vespera_lib_log_verbose2 && echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
 			if [[ $VESPERA_ALWAYS_START_SERVICES == true ]]; then
 				vespera_lib_log_verbose2 && echo "Starting template device services (serial-starter service down)"
 				__start_template_services
