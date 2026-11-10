@@ -10,7 +10,7 @@ VESPERA_DATA_DIR="${VESPERA_ROOT:-}${VESPERA_DATA_DIR}"
 source "$__vespera_path/libs/opkg-lib"
 
 declare _venus_services_to_restart=()
-declare _refresh_devices=
+declare _refresh_devices=false
 
 for app in $(opkg_lib_list_enabled_packages); do
 
@@ -28,6 +28,8 @@ for app in $(opkg_lib_list_enabled_packages); do
 
 	# remove services
 	"${__vespera_path}/scripts/remove-services" "${app}" _refresh_devices
+	retVal=$?
+	[[ $retVal == 2 ]] && _refresh_devices=true
 
 	# unregister overlays
 	"${VESPERA_DATA_DIR}/info/vespera.overlay-lib" overlay-unregister "${app}";
