@@ -228,4 +228,4 @@ case "${PACKAGE_ACTION}" in
 		echo_lang "$LANG_INSTALL_ACTION_ARG1" "$PACKAGE_ACTION"
 		__run_remove
 		;;
-	esac
+esac

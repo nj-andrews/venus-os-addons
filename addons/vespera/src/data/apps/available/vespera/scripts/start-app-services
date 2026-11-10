@@ -9,7 +9,7 @@ VESPERA_VERBOSITY=$(cat "${PKG_WORKING_DIR}/verbosity" 2>/dev/null || echo 1)
 vespera_lib_log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
 
 declare app="${1}"
-declare dbus_name="${2}"
+declare dbus_name="${2:-}"
 declare available_app_path="${VESPERA_ROOT:-}/data/apps/available/${app}"
 declare service_root="${VESPERA_ROOT:-}/service"
 #declare service_templates_root="${VESPERA_ROOT:-}/opt/victronenergy/service-templates"
@@ -48,32 +48,36 @@ for service in $(cat "${services_file}" 2>/dev/null); do
 	fi
 done
 
-for service in $(cat "${templated_services_file}" 2>/dev/null); do
-	[[ -z $service ]] && continue
-	has_templated_devices=true
-	break
-done
+if [[ -n $dbus_name ]]; then
 
-vespera_lib_log_verbose2 && echo "has_templated_devices: $has_templated_devices"
-vespera_lib_log_verbose2 && echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
+	for service in $(cat "${templated_services_file}" 2>/dev/null); do
+		[[ -z $service ]] && continue
+		has_templated_devices=true
+		break
+	done
 
-if [[ $has_templated_devices == true ]]; then
+	vespera_lib_log_verbose2 && echo "has_templated_devices: $has_templated_devices"
+	vespera_lib_log_verbose2 && echo "VESPERA_ALWAYS_START_SERVICES: $VESPERA_ALWAYS_START_SERVICES"
 
-	svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
-	vespera_lib_log_verbose2 && echo "serial_starter_up: $serial_starter_up"
-	if [[ $serial_starter_up == false ]]; then
-		if [[ $VESPERA_ALWAYS_START_SERVICES == true ]]; then
-			vespera_lib_log_verbose2 && echo "Starting template device services (serial-starter service down)"
-			__start_template_services
+	if [[ $has_templated_devices == true ]]; then
+
+		svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
+		vespera_lib_log_verbose2 && echo "serial_starter_up: $serial_starter_up"
+		if [[ $serial_starter_up == false ]]; then
+			if [[ $VESPERA_ALWAYS_START_SERVICES == true ]]; then
+				vespera_lib_log_verbose2 && echo "Starting template device services (serial-starter service down)"
+				__start_template_services
+			else
+				vespera_lib_log_verbose2 && echo "Warning serial-starter down (demo mode?); Template services will not be started"
+			fi
 		else
-			vespera_lib_log_verbose2 && echo "Warning serial-starter down (demo mode?); Template services will not be started"
+			refresh_devices=true
+			vespera_lib_log_verbose2 && echo "serial starter up, should start template services automatically..."
 		fi
 	else
-		refresh_devices=true
-		vespera_lib_log_verbose2 && echo "serial starter up, should start template services automatically..."
+		vespera_lib_log_verbose2 && echo "no template services found"
 	fi
-else
-	vespera_lib_log_verbose2 && echo "no template services found"
+
 fi
 
 [[ $refresh_devices == true ]] &&
