@@ -384,6 +384,7 @@ class ne_shunt_services_controller:
 				'/Sid': [f'{settingsPath}/Sid', self._sid, 0, 0],
 				'/Sid2' : [f'{settingsPath}/Sid2', self._sid, 0, 0],
 				'/ProductName' : [f'{settingsPath}/ProductName', dbus_constants.PRODUCT_NAME, "", ""],
+				'/DeviceKey' : [f'{settingsPath}/DEVICE_KEY', self._sid, 0, 0],
 
 				'/CustomName' : [f'{settingsPath}/CustomName', "", "", ""],
 
@@ -440,4 +441,3 @@ class ne_shunt_services_controller:
 
 				},
 			eventCallback = self._handle_changed_setting)
-
