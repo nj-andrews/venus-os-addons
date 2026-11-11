@@ -1,5 +1,5 @@
 Package: dbus-ne-shunt
-Version: 0.1.2
+Version: 0.1.3
 Description: Adds support for NordElectronica shunt NE196/NE319 board to Venus-OS
 Section: utilities
 Priority: optional

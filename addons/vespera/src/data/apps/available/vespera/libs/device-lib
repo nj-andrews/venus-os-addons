@@ -49,8 +49,11 @@ device_remove() {
 		sdi_remove_rule
 	fi
 
+	# use a grep filter so we catch both these paths
+	# /Settings/Devices/sid_ae4f47c2eb37b65a/CustomName
+	# /Settings/Devices/sid_ae4f47c2eb37b65a_GreyWasteTank2/ClassAndVrmInstance
 	[[ -n ${DEVICE_SID} && ${remove_all} == 1 ]] &&
-		dbus_lib_delete_tree "/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null 2>&1
+		dbus_lib_delete_tree "/Settings/Devices" "^/Settings/Devices/sid_${DEVICE_SID}" 1>/dev/null 2>&1
 
 	return 0
 }
