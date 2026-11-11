@@ -211,7 +211,7 @@ class ne_shunt_services_controller:
 		dbus_service_name = switch_service.serviceNameBuilder(
 				dbus_constants.SERVICE_TYPE_SWITCH, f"neshunt_{device_instance}_sid_{self._sid}")
 
-		self._services["switches"] = switch_service(
+		self._services["switches"] = switch_service(self._settings, self._sid,
 										custome_name,
 										self._serial_port,
 										name,
@@ -362,7 +362,9 @@ class ne_shunt_services_controller:
 	############################################
 	def _initializeSettings(self):
 
-		logging.info("Initializing settings: %s", self._sid)
+		settingsPath = f'/Settings/Devices/sid_{self._sid}'
+
+		logging.info("Initializing settings: %s", settingsPath)
 
 		# unique path used to generate unique ClassAndVrmInstance value
 		# see https://github.com/victronenergy/localsettings#using-addsetting-to-allocate-a-vrm-device-instance
@@ -375,7 +377,6 @@ class ne_shunt_services_controller:
 		# /Settings/Devices/sid_1234/FreshWaterTank/ClassAndVrmInstance
 		# /Settings/Devices/sid_1234/FreshWaterTank2/ClassAndVrmInstance
 
-		settingsPath = f'/Settings/Devices/sid_{self._sid}'
 		self._settings = SettingsDevice(
 			bus = dbusconnection(),
 			supportedSettings = {
@@ -424,13 +425,19 @@ class ne_shunt_services_controller:
 				'/SwitchableOutput/WaterPump/Settings/Group' : [f'{settingsPath}/Switches/WaterPump/Group', "", "", ""],
 				'/SwitchableOutput/Aux/Settings/Group' : [f'{settingsPath}/Switches/Aux/Group', "", "", ""],
 
-				'/SwitchableOutput/InternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/IntenalLights/ShowUIControl', "", "", ""],
-				'/SwitchableOutput/ExternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/ExternalLights/ShowUIControl', "", "", ""],
-				'/SwitchableOutput/WaterPump/Settings/ShowUIControl' : [f'{settingsPath}/Switches/WaterPump/ShowUIControl', "", "", ""],
-				'/SwitchableOutput/Aux/Settings/ShowUIControl' : [f'{settingsPath}/Switches/Aux/ShowUIControl', "", "", ""],
+				'/SwitchableOutput/InternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/IntenalLights/ShowUIControl', 1, 0, 1],
+				'/SwitchableOutput/ExternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/ExternalLights/ShowUIControl', 1, 0, 1],
+				'/SwitchableOutput/WaterPump/Settings/ShowUIControl' : [f'{settingsPath}/Switches/WaterPump/ShowUIControl', 1, 0, 1],
+				'/SwitchableOutput/Aux/Settings/ShowUIControl' : [f'{settingsPath}/Switches/Aux/ShowUIControl', 1, 0, 1],
+
+				'/SwitchableOutput/InternalLights/State' : [f'{settingsPath}/Switches/IntenalLights/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
+				'/SwitchableOutput/ExternalLights/State' : [f'{settingsPath}/Switches/ExternalLights/State', dbus_constants.TOGGLE_SWITCH_OFF, 0, 1],
+				'/SwitchableOutput/WaterPump/State' : [f'{settingsPath}/Switches/WaterPump/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
+				'/SwitchableOutput/Aux/State' : [f'{settingsPath}/Switches/Aux/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
 
 				'/Switches/ClassAndVrmInstance' : [f'{settingsPath}_Switches/ClassAndVrmInstance',
 										f"{dbus_constants.SERVICE_TYPE_SWITCH}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
 
 				},
 			eventCallback = self._handle_changed_setting)
+

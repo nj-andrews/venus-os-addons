@@ -21,3 +21,6 @@ class dbus_constants:
 
 	PATH_SETTING_INITIAL="initial"
 	PATH_SETTING_WRITABLE="writable"
+
+	TOGGLE_SWITCH_ON=1
+	TOGGLE_SWITCH_OFF=0

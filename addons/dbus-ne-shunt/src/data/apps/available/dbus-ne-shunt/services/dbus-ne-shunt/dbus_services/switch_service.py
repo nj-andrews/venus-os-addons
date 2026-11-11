@@ -1,6 +1,7 @@
 from dbus_base_service import dbus_base_service
 from dbus_constants import dbus_constants
 import os
+from ext.settingsdevice import SettingsDevice  # available in the velib_python repository
 
 class switch_service(dbus_base_service):
 
@@ -14,7 +15,8 @@ class switch_service(dbus_base_service):
 
 	OUTPUT_FUNCTION_MANUAL = 2
 
-	def __init__(self, customName:str, portName:str, name:str, serviceName:str, deviceInstance:int, switches:list[str], onValueChangedCallback):
+
+	def __init__(self, settings:SettingsDevice, sid:str, customName:str, portName:str, name:str, serviceName:str, deviceInstance:int, switches:list[str], onValueChangedCallback):
 
 		connection = os.path.basename(portName) # convert from /dev/ttyxxx to ttyxxx
 
@@ -25,18 +27,22 @@ class switch_service(dbus_base_service):
 		}
 
 		for switchName in switches:
-			#group = name if group == "" else group
-			dbusName = switchName.replace(" ", "")
-			paths[f'/SwitchableOutput/{dbusName}/State'] = {'initial': 0, 'writable': True}
-			paths[f'/SwitchableOutput/{dbusName}/Name'] = {'initial': switchName, 'writable': False}
-			paths[f'/SwitchableOutput/{dbusName}/Status'] = {'initial': self.STATUS_OFF, 'writable': True}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/Type'] = {'initial': self.OUTPUT_TYPE_LATCHING, 'writable': False}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/ValidTypes'] = {'initial': validTypesLatching, 'writable': False}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/Group'] = {'initial': "", 'writable': True}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/CustomName'] = {'initial': "", 'writable': True}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/ShowUIControl'] = {'initial': 1, 'writable': True}
-			#paths[f'/SwitchableOutput/{dbusName}/Settings/Function'] = {'initial': (1 << self.OUTPUT_FUNCTION_MANUAL), 'writable': False}
-			paths[f'/SwitchableOutput/{dbusName}/Settings/ValidTypes'] = {'initial': validTypesLatching, 'writable': False}
+
+			# /SwitchableOutput/InternalLights/Settings/CustomName
+			switchName =  switchName.replace(" ", "")
+			key = '/SwitchableOutput/' + switchName
+
+			paths[key + '/Name'] = {'initial': switchName, 'writable': False}
+			paths[key + '/Settings/Type'] = {'initial': self.OUTPUT_TYPE_LATCHING, 'writable': False}
+			paths[key + '/Settings/ValidTypes'] = {'initial': validTypesLatching, 'writable': False}
+
+			# /SwitchableOutput/InternalLights/State
+			# /SwitchableOutput/InternalLights/State'
+			paths[key + '/Status'] = {'initial': self.STATUS_OFF, 'writable': True}
+			paths[key + '/State'] = {'initial': settings[key + '/State'], 'writable': True}
+			paths[key + '/Settings/Group'] = {'initial': settings[key + '/Settings/Group'], 'writable': True}
+			paths[key + '/Settings/CustomName'] = {'initial': settings[key + '/Settings/CustomName'], 'writable': True}
+			paths[key + '/Settings/ShowUIControl'] = {'initial': settings[key + '/Settings/ShowUIControl'], 'writable': True}
 
 		self._registerCore(
 			connection,
