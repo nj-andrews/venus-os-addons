@@ -1,6 +1,14 @@
 # Release Notes
 
-## Release-2026.11.9
+## Release-2026.11#11
+
+### dbus-ne-shunt/v0.1.3
+- Add the `DeviceKey` setting to enable inspection in Vespera..
+
+### vespera/v0.1.12
+- Remove all device settings associated with an SID when unbinding.
+
+## Release-2026.11#9
 
 ### dbus-inetbox/v0.1.4
 - Fix LIN message parsing that could produce incorrect error codes.
@@ -8,9 +16,8 @@
 
 ### dbus-ne-shunt/v0.1.2
 - Fix initial values not being loaded from settings.
-- Add the `DeviceKey` setting to enable inspection in Vespera.
 
-## Release-2026.11.8
+## Release-2026.11#8
 
 ### dbus-ne-shunt/v0.1.1
 - Avoid restarting unnecessary Venus services during installation or removal.
@@ -18,7 +25,7 @@
 ### vespera/v0.1.11
 - Fix device refresh after disabling apps that use templated services.
 
-## Release-2026.11.7
+## Release-2026.11#7
 
 ### dbus-inetbox/v0.1.3
 - Add the `DeviceKey` setting for Inetbox to enable inspecting.
