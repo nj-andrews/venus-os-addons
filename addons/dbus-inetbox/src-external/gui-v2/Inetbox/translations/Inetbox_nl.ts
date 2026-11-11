@@ -117,26 +117,26 @@
     <message id="inetbox_water">
         <location filename="../InetboxDevicePage.qml" line="39"/>
         <location filename="../InetboxSchedules.qml" line="28"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="155"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="156"/>
         <source>Water</source>
         <translation>Water</translation>
     </message>
     <message id="inetbox_heating">
         <location filename="../InetboxSchedules.qml" line="22"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="176"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="177"/>
         <source>Heating</source>
         <translation>Verwarming</translation>
     </message>
     <message id="inetbox_aircon">
         <location filename="../InetboxSchedules.qml" line="34"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="191"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="192"/>
         <source>Aircon</source>
         <translation>Airconditioning</translation>
     </message>
     <message id="inetbox_fan_speed">
         <location filename="../InetboxDevicePage.qml" line="60"/>
         <location filename="../InetboxSchedules.qml" line="156"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="225"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="226"/>
         <source>Fan speed</source>
         <translation>Ventilatorsnelheid</translation>
     </message>
@@ -192,7 +192,7 @@
         <translation>Foutcode: %1</translation>
     </message>
     <message id="inetbox_energy_mix">
-        <location filename="../components/MotorhomeInetbox.qml" line="237"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="238"/>
         <source>Energy Mix</source>
         <translation>Energie mix</translation>
     </message>

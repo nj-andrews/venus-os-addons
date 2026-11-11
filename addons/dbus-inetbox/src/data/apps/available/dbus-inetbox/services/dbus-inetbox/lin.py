@@ -49,7 +49,7 @@ class Lin:
 		# /data persists on Venus OS (logs are rotated); override with INETBOX_DUMP_DIR
 		DUMP_DIR = os.environ.get("INETBOX_DUMP_DIR", "/data/log/dbus-inetbox/lin-dumps")
 		DUMP_KEEP = 20
-		RESTART_ERROR_CODE = 900  # see truma-error-codes.csv
+		RESTART_ERROR_CODE = 900  # see error_parser.py
 
 		# Check Alive-status periodically - with 1ms delay it is appx. 9s
 		# there must be more than 1 D8-requests in this periode, than is alive status "ON"
@@ -175,7 +175,7 @@ class Lin:
 				# preamble "00 1E 00 00 0x22 0xFF 0xFF 0x54 0x01"
 				# buffer id (2 bytes)
 				buf = bytes([])
-				for i in range(5):
+				for i in range(6):
 						buf += self.cpp_in_buffer[i]
 				#print(buf.hex("+"))
 				if buf[:8] != self.BUFFER_PREAMBLE:

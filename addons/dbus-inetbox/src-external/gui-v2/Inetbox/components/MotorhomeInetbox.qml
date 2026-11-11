@@ -66,22 +66,12 @@ Rectangle {
 						text: qsTrId("inetbox_error_code").arg(root.model.errorCodeItem.value)
 					}
 					Label {
-						text: (root.model.errorDescriptionItem.value ?? "").replace(/\|/g, "\n")
+						text: (root.model.errorDescriptionItem.value ?? "")
 						wrapMode: Text.WordWrap
+						textFormat: Text.PlainText
 						Layout.preferredWidth: Math.min(500, implicitWidth)
 					}
-					// ListItemButton {
-					// 	//% "Close"
-					// 	text: qsTrId("inetbox_close")
-					// 	Layout.preferredWidth: Math.min(100, implicitWidth)
-					// 	Layout.alignment: Qt.AlignHCenter
-
-					// 	onClicked:  {
-					// 		root.model.seenError=root.model.errorCodeItem.value
-					// 	}
-					// }
 				}
-
 			}
 		}
 	}

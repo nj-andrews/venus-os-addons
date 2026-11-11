@@ -2,6 +2,7 @@ class dbus_constants:
 
 	PRODUCT_NAME = "dbus-ne-shunt"
 	SAFE_PRODUCT_NAME="dbus_ne_shunt"
+	DEVICE_KEY="NeShunt" # (dbus-name)
 
 	PRODUCT_ID = 0xD01A
 	PRODUCT_VERSION = "0.02"
@@ -21,3 +22,6 @@ class dbus_constants:
 
 	PATH_SETTING_INITIAL="initial"
 	PATH_SETTING_WRITABLE="writable"
+
+	TOGGLE_SWITCH_ON=1
+	TOGGLE_SWITCH_OFF=0

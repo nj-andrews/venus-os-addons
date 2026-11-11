@@ -1,56 +1,60 @@
-Product,Error code,Cause,Remedy
-Truma Combi,17,Hot water mode with empty water container.,Switch off Combi and allow to cool. Fill water container with water.
-Truma Combi,18,Warm-air outlet blocked.,Check the individual outlet openings.
-Truma Combi,18,Circulated air intake blocked.,Remove blockage from circulated air intake.
-Truma Combi,21,Room temperature sensor/cable defective.,Contact Truma Service.
-Truma Combi,24,"Imminent undervoltage, battery voltage too low < 10.4 V.",Charge battery.
-Truma Combi,41,Electronics blocked.,Contact Truma Service.
-Truma Combi,43,Excess voltage > 16.4 V.,"Check battery voltage and power sources, such as battery charger."
-Truma Combi,44,"Undervoltage, battery voltage too  low < 10.0 V.","Charge battery. If necessary, replace old battery."
-Truma Combi,45,No 120 V AC supply voltage.,Restore 120 V AC supply voltage.
-Truma Combi,45,Overheating protection has responded.,Contact Truma Service.
-Truma Combi,112|202|202|121|211,Gas cylinder closed.,Check gas supply.
-Truma Combi,112|202|202|121|211,Gas shut-off valve is closed – switch position = off.,Open gas shut-off valve – switch position = on.
-Truma Combi,112|202|202|121|211,Overheating protection has responded.,"Switch off Combi and allow to cool; if necessary, fill the water container with cold water. Check warm air outlets and circulated air intake and remove blockages.
-Switch Combi on again."
-Truma Combi,122|212,Combustion air infeed or exhaust gas outlet closed.,"Check for obstructions such as slush, ice or leaves and remove from the openings."
-Truma Combi,122|212,Gas shut-off valve is closed – switch position = off.,Open gas shut-off valve – switch position = on.
-Truma Combi,122|212,Gas pressure regulation system defective.,Contact Truma Service.
-Truma Combi,122|212,Overheating protection has responded.,"Switch off Combi and allow to cool; if necessary, fill the water container with cold water. Check warm air outlets and circulated air intake and remove blockages.
-Switch Combi on again."
-Truma Combi,122|212,Electronics defective.,Contact Truma Service.
-Truma Combi,255,Combi has no 12 V DC power supply.,Ensure 12 V DC power supply.
-Truma Combi,255,No connection between the Combi and the control panel.,Ensure connection between Combi and control panel.
-Truma Combi,255,Control panel cable defective.,Contact Truma Service.
-Truma Combi D Comfort Plus,121,Interruption in metering pump - Temperature switch triggered,Remove blockage on the circulated air intake and ensure adequate ventilation in the installation space (see operating instructions / circulated air intake)
-Truma Combi D Comfort Plus,122,"Lack of fuel due to low tank level, and / or vehicle is on a slope",Fill tank with fuel. Then fill the fuel line as tank is empty described in “Initial start-up” (see Combi Diesel operating instructions).
-Truma Combi D Comfort Plus,123,Flame is recognised even though service no flame is burning,Contact Truma
-Truma Combi D Comfort Plus,131,No connection between furnace and control panel.,Check control panel cable and make sure there is connection between the furnace and the control panel
-Truma Combi D Comfort Plus,150,Warm air temperature exceeded,Not all warm air ducts are connected. Check whether the 4 warm air ducts are connected.
-Truma Combi D Comfort Plus,150,Warm air outlets blocked,Check the individual outlet openings
-Truma Combi D Comfort Plus,150,Circulated air intake blocked,Remove the circulated air intake blockage
-Truma Combi D Comfort Plus,151,Water temperature exceeded in heating and hot water mode.,
-Truma Combi D Comfort Plus,151,Water temperature sensor excessive temperature,Switch off appliance and allow it to cool down. Fill water container with water
-Truma Combi D Comfort Plus,151,Warm air outlets blocked,Check the individual outlet openings
-Truma Combi D Comfort Plus,151,Circulated air intake blocked,Remove the circulated air intake blockage
-Truma Combi D Comfort Plus,152,Water temperature exceeded in summer mode,
-Truma Combi D Comfort Plus,152,Water temperature sensor excessive temperature,Switch off appliance and allow it to cool down. Fill water container with water
-Truma Combi D Comfort Plus,152,Warm air outlets blocked,Check the individual outlet openings
-Truma Combi D Comfort Plus,152,Circulated air intake blocked,Remove the circulated air intake blockage
-Truma Combi D Comfort Plus,160,Undervoltage < 10.2 V,"• Check battery voltage, charge if necessary.
-• Short-term immediate measure. Switch off major consumers or start up the vehicle engine until the furnace starts to operate (approx. 4 minutes).
-• Battery capacity inadequate, if necessary exchange old battery."
-Truma Combi D Comfort Plus,161,Overvoltage 16.4 V,Check battery voltage /voltage sources such as the charger.
-Truma Combi D Comfort Plus,163,One of the temperature switches has opened,"Allow furnace to cool. If this occurs frequently, contact Truma Service"
-Truma Combi D Comfort Plus,164,No 120 V AC operating voltage,Restore 120 V AC operating voltage
-Truma Combi D Comfort Plus,164,120 V AC fuse defective,Replace 120 V AC fuse (see Combi operating instructions)
-Truma Combi D Comfort Plus,164,Overheating protection has been triggered,Reset overheating protection (see Combi operating instructions)
-Truma Combi D Comfort Plus,170,Risk of low voltage < 11.5 V,"Use the electrical power from the battery sparingly, e.g. restrict lighting"
-Truma Combi D Comfort Plus,170,,Charge battery
-Truma Combi D Comfort Plus,255,Furnace has no 12 V power supply,Ensure that the 12 V power supply is available
-Truma Combi D Comfort Plus,255,No connection between furnace and control panel,Make connection between furnace and control panel
-Truma Aventa Eco / Comfort,34|47,AC has unstable 120 V power supply in connection with generator or inverter operation,Ensure shore power supply 120 V AC at the unit input
-Truma Combi,632,Empty boiler or internal water temperature sensor error	Ensure the water heater tank is full, Bleed the air taps and reset the panel
-Truma Combi, 507|516|517, gas supply interrupted,Restore the gas supply, for example by connecting a full gas cylinder.
-Then confirm or delete the fault code by tapping the rotary push button.
-Inetbox, 900, Inetbox Lin service restarted
+﻿Fault Code,Cause
+W 17 H,•Warning Water overheat condition (woc)
+W 18 H,"•Warning Air overheat condition
+•Not all warm air ducts are connected
+•Warm air outlets blocked
+•Circulated air intake blocked"
+W 24 H,•Imminent low voltage / battery voltage too low < 10.4 V
+E 29 H,•Power consumption of the FrostControl heating element too high
+W 42 H,•Window switch detects open window
+E 43 H,•12 V power supply faulty (overvoltage)
+W 45 H,•230 V power supply faulty
+E 111 H,•Fault in the electronics
+E 112 H | E 121 H | E 122 H | E 202 H | E 211 H | E 212 H,"•Flame out or not detected
+•Flame unstable during operation
+•Gas supply interrupted"
+E 122 H,"•Lack of fuel due to low tank level, tank is empty and / or vehicle is on a slope"
+W 255 H,"•Heater has no 12 V power supply
+•No connection between heater and control panel"
+W 301 H | W 417 H,•12 V power supply faulty (overvoltage)
+W 302 H | W 418 H,•12 V power supply faulty (low voltage)
+W 303 H | W 411 H,•Risk of low voltage. Battery voltage too low < 10.4 V
+W 401 H,•Hot water mode with empty water container
+W 402 H,"•Warning Air overheat condition
+•Not all warm air ducts are connected
+•Warm air outlets blocked
+•Circulated air intake blocked"
+W 407 H,•230 V power supply faulty
+W 408 H,•Gas supply interrupted in mixed mode
+W 412 H,•Window switch detects open window
+E 507 H | E 516 H | E 517 H,•Gas supply interrupted
+E 607 H,"•Maximum number of fault resets reached / after more than 4 resets within 15 minutes, the heater is blocked"
+E 621 H,•Room temperature sensor or cable faulty
+E 624 H,•FrostControl heating element has a short circuit
+E 632 H,•230 V overheating protection has triggered
+E 111 H,•Room temperature sensor or cable faulty
+E 121 H,•Interruption in the metering pump – temperature switch has triggered
+E 122 H,"•Lack of fuel due to low tank level, tank is empty and / or vehicle is on a slope"
+E 131 H,•No connection between heater and control panel
+E 132 H,•FrostControl heating element has a short circuit
+W 150 H,•Warm air temperature exceeded
+W 151 H,•Water temperature exceeded in heater mode
+E 152 H,•Water temperature exceeded in hot water mode
+W 160 H | W 161 H,•12 V power supply faulty (low voltage)
+E 162 H,•Window above cowl open (window switch)
+W 163 H,•One of the temperature switches has opened
+W 164 H,•230 V power supply faulty
+W 170 H,•Imminent low voltage < 11.5 V
+W 255 H,"•No connection between heater and control panel
+•Heater has no 12 V power supply
+•Control panel cable faulty"
+W 301 H | W 417 H | E 540 H,•12 V power supply faulty (overvoltage)
+W 302 H | W 418 H | E 541 H,•12 V power supply faulty (low voltage)
+W 303 H | W 411 H,•Risk of low voltage. Battery voltage too low < 10.8 V
+W 423 H,•Initial filling required (filling function at initial start-up)
+W 424 H,"•Initial filling active – after initial filling, the heater automatically switches to normal operation with a temperature setting of 30 °C"
+E 560 H,•Maximum number of start attempts reached – operation blocked
+E 561 H,•Heater will not start. Note: The device is locked after five unsuccessful start attempts
+E 565 H,"•Heater will not start, flame repeatedly not detected. One more repeat start for initial filling possible"
+E 8 A | W 8 A,•IR receiver unplugged or cable broken
+E 17 A | W 17 A,•Voltage dip at 230 V power supply
