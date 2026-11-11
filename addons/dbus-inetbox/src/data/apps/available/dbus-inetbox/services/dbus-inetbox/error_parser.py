@@ -36,6 +36,4 @@ def get_error_description(error_code, csv_file=None):
 			if code in codes and cause not in causes:
 				causes.append(cause)
 
-
-
-	return "|".join(causes)
+	return "\n".join(causes)
