@@ -37,9 +37,13 @@ The release build:
 - Prints a suggested commit message containing the snapshot and package tags
   for copying into VS Code's Source Control message box.
 
-The tags are the existing release snapshot tag, `release-YYYY.MM` in UTC
-(adding `.2`, `.3`, etc. if needed), and one `<package>/v<version>` tag for
-each newly built package. Existing package-version tags are left unchanged;
+The tags are a release snapshot tag, `release-YYYY.MM#N` in UTC, and one
+`<package>/v<version>` tag for each newly built package. Snapshot numbering
+starts at `#1` each month and continues after the highest existing number,
+including legacy tags such as `release-YYYY.MM` and `release-YYYY.MM.2`.
+Quote snapshot tags in shell commands, for example
+`git show 'release-2026.11#10'`, and encode `#` as `%23` in URLs.
+Existing package-version tags are left unchanged;
 other conflicting tags stop the operation. Because tags point to commits,
 they identify the current source commit, not the staged feed changes. Review
 the staged feed and tags, commit the staged feed when ready, then push through

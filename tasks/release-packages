@@ -195,11 +195,17 @@ def release_tags(packages):
         )
 
     base = time.strftime("release-%Y.%m", time.gmtime())
-    snapshot = base
-    suffix = 2
+    pattern = re.compile(rf"^{re.escape(base)}(?:[.#]([0-9]+))?$")
+    numbers = []
+    for tag in existing:
+        match = pattern.fullmatch(tag)
+        if match:
+            numbers.append(int(match.group(1)) if match.group(1) else 1)
+    suffix = max(numbers, default=0) + 1
+    snapshot = f"{base}#{suffix}"
     while conflicts(snapshot):
-        snapshot = f"{base}.{suffix}"
         suffix += 1
+        snapshot = f"{base}#{suffix}"
 
     tags = [(snapshot, f"Release {snapshot.removeprefix('release-')}")]
     existing.add(snapshot)
@@ -289,7 +295,6 @@ def finish_release(staged_feed, package_roots):
     print(f"Release: {tags[0][0]}")
     for name, version in sorted(set(package_versions)):
         print(f"  - {name}/v{version}")
-
 
 def main():
     parser = argparse.ArgumentParser(description="Build and tag release package feeds.")

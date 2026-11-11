@@ -93,6 +93,30 @@ class ReleasePackagesTests(unittest.TestCase):
                 )
             )
 
+    def test_snapshot_number_starts_at_one_for_new_month(self):
+        self.make_git_repo()
+        self.run_git("tag", "release-2026.10#99")
+        with patch.object(release_packages.time, "strftime", return_value="release-2026.11"):
+            self.assertEqual(release_packages.release_tags([])[0][0], "release-2026.11#1")
+
+    def test_snapshot_number_continues_local_and_remote_legacy_tags(self):
+        self.make_git_repo()
+        self.run_git("tag", "release-2026.11")
+        self.run_git("tag", "release-2026.11.9")
+        self.run_git("push", "-q", "origin", "refs/tags/release-2026.11.9")
+        self.run_git("tag", "-d", "release-2026.11.9")
+        self.run_git("tag", "release-2026.11#3")
+        with patch.object(release_packages.time, "strftime", return_value="release-2026.11"):
+            self.assertEqual(release_packages.release_tags([])[0][0], "release-2026.11#10")
+
+    def test_snapshot_number_continues_new_tags_and_skips_ref_conflicts(self):
+        self.make_git_repo()
+        self.run_git("tag", "release-2026.11.9")
+        self.run_git("tag", "release-2026.11#12")
+        self.run_git("tag", "release-2026.11#13/child")
+        with patch.object(release_packages.time, "strftime", return_value="release-2026.11"):
+            self.assertEqual(release_packages.release_tags([])[0][0], "release-2026.11#14")
+
     def test_release_changes_are_staged_and_package_tags_point_to_head(self):
         control = self.make_git_repo()
         staged_feed = self.root / ".build" / "release" / "feed"
@@ -158,8 +182,8 @@ class ReleasePackagesTests(unittest.TestCase):
         self.assertEqual(len(self.run_git("diff", "--cached", "--name-only").splitlines()), 4)
         snapshot = self.run_git("tag", "--list", "release-*")
         self.assertIn(
-            f"Suggested commit message:\nBuild release packages: {snapshot}\n\n"
-            "- dbus-inetbox/v0.1.0\n- vespera/v1.2.0\n",
+            f"Suggested commit message:\nRelease: {snapshot}\n"
+            "  - dbus-inetbox/v0.1.0\n  - vespera/v1.2.0\n",
             output.getvalue(),
         )
 
