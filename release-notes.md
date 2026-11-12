@@ -2,8 +2,16 @@
 
 ## Release-2026.11#11
 
+### dbus-inetbox/v0.1.5
+- Increase the publish rate from every 3 seconds to every second for more responsive UI updates.
+
+### dbus-ne-shunt/v0.1.4
+- Add switches to enable and disable the tank and battery services, and display switch status correctly.
+
+## Release-2026.11#10
+
 ### dbus-ne-shunt/v0.1.3
-- Add the `DeviceKey` setting to enable inspection in Vespera..
+- Add the `DeviceKey` setting to enable inspection in Vespera.
 
 ### vespera/v0.1.12
 - Remove all device settings associated with an SID when unbinding.
