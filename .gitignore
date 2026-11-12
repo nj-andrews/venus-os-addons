@@ -23,3 +23,4 @@ feeds/release/.promotion-manifest.jsonl
 feeds/.package-operations.lock
 feeds/.release-staging/
 feeds/.release-previous/
+build/

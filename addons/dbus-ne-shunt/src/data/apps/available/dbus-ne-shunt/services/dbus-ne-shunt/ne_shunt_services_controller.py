@@ -24,6 +24,7 @@ from serial_service.ne_shunt_data import ne_shunt_data
 class ne_shunt_services_controller:
 
 	_serialService : Optional[ne_shunt_serial_service] = None
+	_services : dict = dict()
 	_settings : SettingsDevice
 	_curData : Optional[ne_shunt_data] = None
 	_serial_port : str
@@ -50,9 +51,9 @@ class ne_shunt_services_controller:
 	############################################
 	def initialize(self):
 
-		self._services = dict()
 		self._initializeSettings()
 		self._start_stop_services()
+
 
 	def close(self):
 		self._cancelled = True
@@ -64,7 +65,7 @@ class ne_shunt_services_controller:
 	def _start_stop_serial_service(self):
 		logging.debug('_start_stop_serial_service')
 
-		#state 0 (nothing running ... so close)
+		#state 0 (nothing running ... close)
 		if (self._serialService and len(self._services) == 0):
 			self._serialService.close()
 			self._serialService = None
@@ -72,18 +73,18 @@ class ne_shunt_services_controller:
 		if (self._serialService == None and len(self._services) > 0):
 			self._serialService = ne_shunt_serial_service(self._serial_port, self._readonly)
 
-	############################################
-	# Occurs when the a device setting value is
-	# changed such as ShowControls
-	############################################
+	# ############################################
+	# # Occurs when the a device setting value is
+	# # changed such as ShowControls
+	# ############################################
 	def _handle_changed_setting(self, setting, oldvalue, newvalue):
-		logging.debug('setting changed, setting: %s, old: %s, new: %s' % (setting, oldvalue, newvalue))
-
-		self._start_stop_services(setting, newvalue)
+		logging.info('setting changed, setting: %s, old: %s, new: %s' % (setting, oldvalue, newvalue))
+		if (setting == "/SwitchableOutput/FreshWaterTank/State"):
+			self._start_stop_services(setting, newvalue)
 		return True
 
 	def _dbus_tank_value_changed(self, name, path, newvalue):
-		logging.debug(f"_dbus_tank_value_changed:{name}, {path}, {newvalue}")
+		logging.info(f"_dbus_tank_value_changed:{name}, {path}, {newvalue}")
 		self._settings[f"/{name}{path}"] = newvalue
 		return True
 
@@ -92,19 +93,33 @@ class ne_shunt_services_controller:
 	############################################
 	def _dbus_switch_value_changed(self, name, path, newvalue):
 
-		logging.debug('switch dbus value changed, name: %s, path: %s, newvalue: %s' % (name, path, newvalue))
+		logging.info('switch dbus value changed, name: %s, path: %s, newvalue: %s' % (name, path, newvalue))
 
 		if (path.endswith('/CustomName') or path.endswith('/Group') or path.endswith('/ShowUIControl')):
 			self._settings[path] = newvalue
 		elif (path == '/SwitchableOutput/ExternalLights/State'):
-			self._try_toggle_serial_switch_value("external_lights", newvalue)
+			self._try_toggle_serial_switch_value("external_lights", path, newvalue)
 		elif (path == "/SwitchableOutput/InternalLights/State"):
-			self._try_toggle_serial_switch_value("internal_lights", newvalue)
+			self._try_toggle_serial_switch_value("internal_lights", path, newvalue)
 		elif (path == "/SwitchableOutput/WaterPump/State" ):
-			self._try_toggle_serial_switch_value("water_pump", newvalue)
+			self._try_toggle_serial_switch_value("water_pump", path, newvalue)
 		elif (path == "/SwitchableOutput/Aux/State" ):
-			self._try_toggle_serial_switch_value("aux", newvalue)
-
+			self._try_toggle_serial_switch_value("aux", path, newvalue)
+		elif (path == "/SwitchableOutput/FreshWaterTank/State"):
+			self._settings[path] = newvalue
+			self._start_stop_services('FreshWaterTank', newvalue)
+		elif (path == "/SwitchableOutput/GreyWasteTank/State"):
+			self._settings[path] = newvalue
+			self._start_stop_services('GreyWasteTank', newvalue)
+		elif (path == "/SwitchableOutput/GreyWasteTank2/State"):
+			self._settings[path] = newvalue
+			self._start_stop_services('GreyWasteTank2', newvalue)
+		elif (path == "/SwitchableOutput/LeisureBattery/State"):
+			self._settings[path] = newvalue
+			self._start_stop_services('LeisureBattery', newvalue)
+		elif (path == "/SwitchableOutput/VehicleBattery/State"):
+			self._settings[path] = newvalue
+			self._start_stop_services('VehicleBattery', newvalue)
 		else:
 			return False
 		return True
@@ -114,30 +129,33 @@ class ne_shunt_services_controller:
 	############################################
 	def _dbus_battery_value_changed(self, name, path, newvalue):
 		if path == '/CustomName':
-			self._settings[f"{name}/{path}"]=newvalue
-			return
+			self._settings[f"/{name}{path}"] = newvalue
+			return True
 
 		service = self._services.get(name, None)
-		if (service == none): return
+		if service is None:
+			return False
 
 		if path == '/MinVoltage':
 			service.MinVoltage = newvalue
 		elif path == '/MaxVoltage':
 			service.MaxVoltage = newvalue
 		else:
-			return
+			return False
 
-		self._settings[f"{name}/{path}"] = newvalue
+		self._settings[f"/{name}{path}"] = newvalue
+		return True
 
 	############################################
 	# if the value recieved has changed it
 	# sends the toggle switch serial message to
 	# the pysical device
 	############################################
-	def _try_toggle_serial_switch_value(self, name, newvalue):
+	def _try_toggle_serial_switch_value(self, name, service_path, newvalue):
 
-		if (self._serialService == None or self._curData == None):
-			logging.debug('_try_toggle_serial_switch_value: serial service or curData is None')
+		service = self._services.get(name, None)
+		if (self._serialService == None or service is None or self._curData == None):
+			logging.debug('_try_toggle_serial_switch_value: serial service, switches service or curData is None')
 			return False
 
 		if not (newvalue == 1 or newvalue == 0):
@@ -145,38 +163,41 @@ class ne_shunt_services_controller:
 			return False
 
 		curValue = self._curData.get_value(name)
-
 		if (curValue != newvalue):
 			return self._serialService.toggle_switch(name)
 
 		return False
 
-	def _get_device_instance(self, key):
+	def _get_vrm_class_instance(self, key):
 		# value format is "<class>:<instance>"
 		return int(str(self._settings[f'/{key}/ClassAndVrmInstance']).split(':')[1])
+
 
 	############################################
 	# starts and stops the dbus tank service
 	# There can be upto 3 three tanks.
 	# FreshWater, GreyWaste1 and GreyWaste2
 	############################################
-	def _start_stop_tank_service(self, name, fluid_type):
-		logging.debug(f"_start_stop_tank_service: {name}")
+	def _start_stop_tank_service(self, name, fluid_type, enabled = None):
+		logging.info(f"_start_stop_tank_service: {name}")
 		service = self._services.get(name, None)
 
-		custome_name = str(self._settings[f"/{name}/CustomName"])
-		display = int(self._settings[f"/{name}/Display"])
+		# '/SwitchableOutput/FreshWaterTank/State'
 
-		if (display == 1):
+		if (enabled is None):
+			enabled = int(self._settings[f"/SwitchableOutput/{name}/State"])
+
+		if (enabled == 1):
 			if (service is None):
 				logging.debug(f"_start_stop_tank_service: {name} creating")
 
-				device_instance = self._get_device_instance(name)
+				device_instance = self._get_vrm_class_instance(name)
 				dbus_service_name = switch_service.serviceNameBuilder(
 						dbus_constants.SERVICE_TYPE_TANK, f"neshunt_{device_instance}_sid_{self._sid}")
 
-				service = tank_service(custome_name, self._serial_port, name, dbus_service_name, device_instance, fluid_type, 1.0,
-					self._dbus_tank_value_changed)
+				custome_name = str(self._settings[f"/{name}/CustomName"])
+				service = tank_service(custome_name, self._serial_port, name, dbus_service_name, device_instance,
+					fluid_type, 1.0, self._dbus_tank_value_changed)
 
 				self._services[name] = service
 			else:
@@ -185,6 +206,10 @@ class ne_shunt_services_controller:
 			logging.debug(f"_start_stop_tank_service: {name} removing")
 			self._services.pop(name)
 			service.unregister()
+
+		switches_service = self._services.get("switches", None)
+		if (switches_service):
+			switches_service.set_switch_status(f"/SwitchableOutput/{name}/Status", enabled)
 
 	############################################
 	# starts and stops the dbus switch service
@@ -196,18 +221,18 @@ class ne_shunt_services_controller:
 		logging.debug("_start_stop_switch_service in")
 
 		name = 'Switches'
-		service = self._services.get(name, None)
+		service = self._services.get("switches", None)
 		if service:
 			logging.debug("_start_stop_switch_service: unregister")
 			service.unregister()
 			service = None
-			self._services.pop(name)
+			self._services.pop("switches")
 		else:
 			logging.debug("_start_stop_switch_service: Not running")
 
-		switches = ["Internal Lights", "External Lights", "Water Pump", "Aux"]
-		custome_name = "Ne-Shunt switches" #str(self._settings[f"/{name}/CustomName"])
-		device_instance = self._get_device_instance(name)
+		switches = ["Internal Lights", "External Lights", "Water Pump", "Aux", "FreshWaterTank", "GreyWasteTank", "GreyWasteTank2", "LeisureBattery", "VehicleBattery"]
+		custome_name = str(self._settings[f"/{name}/CustomName"])
+		device_instance = self._get_vrm_class_instance(name)
 		dbus_service_name = switch_service.serviceNameBuilder(
 				dbus_constants.SERVICE_TYPE_SWITCH, f"neshunt_{device_instance}_sid_{self._sid}")
 
@@ -226,18 +251,24 @@ class ne_shunt_services_controller:
 	# but this is not likely needed in Victron
 	# setup
 	############################################
-	def _start_battery_services(self):
+	def _start_stop_battery_service(self, name, enabled = None):
 
-		logging.debug("_start_battery_services in")
+		logging.debug("_start_stop_battery_service in")
 
-		def _start_battery_service(name, custom_name):
-			service = self._services.get(name, None)
-			if (service == None):
-				device_instance = self._get_device_instance(name)
+		service = self._services.get(name, None)
+
+		if (enabled is None):
+			enabled = int(self._settings[f"/SwitchableOutput/{name}/State"])
+
+		if (enabled == 1):
+			if (service is None):
+
+				device_instance = self._get_vrm_class_instance(name)
 				dbus_service_name = battery_service.serviceNameBuilder(
 						dbus_constants.SERVICE_TYPE_BATTERY, f"neshunt_{device_instance}_sid_{self._sid}")
 
-				self._services[name] = battery_service(
+				custom_name = str(self._settings[f"/{name}/CustomName"])
+				service = battery_service(
 							custom_name,
 							self._serial_port,
 							name,
@@ -245,31 +276,41 @@ class ne_shunt_services_controller:
 							device_instance,
 							capacity = 0,
 							onValueChangedCallback = self._dbus_battery_value_changed)
+				self._services[name] = service
+			else:
+				logging.debug(f"_start_stop_tank_service: {name} already running")
 
-		_start_battery_service('VehicleBattery', 'Vehicle Battery')
-		_start_battery_service('LeisureBattery', 'Leisure Battery')
+		elif (service):
+			logging.debug(f"_start_stop_tank_service: {name} removing")
+			self._services.pop(name)
+			service.unregister()
+
+		switches_service = self._services.get("switches", None)
+		if (switches_service):
+			switches_service.set_switch_status(f"/SwitchableOutput/{name}/Status", enabled)
 
 	############################################
 	# starts and stops all services
-	# note: only starts the vehicle battery service
 	############################################
-	def _start_stop_services(self, dbusservice_name = "", newValue = None):
+	def _start_stop_services(self, name = None, newValue = None):
 
-		if (dbusservice_name == "" or dbusservice_name.endswith('FreshWaterTank')):
+		if (name is None or name == 'FreshWaterTank'):
+			self._start_stop_tank_service('FreshWaterTank', dbus_constants.FLUID_TYPE_FRESH_WATER, newValue)
 
-			self._start_stop_tank_service('FreshWaterTank', dbus_constants.FLUID_TYPE_FRESH_WATER)
+		if (name is None or name == 'GreyWasteTank'):
+			self._start_stop_tank_service('GreyWasteTank', dbus_constants.FLUID_TYPE_WASTE_WATER, newValue)
 
-		if (dbusservice_name == "" or dbusservice_name.endswith('GreyWasteTank')):
-			self._start_stop_tank_service('GreyWasteTank', dbus_constants.FLUID_TYPE_WASTE_WATER)
+		if (name is None or name == 'GreyWasteTank2'):
+			self._start_stop_tank_service('GreyWasteTank2', dbus_constants.FLUID_TYPE_WASTE_WATER, newValue)
 
-		if (dbusservice_name == "" or dbusservice_name.endswith('GreyWasteTank2')):
-			self._start_stop_tank_service('GreyWasteTank2', dbus_constants.FLUID_TYPE_WASTE_WATER)
+		if (name is None or name == 'VehicleBattery'):
+			self._start_stop_battery_service('VehicleBattery', newValue)
 
-		if (dbusservice_name == "" or dbusservice_name.endswith("Switch")):
+		if (name is None or name == 'LeisureBattery'):
+			self._start_stop_battery_service('LeisureBattery', newValue)
+
+		if (name is None or name == 'Switch'):
 			self._start_stop_switch_service()
-
-		if (dbusservice_name == ""):
-			self._start_battery_services()
 
 		# start stop the serial service as required.
 		self._start_stop_serial_service()
@@ -285,6 +326,9 @@ class ne_shunt_services_controller:
 		if dbus_service:
 			logging.debug(f"update_dbus_item set_value: {servicePath}/newValue = {newValue}")
 			dbus_service.set_value(servicePath, newValue)
+			if serviceName == "switches" and servicePath.endswith("/State"):
+				status_path = servicePath.removesuffix("/State") + "/Status"
+				dbus_service.set_switch_status(status_path, newValue)
 
 		else:
 			logging.debug(f"update_dbus_item: serviceName = None ({serviceName})" )
@@ -334,7 +378,12 @@ class ne_shunt_services_controller:
 
 			match key:
 				case 'fresh_water_tank' | 'grey_waste_tank' | 'grey_waste_tank2':
-					self.update_dbus_item(key, "/Level", value)
+					service_name = {
+						'fresh_water_tank': 'FreshWaterTank',
+						'grey_waste_tank': 'GreyWasteTank',
+						'grey_waste_tank2': 'GreyWasteTank2',
+					}[key]
+					self.update_dbus_item(service_name, "/Level", value)
 				case 'external_lights':
 					self.update_dbus_item("switches", "/SwitchableOutput/ExternalLights/State", value)
 				case 'internal_lights':
@@ -344,10 +393,11 @@ class ne_shunt_services_controller:
 				case 'aux':
 					self.update_dbus_item("switches", "/SwitchableOutput/Aux/State", value)
 				case 'vehicle_battery' | 'leisure_battery':
-					self.update_dbus_item(key, "/Voltage", value)
-					dbus_service = self._services.get(key, None)
+					service_name = {'vehicle_battery': 'VehicleBattery', 'leisure_battery': 'LeisureBattery'}[key]
+					self.update_dbus_item(service_name, "/Voltage", value)
+					dbus_service = self._services.get(service_name, None)
 					if dbus_service:
-						self.update_dbus_item(key, "/Soc", dbus_service.calcBatterySoc(value))
+						self.update_dbus_item(service_name, "/Soc", dbus_service.calcBatterySoc(value))
 
 		 #keep at end, helps dbus events from turning off values before we are populated
 		self._curData = newData
@@ -377,67 +427,68 @@ class ne_shunt_services_controller:
 		# /Settings/Devices/sid_1234/FreshWaterTank/ClassAndVrmInstance
 		# /Settings/Devices/sid_1234/FreshWaterTank2/ClassAndVrmInstance
 
+		def _add_switch_settings(name, custom_name, group, visible, value):
+			return {f'/SwitchableOutput/{name}/Settings/CustomName' : [f'{settingsPath}/Switches/{name}/CustomName', custom_name, "", ""],
+			f'/SwitchableOutput/{name}/Settings/Group' : [f'{settingsPath}/Switches/{name}/Group', group, "", ""],
+			f'/SwitchableOutput/{name}/Settings/ShowUIControl' : [f'{settingsPath}/Switches/{name}/ShowUIControl', visible, 0, 1],
+			f'/SwitchableOutput/{name}/State' : [f'{settingsPath}/Switches/{name}/State', value, 0, 1]
+			}
+
+		supportedSettings = {
+
+			'/Sid': [f'{settingsPath}/Sid', self._sid, 0, 0],
+			'/Sid2' : [f'{settingsPath}/Sid2', self._sid, 0, 0],
+			'/ProductName' : [f'{settingsPath}/ProductName', dbus_constants.PRODUCT_NAME, "", ""],
+			'/DeviceKey' : [f'{settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY, 0, 0],
+
+			# ClassAndVrmInstance
+			'/Switches/ClassAndVrmInstance' : [f'{settingsPath}_Switches/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_SWITCH}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+			'/FreshWaterTank/ClassAndVrmInstance' : [f'{settingsPath}_FreshWaterTank/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+			'/GreyWasteTank/ClassAndVrmInstance' : [f'{settingsPath}_GreyWasteTank/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+			'/GreyWasteTank2/ClassAndVrmInstance' : [f'{settingsPath}_GreyWasteTank2/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+			'/VehicleBattery/ClassAndVrmInstance' : [f'{settingsPath}_CabBattery/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_BATTERY}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+			'/LeisureBattery/ClassAndVrmInstance' : [f'{settingsPath}_LeisureBattery/ClassAndVrmInstance',
+									f"{dbus_constants.SERVICE_TYPE_BATTERY}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
+
+			'/Switches/CustomName' : [f'{settingsPath}/Switches/CustomName', "NeShunt switches", "", ""],
+			'/VehicleBattery/CustomName' : [f'{settingsPath}/VehicleBattery/CustomName', "NeShunt vehicle battery", "", ""],
+			'/LeisureBattery/CustomName' : [f'{settingsPath}/LeisureBattery/CustomName', "NeShunt leisure battery", "", ""],
+			'/FreshWaterTank/CustomName' : [f'{settingsPath}/FreshWaterTank/CustomName', "NeShunt fresh water tank", "", ""],
+			'/GreyWasteTank/CustomName' : [f'{settingsPath}/GreyWasteTank/CustomName', "NeShunt grey waste tank", "", ""],
+			'/GreyWasteTank2/CustomName' : [f'{settingsPath}/GreyWasteTank2/CustomName', "NeShunt grey waste tank 2", "", ""],
+
+			# Battery
+			# TODO add input controls for min/max (4 controls)
+
+			'/VehicleBattery/MinVoltage' : [f'{settingsPath}/VehicleBattery/MinVoltage', 0, 0, 24],
+			'/VehicleBattery/MaxVoltage' : [f'{settingsPath}/VehicleBattery/MaxVoltage', 0, 0, 24],
+
+			'/LeisureBattery/MinVoltage' : [f'{settingsPath}/LeisureBattery/MinVoltage', 0, 0, 24],
+			'/LeisureBattery/MaxVoltage' : [f'{settingsPath}/LeisureBattery/MaxVoltage', 0, 0, 24],
+
+			# CustomName
+			'/CustomName' : [f'{settingsPath}/CustomName', "", "", ""],
+
+		}
+
+		supportedSettings.update(_add_switch_settings("InternalLights", "Internal lights", "", 1, 1))
+		supportedSettings.update(_add_switch_settings("ExternalLights", "External lights", "", 1, 0))
+		supportedSettings.update(_add_switch_settings("WaterPump", "Water pump", "", 1, 1))
+		supportedSettings.update(_add_switch_settings("Aux","Aux", "", 1, 1))
+
+		supportedSettings.update(_add_switch_settings("FreshWaterTank", "Enable fresh water tank service", "", 1, 1))
+		supportedSettings.update(_add_switch_settings("GreyWasteTank", "Enable grey waste tank service", "", 1, 1))
+		supportedSettings.update(_add_switch_settings("GreyWasteTank2", "Enable grey waste tank 2 service", "", 0, 0))
+		supportedSettings.update(_add_switch_settings("LeisureBattery", "Enable leisure battery service", "", 0, 0))
+		supportedSettings.update(_add_switch_settings("VehicleBattery", "Enable vehicle battery service", "", 1, 1))
+
 		self._settings = SettingsDevice(
 			bus = dbusconnection(),
-			supportedSettings = {
-
-				'/Sid': [f'{settingsPath}/Sid', self._sid, 0, 0],
-				'/Sid2' : [f'{settingsPath}/Sid2', self._sid, 0, 0],
-				'/ProductName' : [f'{settingsPath}/ProductName', dbus_constants.PRODUCT_NAME, "", ""],
-				'/DeviceKey' : [f'{settingsPath}/DeviceKey', dbus_constants.DEVICE_KEY, 0, 0],
-
-				'/CustomName' : [f'{settingsPath}/CustomName', "", "", ""],
-
-				'/FreshWaterTank/CustomName' : [f'{settingsPath}/FreshWaterTank/CustomName', "", "", ""],
-				'/FreshWaterTank/Display': [f'{settingsPath}/FreshWaterTank/Display', 1, 0, 1],
-				'/FreshWaterTank/ClassAndVrmInstance' : [f'{settingsPath}_FreshWaterTank/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-				'/GreyWasteTank/CustomName' : [f'{settingsPath}/GreyWasteTank/CustomName', "", "", ""],
-				'/GreyWasteTank/Display': [f'{settingsPath}/FreshWaterTank/Display', 1, 0, 1],
-				'/GreyWasteTank/ClassAndVrmInstance' : [f'{settingsPath}_GreyWasteTank/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-				'/GreyWasteTank2/CustomName' : [f'{settingsPath}/GreyWasteTank2/CustomName', "", "", ""],
-				'/GreyWasteTank2/Display': [f'{settingsPath}/GreyWasteTank2/Display', 1, 0, 1],
-				'/GreyWasteTank2/ClassAndVrmInstance' : [f'{settingsPath}_GreyWasteTank2/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_TANK}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-				'/VehicleBattery/CustomName' : [f'{settingsPath}/VehicleBattery/CustomName', "", "", ""],
-				'/VehicleBattery/MinVoltage' : [f'{settingsPath}/VehicleBattery/MinVoltage', "", "", ""],
-				'/VehicleBattery/MaxVoltage' : [f'{settingsPath}/VehicleBattery/MaxVoltage', "", "", ""],
-				'/VehicleBattery/ClassAndVrmInstance' : [f'{settingsPath}_CabBattery/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_BATTERY}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-				'/LeisureBattery/CustomName' : [f'{settingsPath}/LeisureBattery/CustomName', "", "", ""],
-				'/LeisureBattery/MinVoltage' : [f'{settingsPath}/LeisureBattery/MinVoltage', "", "", ""],
-				'/LeisureBattery/MaxVoltage' : [f'{settingsPath}/LeisureBattery/MaxVoltage', "", "", ""],
-				'/LeisureBattery/ClassAndVrmInstance' : [f'{settingsPath}_LeisureBattery/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_BATTERY}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-
-				'/SwitchableOutput/InternalLights/Settings/CustomName' : [f'{settingsPath}/Switches/IntenalLights/CustomName', "", "", ""],
-				'/SwitchableOutput/ExternalLights/Settings/CustomName' : [f'{settingsPath}/Switches/ExternalLights/CustomName', "", "", ""],
-				'/SwitchableOutput/WaterPump/Settings/CustomName' : [f'{settingsPath}/Switches/WaterPump/CustomName', "", "", ""],
-				'/SwitchableOutput/Aux/Settings/CustomName' : [f'{settingsPath}/Switches/Aux/CustomName', "", "", ""],
-
-				'/SwitchableOutput/InternalLights/Settings/Group' : [f'{settingsPath}/Switches/IntenalLights/Group', "", "", ""],
-				'/SwitchableOutput/ExternalLights/Settings/Group' : [f'{settingsPath}/Switches/ExternalLights/Group', "", "", ""],
-				'/SwitchableOutput/WaterPump/Settings/Group' : [f'{settingsPath}/Switches/WaterPump/Group', "", "", ""],
-				'/SwitchableOutput/Aux/Settings/Group' : [f'{settingsPath}/Switches/Aux/Group', "", "", ""],
-
-				'/SwitchableOutput/InternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/IntenalLights/ShowUIControl', 1, 0, 1],
-				'/SwitchableOutput/ExternalLights/Settings/ShowUIControl' : [f'{settingsPath}/Switches/ExternalLights/ShowUIControl', 1, 0, 1],
-				'/SwitchableOutput/WaterPump/Settings/ShowUIControl' : [f'{settingsPath}/Switches/WaterPump/ShowUIControl', 1, 0, 1],
-				'/SwitchableOutput/Aux/Settings/ShowUIControl' : [f'{settingsPath}/Switches/Aux/ShowUIControl', 1, 0, 1],
-
-				'/SwitchableOutput/InternalLights/State' : [f'{settingsPath}/Switches/IntenalLights/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
-				'/SwitchableOutput/ExternalLights/State' : [f'{settingsPath}/Switches/ExternalLights/State', dbus_constants.TOGGLE_SWITCH_OFF, 0, 1],
-				'/SwitchableOutput/WaterPump/State' : [f'{settingsPath}/Switches/WaterPump/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
-				'/SwitchableOutput/Aux/State' : [f'{settingsPath}/Switches/Aux/State', dbus_constants.TOGGLE_SWITCH_ON, 0, 1],
-
-				'/Switches/ClassAndVrmInstance' : [f'{settingsPath}_Switches/ClassAndVrmInstance',
-										f"{dbus_constants.SERVICE_TYPE_SWITCH}:{dbus_constants.DEFAULT_DEVICE_INSTANCE}", 0, 0],
-
-				},
-			eventCallback = self._handle_changed_setting)
+			supportedSettings=supportedSettings,
+			eventCallback = None)
+			# eventCallback = self._handle_changed_setting)

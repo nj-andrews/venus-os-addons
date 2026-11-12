@@ -38,8 +38,11 @@ class switch_service(dbus_base_service):
 
 			# /SwitchableOutput/InternalLights/State
 			# /SwitchableOutput/InternalLights/State'
-			paths[key + '/Status'] = {'initial': self.STATUS_OFF, 'writable': True}
-			paths[key + '/State'] = {'initial': settings[key + '/State'], 'writable': True}
+			switch_state = settings[key + '/State']
+			paths[key + '/State'] = {'initial': switch_state, 'writable': True}
+			switch_states = 0x9 if switch_state == 1 else 0x0
+
+			paths[key + '/Status'] = {'initial': switch_states, 'writable': True}
 			paths[key + '/Settings/Group'] = {'initial': settings[key + '/Settings/Group'], 'writable': True}
 			paths[key + '/Settings/CustomName'] = {'initial': settings[key + '/Settings/CustomName'], 'writable': True}
 			paths[key + '/Settings/ShowUIControl'] = {'initial': settings[key + '/Settings/ShowUIControl'], 'writable': True}
@@ -57,5 +60,9 @@ class switch_service(dbus_base_service):
 			onValueChanged = onValueChangedCallback
 		)
 
-		def ShowUIControl(self, name):
-			return self.get_value(f"/SwitchableOutput/{name}/Settings/ShowUIControl")
+	def set_switch_status(self, path, checked):
+		states_flags = self.STATUS_ON if checked == 1 else self.STATUS_OFF
+		return self.set_value(path, states_flags)
+
+	def ShowUIControl(self, name):
+		return self.get_value(f"/SwitchableOutput/{name}/Settings/ShowUIControl")
