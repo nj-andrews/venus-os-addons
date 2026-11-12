@@ -16,7 +16,7 @@ import time
 class InetboxApp:
 
 	ALIVE_INTERVAL = 60.0 # 60 seconds
-	PUBLISH_INTERVAL = 3.0 # 3 seconds
+	PUBLISH_INTERVAL = 1.0 # 3 seconds
 
 	ENERGY_MIX_MAPPING = {
 		0x00: "electricity",

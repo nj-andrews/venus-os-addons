@@ -1,6 +1,6 @@
 Package: dbus-inetbox
-Version: 0.1.4
-Description: Adds support for Truma inetbox to Venus-OS
+Version: 0.1.5
+Description: Adds support for Truma iNet control to Venus-OS
 Section: utilities
 Priority: optional
 Maintainer: nj-andrews@github.com
