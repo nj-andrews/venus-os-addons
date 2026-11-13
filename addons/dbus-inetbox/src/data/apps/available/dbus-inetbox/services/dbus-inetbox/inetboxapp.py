@@ -384,7 +384,7 @@ class InetboxApp:
 			else:
 				wd_task = None
 
-			self.log.debug(f"sleeping: {self.PUBLISH_INTERVAL}")
+			#self.log.debug(f"sleeping: {self.PUBLISH_INTERVAL}")
 			await asyncio.sleep(self.PUBLISH_INTERVAL)
 
 	def add_publish_callback(self, callback: Callable[[str, None], None]):

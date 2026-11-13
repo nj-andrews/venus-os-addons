@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+this_path="$(dirname "${BASH_SOURCE[0]}")"
+. "$this_path/../../../scripts/libs/test-lib"
+
+test_inetbox_controller_heating() {
+	python3 "$this_path/test_inetbox_controller.py"
+	assert_exitcode 0
+}
+
+if [[ "${0:-}" == "${BASH_SOURCE[0]}" ]]; then
+	test_runner_all --summary ""
+fi

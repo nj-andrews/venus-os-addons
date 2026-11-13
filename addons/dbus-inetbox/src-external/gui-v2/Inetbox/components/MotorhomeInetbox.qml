@@ -158,7 +158,7 @@ Rectangle {
 		CycleButton {
 			id: heatingCycleButton
 			group: cycleButtonGroup
-			Layout.topMargin: buttonSpacing
+			Layout.topMargin: root.buttonSpacing
 			icon.source: "qrc:/Inetbox/images/heating.svg"
 			binding: root.model.heatingModeItem
 			model: root.model.heatingModeModel

@@ -158,8 +158,8 @@ class InetboxController:
 	def inetbox_value_to_dbus(self, name: str, value):
 
 		try:
-
-			self.log.debug(f'inetbox_value_to_dbus:, {name}={value}')
+			if (name != "alive"):
+				self.log.debug(f'inetbox_value_to_dbus:, {name}={value}')
 
 			dbusName = self.map_or_debug(self.LIN_TO_DBUS_MAPPING, name)
 			if dbusName == "":
@@ -171,14 +171,9 @@ class InetboxController:
 					error_description = get_error_description(value)
 					self._settings["/LastErrorCode"] = value
 					self._settings["/LastErrorTimeStamp"] = datetime.now(timezone.utc).isoformat()
-					self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
+					#self._dbusInetboxService.inject_notification(dbus_constants.PRODUCT_NAME, error_description)
 
 				self._dbusInetboxService.set_value(self.DBUS_PATH + "ErrorDescription", error_description)
-
-
-			elif (name == "target_temp_room"): # coerse using LastHeatingTemp
-				if (value == "0"):
-					value = self._settings["/LastHeatingTemp"]
 
 			elif (name == "target_temp_aircon"):
 				value = self._coerce_aircon_target_temp(value)
@@ -207,7 +202,7 @@ class InetboxController:
 	# serial port or
 	# com.victronenergy.settings
 	def dbus_value_to_inetbox(self, path : str, value ):
-
+		self.log.debug(f"dbus_value_to_inetbox: path={path},value={value}")
 		try:
 			if not path.startswith(self.DBUS_PATH):
 				if (path == "/CustomName"):
@@ -234,6 +229,20 @@ class InetboxController:
 				self.log.debug("dbus_value_to_inetbox: EXITING linName=\"\"")
 				return False
 
+			heating_temp_to_save = None
+			if (name == "HeatingTargetTemp" and
+					self._dbusInetboxService.get_value("/Values/HeatingMode") == "off"):
+				try:
+					temperature = float(value)
+				except (TypeError, ValueError):
+					self.log.warning("Invalid heating target temperature: %r", value)
+					return False
+				if temperature != 0:
+					if not 4 <= temperature <= 31 or not temperature.is_integer():
+						self.log.warning("Invalid heating target temperature while heating is off: %r", value)
+						return False
+					heating_temp_to_save = int(temperature)
+
 			current_value = self._dbusInetboxService.get_value(path)
 			if current_value == value:
 				self.log.debug(f"dbus_value_to_inetbox: no-op for {path}={value}")
@@ -245,33 +254,35 @@ class InetboxController:
 			self._dbusInetboxService.set_value(path, value)
 
 			if (name == "HeatingTargetTemp"):
-				if (self._dbusInetboxService.get_value("/Values/HeatingMode") == "off"):
-					self._settings["/LastHeatingTemp"] = value
+				if (heating_temp_to_save is not None and
+						self._settings["/LastHeatingTemp"] != heating_temp_to_save):
+					self._settings["/LastHeatingTemp"] = heating_temp_to_save
 
 			elif (name == "HeatingMode"):
 				if (value == "off"):
-					lastvalue =  self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp"))
-					if (lastvalue < 4  or value > 30): value = 4
-					self._settings["/LastHeatingTemp"] = lastvalue
-
-					self.dbus_value_to_inetbox("/Values/HeatingTargetTemp", 0)
+					return self._set_last_heating_temp_off()
 				else:
-					heating_temp = self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp"))
-					if (heating_temp < 5):
-						heating_temp = self._settings["/LastHeatingTemp"]
-						heating_temp = 5 if heating_temp < 5 else heating_temp
-
-					self.dbus_value_to_inetbox("/Values/HeatingTargetTemp", heating_temp)
+					return self.set_heating_temp_on()
 
 			return True
 		except Exception as e:
-			self.log.exception(
-				"Exception in dbus_value_to_inetbox: path=%r, value=%r, error=%r",
-				path,
-				value,
-				e,
-			)
+			self.log.exception( "Exception in dbus_value_to_inetbox: path=%r, value=%r, error=%r", path, value, e)
 			return False
+
+	def set_heating_temp_on(self):
+		heating_temp = int(self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp")))
+		if (heating_temp < 5):
+			heating_temp = int(self._settings["/LastHeatingTemp"])
+			heating_temp = 5 if heating_temp < 5 else heating_temp
+
+		return self.dbus_value_to_inetbox("/Values/HeatingTargetTemp", heating_temp)
+
+	def _set_last_heating_temp_off(self):
+		heating_temp = int(self._to_float(self._dbusInetboxService.get_value("/Values/HeatingTargetTemp")))
+		if (4 <= heating_temp <= 31 and int(self._settings["/LastHeatingTemp"]) != heating_temp):
+			self._settings["/LastHeatingTemp"] = heating_temp
+
+		return self.dbus_value_to_inetbox("/Values/HeatingTargetTemp", 0)
 
 	# dbus com.victronenergy.settings changed
 	def _handle_dbus_setting_changed(self, path, oldvalue, newvalue):

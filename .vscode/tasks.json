@@ -308,7 +308,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "SCP the active file to the RPi, stripping /data/dev/addons/vespera/src from the remote destination path."
+			"detail": "SCP the active file to the device, stripping /data/dev/addons/vespera/src from the remote destination path."
 		},
 		{
 			"label": "transfer active file to device (prompt for ip)",
@@ -327,7 +327,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "SCP the active file to the RPi, prompting for its IP address and stripping /data/dev/addons/vespera/src from the remote destination path."
+			"detail": "SCP the active file to the device, prompting for its IP address and stripping /data/dev/addons/vespera/src from the remote destination path."
 		}
 	]
 }

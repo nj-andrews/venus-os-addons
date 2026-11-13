@@ -81,7 +81,7 @@ class InetboxSchedules:
 			self._apply_callback("/Values/HeatingMode", heating_mode)
 
 		heating_temp = self._read_value(base_path, "HeatingTargetTemp")
-		if heating_temp is not None:
+		if heating_temp is not None and heating_mode != "off":
 			self._log.debug(f"inetbox_Schedules:_apply_callback:/Values/HeatingTargetTemp: {heating_temp}")
 			self._apply_callback("/Values/HeatingTargetTemp", heating_temp)
 
