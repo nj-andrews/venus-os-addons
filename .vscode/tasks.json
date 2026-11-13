@@ -83,7 +83,7 @@
 				"clear": true
 			},
 			"problemMatcher": [],
-			"detail": "Build changed package versions on release, stage feeds/release, and create release tags locally."
+			"detail": "Build changed package versions on release, keep the three newest versions per package, stage feeds/release, and create release tags locally."
 		},
 		{
 			"label": "cleanup vscode server installs",

@@ -1,5 +1,10 @@
 # Release Notes
 
+## Release-2026.11#12
+
+### dbus-ne-shunt/v0.1.4
+- Fixed regression, switches in dbus-ne-shunt not working, wrong key used.
+
 ## Release-2026.11#11
 
 ### dbus-inetbox/v0.1.5

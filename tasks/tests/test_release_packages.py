@@ -145,6 +145,49 @@ class ReleasePackagesTests(unittest.TestCase):
         ).stdout.strip()
         self.assertEqual(remote_release, head)
 
+    def test_release_keeps_only_three_newest_package_versions(self):
+        control = self.make_git_repo()
+        staged_feed = self.root / ".build" / "release" / "feed"
+        feed = staged_feed / "vespera"
+        feed.mkdir(parents=True)
+        versions = ("1.2.0", "1.0.0", "0.9.0", "1.1.0")
+        blocks = []
+        stamps = []
+        for index, version in enumerate(versions):
+            filename = f"vespera_{version}_all.ipk"
+            (feed / filename).write_bytes(b"package bytes")
+            blocks.append(
+                f"Package: vespera\nVersion: {version}\nFilename: ./{filename}"
+            )
+            stamps.append(f"{index} ./{filename}")
+        (feed / "Packages").write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
+        (feed / "Packages.stamps").write_text("\n".join(stamps) + "\n", encoding="utf-8")
+
+        with patch.object(
+            release_packages,
+            "compare_versions",
+            side_effect=lambda left, operator, right: tuple(map(int, left.split(".")))
+            > tuple(map(int, right.split("."))),
+        ):
+            release_packages.finish_release(staged_feed, [control.parents[2]])
+
+        self.assertEqual(
+            {path.name for path in (release_packages.RELEASE / "vespera").glob("*.ipk")},
+            {
+                "vespera_1.0.0_all.ipk",
+                "vespera_1.1.0_all.ipk",
+                "vespera_1.2.0_all.ipk",
+            },
+        )
+        index = (release_packages.RELEASE / "vespera" / "Packages").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("Version: 0.9.0", index)
+        self.assertEqual(index.count("Package: vespera"), 3)
+        self.assertNotIn("0.9.0", (release_packages.RELEASE / "vespera" / "Packages.stamps").read_text(
+            encoding="utf-8"
+        ))
+
     def test_every_built_package_gets_a_version_tag(self):
         vespera_control = self.make_git_repo()
         inetbox_control = self.root / "addons" / "dbus-inetbox" / "src" / "CONTROL" / "control"

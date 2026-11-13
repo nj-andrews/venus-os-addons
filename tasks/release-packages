@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from functools import cmp_to_key
 import os
 import re
 import subprocess
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE = ROOT / "feeds" / "release"
 CONTROL_FIELD_RE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9-]*):[ \t]*(.*)$")
 PACKAGE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+_.-]*$")
+MAX_RELEASE_VERSIONS = 3
 
 
 class ReleaseBuildError(RuntimeError):
@@ -108,6 +110,115 @@ def release_versions(packages_file):
         if previous is None or compare_versions(version, ">>", previous):
             versions[name] = version
     return versions
+
+
+def compare_release_versions(left, right):
+    if compare_versions(left, ">>", right):
+        return -1
+    if compare_versions(right, ">>", left):
+        return 1
+    return 0
+
+
+def prune_release_feed(staged_feed):
+    for packages_file in Path(staged_feed).rglob("Packages"):
+        feed_path = packages_file.parent
+        try:
+            text = packages_file.read_text(encoding="utf-8")
+        except OSError as error:
+            raise ReleaseBuildError(
+                f"cannot read release package index {packages_file}: {error}"
+            ) from error
+
+        blocks = [block for block in re.split(r"\n[ \t]*\n", text.strip()) if block]
+        entries = []
+        versions_by_package = {}
+        for block in blocks:
+            fields = parse_control(block, packages_file)
+            if not fields.get("Package") or not fields.get("Version"):
+                raise ReleaseBuildError(
+                    f"package index entry in {packages_file} lacks Package or Version"
+                )
+            entries.append((block, fields))
+            versions_by_package.setdefault(fields["Package"], set()).add(fields["Version"])
+
+        remove_versions = set()
+        for package, versions in versions_by_package.items():
+            ordered = sorted(versions, key=cmp_to_key(compare_release_versions))
+            equivalent_groups = []
+            for version in ordered:
+                if equivalent_groups and compare_release_versions(
+                    equivalent_groups[-1][-1], version
+                ) == 0:
+                    equivalent_groups[-1].append(version)
+                else:
+                    equivalent_groups.append([version])
+            for group in equivalent_groups[MAX_RELEASE_VERSIONS:]:
+                remove_versions.update((package, version) for version in group)
+
+        if not remove_versions:
+            continue
+
+        retained_blocks = []
+        removed_files = set()
+        feed_root = feed_path.resolve()
+        for block, fields in entries:
+            package_version = (fields["Package"], fields["Version"])
+            if package_version not in remove_versions:
+                retained_blocks.append(block)
+                continue
+
+            filename = fields.get("Filename")
+            if not filename:
+                raise ReleaseBuildError(
+                    f"old package index entry in {packages_file} has no Filename field"
+                )
+            relative_path = Path(filename)
+            if relative_path.is_absolute() or ".." in relative_path.parts:
+                raise ReleaseBuildError(
+                    f"invalid package filename in {packages_file}: {filename}"
+                )
+            ipk_path = feed_path / relative_path
+            if not ipk_path.resolve().is_relative_to(feed_root):
+                raise ReleaseBuildError(
+                    f"package filename escapes release feed in {packages_file}: {filename}"
+                )
+            if ipk_path.suffix != ".ipk":
+                raise ReleaseBuildError(
+                    f"invalid package filename in {packages_file}: {filename}"
+                )
+            removed_files.add(ipk_path)
+
+        for ipk_path in removed_files:
+            if ipk_path.is_file() or ipk_path.is_symlink():
+                ipk_path.unlink()
+        updated_index = "\n\n".join(retained_blocks)
+        if text.endswith("\n"):
+            updated_index += "\n"
+        try:
+            packages_file.write_text(updated_index, encoding="utf-8")
+        except OSError as error:
+            raise ReleaseBuildError(
+                f"cannot update release package index {packages_file}: {error}"
+            ) from error
+
+        stamps = feed_path / "Packages.stamps"
+        if stamps.is_file():
+            try:
+                stamp_lines = stamps.read_text(encoding="utf-8").splitlines()
+                stamps.write_text(
+                    "".join(
+                        f"{line}\n"
+                        for line in stamp_lines
+                        if len(line.split(maxsplit=1)) == 2
+                        and (feed_path / line.split(maxsplit=1)[1]).is_file()
+                    ),
+                    encoding="utf-8",
+                )
+            except OSError as error:
+                raise ReleaseBuildError(
+                    f"cannot update release package stamps {stamps}: {error}"
+                ) from error
 
 
 def package_is_newer(package_root, feed_path):
@@ -242,6 +353,7 @@ def finish_release(staged_feed, package_roots):
     staged_feed = Path(staged_feed).resolve()
     if not staged_feed.is_dir():
         raise ReleaseBuildError(f"release build feed not found: {staged_feed}")
+    prune_release_feed(staged_feed)
 
     package_versions = []
     for package_root in package_roots:
