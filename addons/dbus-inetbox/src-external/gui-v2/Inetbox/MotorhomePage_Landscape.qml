@@ -77,7 +77,9 @@ Page {
 	}
 
 	// version
+
 	Label {
+		id: versionLabel
 		color: Theme.color_gray4
 		font.pixelSize: Theme.font_size_caption
 		anchors {
@@ -86,6 +88,16 @@ Page {
 			bottom: bg_image.bottom
 		}
 		text: root.inetboxModel.version
+	}
+	Label {
+		font.pixelSize: Theme.font_size_caption
+		visible: root.inetboxModel.monitor_StatusItem.value == 1
+		anchors {
+			right: versionLabel.left
+			rightMargin: 10
+			bottom: bg_image.bottom
+		}
+		text: root.inetboxModel.statusItem.value
 	}
 
 	// left image

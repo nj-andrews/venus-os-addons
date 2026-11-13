@@ -3,6 +3,7 @@
 # inetboxapp, the dbus_inetbox_service and the settings
 
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import sys
 
@@ -19,6 +20,9 @@ from taskmanager import TaskManager
 from error_parser import get_error_description
 from dbus_services.dbus_inetbox_service import dbusInetboxService
 from datetime import datetime, timezone
+
+STATUS_LOG_FILE = "/var/log/dbus-inetbox-operating-status.log"
+STATUS_NOT_SEEN = object()
 
 class InetboxController:
 	DBUS_PATH="/Values/"
@@ -69,6 +73,11 @@ class InetboxController:
 	def __init__(self, tasks: TaskManager, serialPort, sid, debug_lin, debug_inet, record_file=None):
 
 		self.log.setLevel(logging.DEBUG)
+		self._last_operating_status = STATUS_NOT_SEEN
+		self._status_logger = logging.Logger(
+			f"{__name__}.operating_status.{sid}", level=logging.INFO)
+		self._status_logger.propagate = False
+		self._status_log_handler = None
 		self._serialPort = serialPort
 
 		serviceName = dbusInetboxService.serviceNameBuilder(dbus_constants.SERVICE_CLASS_NAME, "sid_" + sid)
@@ -100,6 +109,50 @@ class InetboxController:
 			apply_callback=self.dbus_value_to_inetbox,
 			logger=self.log)
 		tasks.add_task("inetbox_schedules", self._schedules.run_loop)
+
+	def _log_operating_status(self, value):
+		if value == self._last_operating_status:
+			return
+		previous_status = self._last_operating_status
+		if self._settings["/Monitor_Status"] != 1:
+			self._last_operating_status = value
+			return
+
+		if self._status_log_handler is None:
+			self._status_log_handler = RotatingFileHandler(
+				STATUS_LOG_FILE,
+				maxBytes=1_000_000,
+				backupCount=3,
+				encoding="utf-8",
+			)
+			self._status_log_handler.setFormatter(
+				logging.Formatter("%(asctime)s %(message)s")
+			)
+			self._status_logger.addHandler(self._status_log_handler)
+
+		water_current = self._dbusInetboxService.get_value(
+			self.DBUS_PATH + "WaterCurrentTemp")
+		water_target = self._dbusInetboxService.get_value(
+			self.DBUS_PATH + "WaterTargetTemp")
+		heating_current = self._dbusInetboxService.get_value(
+			self.DBUS_PATH + "CurrentRoomTemp")
+		heating_target = self._dbusInetboxService.get_value(
+			self.DBUS_PATH + "HeatingTargetTemp")
+		heating_mode = self._dbusInetboxService.get_value(
+			self.DBUS_PATH + "HeatingMode")
+		self._status_logger.info(
+			"operating_status=%r (previous=%r) "
+			"water_current_temp=%r water_target_temp=%r "
+			"heating_current_temp=%r heating_target_temp=%r heating_mode=%r",
+			value,
+			"unknown" if previous_status is STATUS_NOT_SEEN else previous_status,
+			water_current,
+			water_target,
+			heating_current,
+			heating_target,
+			heating_mode,
+		)
+		self._last_operating_status = value
 
 	# serial port -> dbus com.victronenergy.inetbox_sid_[xxxx]
 	def inetbox_value_to_dbus(self, name: str, value):
@@ -138,6 +191,9 @@ class InetboxController:
 					self._dbusInetboxService.set_value("/Temperature", temperature_value)
 			elif (name == "el_power_level" or name == "energy_mix"):
 				self._toEnergyMixCombined(dbusName, value)
+
+			if name == "operating_status":
+				self._log_operating_status(value)
 
 		except Exception as e:
 			self.log.exception(
@@ -334,7 +390,7 @@ class InetboxController:
 				'/ShowAircon': [f'{self._settingsPath}/ShowAircon', True, 0, 1],
 				'/LastErrorCode': [f'{self._settingsPath}/LastErrorCode', "", 0, 0],
 				'/LastErrorTimeStamp': [f'{self._settingsPath}/LastErrorTimeStamp', "", 0, 0],
-
+				'/Monitor_Status': [f'{self._settingsPath}/Monitor_Status', 0, 0, 1],
 				# 1=Heating enabled;2=Water enabled|4=Aircon enabled;
 				'/Schedules/State': [f'{self._settingsPath}/Schedules/State', 0, 0, 7],
 
