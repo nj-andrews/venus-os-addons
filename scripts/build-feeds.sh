@@ -28,12 +28,17 @@ echo "======================================="
 
 function create_latest_feed_package() {
 	local feed="${1}"
-    local newest_vespera_ipk="$(find feeds/"${feed}"/vespera -type f -name 'vespera*.ipk' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)"
+	local feed_path="feeds/${feed}/vespera"
+	[[ -f "$feed_path/Packages" ]] || return 0
+	local filename
+	filename="$(awk '
+		/^Package: / { package = $2 }
+		/^Filename: / && package == "vespera" { print $2; exit }
+	' "$feed_path/Packages")"
 
-    if [ -n "$newest_vespera_ipk" ]; then
-            latest_copy_path="$(dirname "$newest_vespera_ipk")/vespera-latest.ipk"
-            cp -f "$newest_vespera_ipk" "$latest_copy_path"
-			echo "Created latest package copy: feeds/${feed}/$latest_copy_path"
+    if [ -n "$filename" ]; then
+            cp -f "$feed_path/$filename" "$feed_path/vespera-latest.ipk"
+			echo "Created latest package copy: $feed_path/vespera-latest.ipk"
 	else
 			echo "No vespera*.ipk package found under feeds/${feed}"
 	fi
@@ -41,6 +46,7 @@ function create_latest_feed_package() {
 
 create_latest_feed_package "release"
 create_latest_feed_package "develop"
+create_latest_feed_package "beta"
 
 echo "======================================="
 echo " Generating feed HTML indexes"

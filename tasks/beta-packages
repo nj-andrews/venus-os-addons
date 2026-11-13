@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+import importlib.machinery
+import importlib.util
+import filecmp
+import sys
+from pathlib import Path
+
+
+sys.dont_write_bytecode = True
+loader = importlib.machinery.SourceFileLoader(
+    "release_packages", str(Path(__file__).with_name("release-packages"))
+)
+spec = importlib.util.spec_from_loader(loader.name, loader)
+release = importlib.util.module_from_spec(spec)
+loader.exec_module(release)
+
+
+def check(control, feed):
+    fields = release.read_package_control(Path(control))
+    name, version = fields["Package"], fields["Version"]
+    previous = release.release_versions(Path(feed) / "Packages").get(name)
+    if previous and not release.compare_versions(version, ">>", previous):
+        raise release.ReleaseBuildError(
+            f"{name} {version} is not newer than {previous}; "
+            "wait for the next timestamp or use a newer base version/channel"
+        )
+    existing = list(Path(feed).glob(f"{name}_{version}_*.ipk"))
+    if existing:
+        raise release.ReleaseBuildError(f"package version already exists: {existing[0]}")
+
+
+def check_notes(published, local):
+    published, local = Path(published), Path(local)
+    published_path = published / "RELEASE-NOTES.md"
+    local_path = local / "RELEASE-NOTES.md"
+    if published_path.exists():
+        published_notes = published_path.read_bytes()
+        if not local_path.exists() or not local_path.read_bytes().startswith(published_notes):
+            raise release.ReleaseBuildError(
+                "local beta feed is older than or diverges from release; "
+                "move it aside and rebuild from the published feed"
+            )
+    for package in local.rglob("*.ipk"):
+        previous = published / package.relative_to(local)
+        if previous.is_file() and not filecmp.cmp(previous, package, shallow=False):
+            raise release.ReleaseBuildError(f"conflicting package contents for {previous}")
+
+
+def write_notes(feed, kind, stamp, notes, source_commit, stable_commit, packages):
+    label = "Release candidate" if kind == "rc" else "Beta"
+    suffix = "rc" if kind == "rc" else "b"
+    lines = [f"## {label} {stamp} UTC", "", f"Source commit: `{source_commit}`",
+             f"Stable feed commit: `{stable_commit}`", "", "Packages:"]
+    for package in sorted(packages):
+        fields = release.read_package_control(Path(package) / "src" / "CONTROL" / "control")
+        lines.append(f"- `{fields['Package']} {fields['Version']}~{suffix}{stamp}`")
+    lines += ["", notes, ""]
+    with (Path(feed) / "RELEASE-NOTES.md").open("a", encoding="utf-8") as output:
+        output.write("\n".join(lines) + "\n")
+
+
+def main():
+    if len(sys.argv) == 4 and sys.argv[1] == "--check":
+        check(sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 4 and sys.argv[1] == "--check-notes":
+        check_notes(sys.argv[2], sys.argv[3])
+    elif len(sys.argv) >= 9 and sys.argv[1] == "--notes":
+        write_notes(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5],
+                    sys.argv[6], sys.argv[7], sys.argv[8:])
+    else:
+        raise release.ReleaseBuildError("invalid beta-packages arguments")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (release.ReleaseBuildError, OSError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        sys.exit(1)

@@ -64,7 +64,7 @@ Page {
 				}
 				Label {
 					text: (root.installed)
-							? root.model.installedVersion + (root.model.installedVersionSuffix ? "." + root.model.installedVersionSuffix : "")
+							? root.model.installedVersion + (root.model.installedVersionSuffix || "")
 							: CommonWords.None
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary
@@ -82,7 +82,7 @@ Page {
 				}
 				Label {
 					text: (root.available)
-							? root.model.availableVersion + (root.model.availableVersionSuffix ? "." + root.model.availableVersionSuffix : "")
+							? root.model.availableVersion + (root.model.availableVersionSuffix || "")
 							: CommonWords.None
 					font.pixelSize: Theme.font_size_body2
 					color: Theme.color_font_primary

@@ -20,7 +20,7 @@ class PackageBuildIntegrationTests(unittest.TestCase):
         self.repo = self.base / "repo"
         self.repo.mkdir()
         (self.repo / "tasks").mkdir()
-        for name in ("build-packages", "release-packages"):
+        for name in ("build-packages", "release-packages", "beta-packages"):
             shutil.copy2(ROOT / "tasks" / name, self.repo / "tasks" / name)
         (self.repo / "tooling").mkdir()
         (self.repo / "tooling" / "gui-v2-plugin-compiler.py").write_text(
@@ -152,9 +152,128 @@ class PackageBuildIntegrationTests(unittest.TestCase):
     def test_develop_build_is_isolated_and_keeps_version_stamp(self):
         result = self.build("--develop-only", "vespera")
         self.assertEqual(result.returncode, 0, result.stdout)
-        packages = list((self.repo / "feeds" / "develop" / "vespera").glob("vespera_1.2.0~d*_all.ipk"))
+        packages = list((self.repo / "feeds" / "develop" / "vespera").glob("vespera_1.2.0~[0-9]*_all.ipk"))
         self.assertEqual(len(packages), 1, result.stdout)
+        self.assertRegex(packages[0].name, r"^vespera_1\.2\.0~\d{6}\.\d{4}_all\.ipk$")
         self.assert_package_contains_rebuilt_plugin(packages[0])
+
+    def prepare_beta(self):
+        self.git("switch", "-q", "-c", "release")
+        result = self.build("--release-only", "vespera")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.git("commit", "-qm", "stable feed")
+        self.git("switch", "-q", "develop")
+        control = self.package / "src" / "CONTROL" / "control"
+        control.write_text(control.read_text().replace("Version: 1.2.0", "Version: 1.3.0"))
+        self.git("add", "addons")
+        self.git("commit", "-qm", "next version")
+
+    def test_beta_and_rc_builds_include_stable_baseline_and_notes(self):
+        self.prepare_beta()
+        beta = self.build("--beta-only", "beta", "--notes", "Changes: test. Known issues: none.", "vespera")
+        self.assertEqual(beta.returncode, 0, beta.stdout)
+        feed = self.repo / "feeds" / "beta"
+        packages = list((feed / "vespera").glob("vespera_1.3.0~b*_all.ipk"))
+        self.assertEqual(len(packages), 1, beta.stdout)
+        self.assertTrue((feed / "vespera" / "vespera_1.2.0_all.ipk").exists())
+        self.assertIn("Version: 1.3.0~b", (feed / "vespera" / "Packages").read_text())
+        self.assertIn(self.git("rev-parse", "HEAD"), (feed / "RELEASE-NOTES.md").read_text())
+        rc = self.build("--beta-only", "rc", "--notes", "RC fixes.", "vespera")
+        self.assertEqual(rc.returncode, 0, rc.stdout)
+        self.assertEqual(len(list((feed / "vespera").glob("vespera_1.3.0~rc*_all.ipk"))), 1)
+        self.assertIn("Version: 1.3.0~rc", (feed / "vespera" / "Packages").read_text())
+        self.assertIn("RC fixes.", (feed / "RELEASE-NOTES.md").read_text())
+        site = subprocess.run(
+            ["bash", str(ROOT / "scripts" / "build-feeds.sh")],
+            cwd=self.repo, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        )
+        self.assertEqual(site.returncode, 0, site.stdout)
+        rc_ipk = next((feed / "vespera").glob("vespera_1.3.0~rc*_all.ipk"))
+        self.assertEqual((feed / "vespera" / "vespera-latest.ipk").read_bytes(), rc_ipk.read_bytes())
+        before = (feed / "vespera" / "Packages").read_bytes()
+        rejected = self.build("--beta-only", "beta", "--notes", "Older channel.", "vespera")
+        self.assertNotEqual(rejected.returncode, 0, rejected.stdout)
+        self.assertIn("not newer than", rejected.stdout)
+        self.assertEqual((feed / "vespera" / "Packages").read_bytes(), before)
+        stable = self.repo / "feeds" / "release" / "vespera"
+        stable.mkdir(parents=True)
+        for name in ("Packages", "vespera_1.2.0_all.ipk"):
+            content = subprocess.run(
+                ["git", "-C", str(self.repo), "show", f"release:feeds/release/vespera/{name}"],
+                check=True, stdout=subprocess.PIPE,
+            ).stdout
+            (stable / name).write_bytes(content)
+        stable_index = (stable / "Packages").read_bytes()
+        stable_ipk = (stable / "vespera_1.2.0_all.ipk").read_bytes()
+        site = subprocess.run(
+            ["bash", str(ROOT / "scripts" / "build-feeds.sh")],
+            cwd=self.repo, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        )
+        self.assertEqual(site.returncode, 0, site.stdout)
+        self.assertEqual((stable / "Packages").read_bytes(), stable_index)
+        self.assertEqual((stable / "vespera_1.2.0_all.ipk").read_bytes(), stable_ipk)
+        self.assertEqual((stable / "vespera-latest.ipk").read_bytes(), stable_ipk)
+
+    def test_beta_baseline_refresh_adds_stable_packages_without_rebuilding(self):
+        self.prepare_beta()
+        beta = self.build("--beta-only", "beta", "--notes", "Initial beta.", "vespera")
+        self.assertEqual(beta.returncode, 0, beta.stdout)
+        self.git("switch", "-q", "release")
+        addon = self.repo / "addons" / "example-addon" / "src"
+        shutil.copytree(self.package / "src", addon, symlinks=True)
+        control = addon / "CONTROL" / "control"
+        control.write_text(control.read_text().replace("Package: vespera", "Package: example-addon"))
+        stable_feed = self.repo / "feeds" / "release" / "addons"
+        stable_feed.mkdir(parents=True)
+        subprocess.run(["opkg-build", "-o", "root", "-g", "root", str(addon), str(stable_feed)],
+                       check=True, stdout=subprocess.PIPE)
+        subprocess.run(["opkg-make-index", "-p", "Packages", "./"], cwd=stable_feed,
+                       check=True, stdout=subprocess.PIPE)
+        self.git("add", "addons/example-addon", "feeds/release")
+        self.git("commit", "-qm", "add stable addon")
+        self.git("switch", "-q", "develop")
+        refreshed = self.build("--refresh-beta")
+        self.assertEqual(refreshed.returncode, 0, refreshed.stdout)
+        feed = self.repo / "feeds" / "beta"
+        self.assertIn("Package: example-addon", (feed / "addons" / "Packages").read_text())
+        self.assertIn("Version: 1.3.0~b", (feed / "vespera" / "Packages").read_text())
+        self.assertIn("Initial beta.", (feed / "RELEASE-NOTES.md").read_text())
+
+    def test_beta_rejects_dirty_tree_and_stable_version(self):
+        self.prepare_beta()
+        control = self.package / "src" / "CONTROL" / "control"
+        control.write_text(control.read_text().replace("Version: 1.3.0", "Version: 1.2.0"))
+        dirty = self.build("--beta-only", "beta", "--notes", "Test.", "vespera")
+        self.assertNotEqual(dirty.returncode, 0, dirty.stdout)
+        self.assertIn("clean working tree", dirty.stdout)
+        self.git("add", "addons")
+        self.git("commit", "-qm", "old version")
+        old = self.build("--beta-only", "beta", "--notes", "Test.", "vespera")
+        self.assertNotEqual(old.returncode, 0, old.stdout)
+        self.assertIn("newer than the stable feed", old.stdout)
+
+    def test_same_minute_beta_collision_and_failed_build_leave_feed_unchanged(self):
+        self.prepare_beta()
+        bin_dir = self.base / "clock-bin"
+        bin_dir.mkdir()
+        clock = bin_dir / "date"
+        clock.write_text(
+            '#!/bin/sh\n'
+            'if [ "$1" = "-u" ]; then echo 261113.1219; else exec /bin/date "$@"; fi\n'
+        )
+        clock.chmod(0o755)
+        first = self.build("--beta-only", "beta", "--notes", "First.", "vespera", path=bin_dir)
+        self.assertEqual(first.returncode, 0, first.stdout)
+        feed = self.repo / "feeds" / "beta"
+        before_index = (feed / "vespera" / "Packages").read_bytes()
+        before_notes = (feed / "RELEASE-NOTES.md").read_bytes()
+        repeated = self.build("--beta-only", "beta", "--notes", "Duplicate.", "vespera", path=bin_dir)
+        self.assertNotEqual(repeated.returncode, 0, repeated.stdout)
+        self.assertIn("not newer than", repeated.stdout)
+        failed = self.build("--beta-only", "rc", "--notes", "Failure.", "vespera", fail=True, path=bin_dir)
+        self.assertNotEqual(failed.returncode, 0, failed.stdout)
+        self.assertEqual((feed / "vespera" / "Packages").read_bytes(), before_index)
+        self.assertEqual((feed / "RELEASE-NOTES.md").read_bytes(), before_notes)
 
     def test_staged_debug_plugin_builds_use_control_version(self):
         compiler = self.repo / "tooling" / "gui-v2-plugin-compiler.py"

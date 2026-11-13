@@ -71,19 +71,29 @@ opkg_ensure_combined_conf_file() {
 
 	opkg_ensure_feed_symlink || return
 
-	# -nt follows symlinks
-	# stat checks actual symlink file itself
-
-	if [[ ! -f "${VESPERA_COMBINED_CONF_FILE}" ]] || \
-		[[ "${VESPERA_FEEDS_CONF_FILE}" -nt "${VESPERA_COMBINED_CONF_FILE}" ]] || \
-		[[ "${VESPERA_FEEDS_SYMLINK}" -nt "${VESPERA_COMBINED_CONF_FILE}" ]] || \
-		[[ $(stat -c %Y "${VESPERA_FEEDS_SYMLINK}") -gt $(stat -c %Y "${VESPERA_COMBINED_CONF_FILE}") ]]; then
-
-		local combined_dir; combined_dir="$(dirname "${VESPERA_COMBINED_CONF_FILE}")"
-		mkdir -p "${combined_dir}"
-
-		cat "${VESPERA_FEEDS_CONF_FILE}" "${VESPERA_FEEDS_SYMLINK}" > "${VESPERA_COMBINED_CONF_FILE}"
+	local combined_dir tmp_file status
+	combined_dir="$(dirname "${VESPERA_COMBINED_CONF_FILE}")"
+	mkdir -p "${combined_dir}" || return 1
+	tmp_file="$(mktemp "${VESPERA_COMBINED_CONF_FILE}.XXXXXX")" || return 1
+	if ! cat "${VESPERA_FEEDS_CONF_FILE}" "${VESPERA_FEEDS_SYMLINK}" > "$tmp_file"; then
+		echo "vespera: failed to combine feed configuration" >&2
+		rm -f "$tmp_file"
+		return 1
 	fi
+	if [[ -f "${VESPERA_COMBINED_CONF_FILE}" ]]; then
+		if cmp -s "$tmp_file" "${VESPERA_COMBINED_CONF_FILE}"; then
+			rm -f "$tmp_file"
+			return
+		else
+			status=$?
+			if (( status != 1 )); then
+				echo "vespera: failed to compare feed configuration" >&2
+				rm -f "$tmp_file"
+				return 1
+			fi
+		fi
+	fi
+	mv -f "$tmp_file" "${VESPERA_COMBINED_CONF_FILE}"
 }
 
 opkg_lib_update() {

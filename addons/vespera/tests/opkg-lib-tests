@@ -96,6 +96,19 @@ test_opkg_ensure_combined_conf_file_is_rebuilt_when_feeds_change() {
   assert_file_contains "$VESPERA_COMBINED_CONF_FILE" "src/gz updated http://updated.example.com"
 }
 
+test_opkg_ensure_combined_conf_file_updates_when_switching_to_older_feed_file() {
+  opkg_ensure_feed_symlink
+  opkg_ensure_combined_conf_file
+  touch -d "@1" "$VESPERA_DATA_DIR/feeds-develop.conf"
+  ln -sfn "$VESPERA_DATA_DIR/feeds-develop.conf" "$VESPERA_FEEDS_SYMLINK"
+  touch -h -r "$VESPERA_COMBINED_CONF_FILE" "$VESPERA_FEEDS_SYMLINK"
+
+  opkg_ensure_combined_conf_file
+
+  assert_exitcode 0
+  assert_file_contains "$VESPERA_COMBINED_CONF_FILE" "src/gz develop http://develop.example.com"
+}
+
 test_opkg_feed_lib_crud_adds_feed() {
   local stderr=
 

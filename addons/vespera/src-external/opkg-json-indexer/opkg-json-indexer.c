@@ -175,87 +175,65 @@ static size_t parse_base_version_parts(const char *version,
 	return count;
 }
 
-static size_t parse_suffix_numbers(const char *suffix, unsigned long *parts, size_t max_parts)
+static int version_char_order(unsigned char c)
 {
-	const char *p = suffix ? suffix : "";
-	size_t count = 0;
-
-	while (*p) {
-		if (!isdigit((unsigned char)*p)) {
-			p++;
-			continue;
-		}
-
-		char *end = NULL;
-		unsigned long value = strtoul(p, &end, 10);
-		if (count < max_parts) {
-			parts[count++] = value;
-		}
-		p = end;
-	}
-
-	return count;
+	if (c == '~') return -1;
+	if (c == '\0' || isdigit(c)) return 0;
+	if (isalpha(c)) return c;
+	return c + 256;
 }
 
-static int compare_numeric_parts(const unsigned long *a,
-								 size_t a_count,
-								 const unsigned long *b,
-								 size_t b_count)
+static int compare_version_part(const char *a, const char *b)
 {
-	size_t max_count = a_count > b_count ? a_count : b_count;
-
-	for (size_t i = 0; i < max_count; ++i) {
-		unsigned long av = i < a_count ? a[i] : 0;
-		unsigned long bv = i < b_count ? b[i] : 0;
-		if (av > bv) {
-			return 1;
+	while (*a || *b) {
+		while ((*a && !isdigit((unsigned char)*a)) ||
+			   (*b && !isdigit((unsigned char)*b))) {
+			int difference = version_char_order((unsigned char)*a) -
+				version_char_order((unsigned char)*b);
+			if (difference) return difference;
+			if (*a) a++;
+			if (*b) b++;
 		}
-		if (av < bv) {
-			return -1;
+		while (*a == '0') a++;
+		while (*b == '0') b++;
+		int difference = 0;
+		while (isdigit((unsigned char)*a) && isdigit((unsigned char)*b)) {
+			if (!difference) difference = (unsigned char)*a - (unsigned char)*b;
+			a++;
+			b++;
 		}
+		if (isdigit((unsigned char)*a)) return 1;
+		if (isdigit((unsigned char)*b)) return -1;
+		if (difference) return difference;
 	}
-
 	return 0;
 }
 
 static int version_greater_than(const char *candidate, const char *installed)
 {
-	unsigned long base_candidate[32] = {0};
-	unsigned long base_installed[32] = {0};
-	unsigned long suffix_candidate[32] = {0};
-	unsigned long suffix_installed[32] = {0};
-	const char *suffix_candidate_start = NULL;
-	const char *suffix_installed_start = NULL;
-
-	size_t base_candidate_count = parse_base_version_parts(candidate,
-												   base_candidate,
-												   sizeof(base_candidate) / sizeof(base_candidate[0]),
-												   &suffix_candidate_start);
-	size_t base_installed_count = parse_base_version_parts(installed,
-												   base_installed,
-												   sizeof(base_installed) / sizeof(base_installed[0]),
-												   &suffix_installed_start);
-	int base_cmp = compare_numeric_parts(base_candidate,
-									 base_candidate_count,
-									 base_installed,
-									 base_installed_count);
-	if (base_cmp > 0) {
-		return 1;
-	}
-	if (base_cmp < 0) {
-		return 0;
+	const char *candidate_epoch = strchr(candidate, ':');
+	const char *installed_epoch = strchr(installed, ':');
+	if (candidate_epoch || installed_epoch) {
+		unsigned long a = candidate_epoch ? strtoul(candidate, NULL, 10) : 0;
+		unsigned long b = installed_epoch ? strtoul(installed, NULL, 10) : 0;
+		if (a != b) return a > b;
+		if (candidate_epoch) candidate = candidate_epoch + 1;
+		if (installed_epoch) installed = installed_epoch + 1;
 	}
 
-	size_t suffix_candidate_count = parse_suffix_numbers(suffix_candidate_start,
-												 suffix_candidate,
-												 sizeof(suffix_candidate) / sizeof(suffix_candidate[0]));
-	size_t suffix_installed_count = parse_suffix_numbers(suffix_installed_start,
-												 suffix_installed,
-												 sizeof(suffix_installed) / sizeof(suffix_installed[0]));
-	return compare_numeric_parts(suffix_candidate,
-								 suffix_candidate_count,
-								 suffix_installed,
-								 suffix_installed_count) > 0;
+	char a[MAX_FIELD], b[MAX_FIELD];
+	snprintf(a, sizeof(a), "%s", candidate);
+	snprintf(b, sizeof(b), "%s", installed);
+	char *a_revision = strrchr(a, '-');
+	char *b_revision = strrchr(b, '-');
+	if (a_revision) *a_revision++ = '\0';
+	if (b_revision) *b_revision++ = '\0';
+	int result = compare_version_part(a, b);
+	if (!result) {
+		result = compare_version_part(a_revision ? a_revision : "0",
+									  b_revision ? b_revision : "0");
+	}
+	return result > 0;
 }
 
 static void split_version_info(const char *version,

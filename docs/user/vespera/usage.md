@@ -62,6 +62,32 @@ The Vespera feed cannot be edited or removed.
 * Use development feeds only when testing and you are prepared for breakage.
 * Keep the number of active feeds minimal to reduce conflicts between package versions.
 
+#### Trying beta and release candidate packages
+
+The beta feed is opt-in and may contain unfinished software. It also contains
+stable packages for add-ons that do not have a newer test version. After the
+beta feed is published, check `vespera feed list`. If `beta` is not listed on
+an older Vespera installation, create it over SSH:
+
+```bash
+vespera feed add beta
+vespera feed add-source vespera https://nj-andrews.github.io/venus-os-addons/feeds/beta/vespera
+vespera feed add-source addons https://nj-andrews.github.io/venus-os-addons/feeds/beta/addons
+```
+
+Select it and refresh the package list:
+
+```bash
+vespera feed set beta
+vespera update
+```
+
+Then use the Packages page to install or upgrade packages. To return to the
+stable feed, run `vespera feed set release` and `vespera update`. Switching
+feeds does not downgrade an installed beta; it will normally update to stable
+when a newer stable version is published. Installing an older stable version
+requires an explicit downgrade.
+
 ### Custom Devices
 The Custom Devices paged helps to bind supported USB serial devices to a selected service.
 

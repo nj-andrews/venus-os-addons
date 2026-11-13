@@ -7,6 +7,22 @@
       "description": "Package(s) (all or vespera mount-shares themer etc)",
       "default": ""
     },
+    {
+      "id": "betaType",
+      "type": "pickString",
+      "description": "Prerelease type",
+      "options": [
+        {"label": "Beta", "value": "beta"},
+        {"label": "Release candidate", "value": "rc"}
+      ],
+      "default": "beta"
+    },
+    {
+      "id": "betaNotes",
+      "type": "promptString",
+      "description": "Changes and known issues for the beta feed notes",
+      "default": ""
+    },
 		{
 			"id": "bashCountPath",
 			"type": "promptString",
@@ -28,6 +44,38 @@
 		}
   ],
   "tasks": [
+    {
+      "label": "Refresh beta feed baseline",
+      "type": "shell",
+      "command": "${workspaceFolder}/tasks/build-packages",
+      "args": ["--refresh-beta"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Refresh stable packages in the beta feed from the local release branch."
+    },
+    {
+      "label": "Build packages (beta)",
+      "type": "shell",
+      "command": "${workspaceFolder}/tasks/build-packages",
+      "args": ["--beta-only", "${input:betaType}", "--notes", "${input:betaNotes}", "${input:opkgPackage}"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Build beta or release candidate packages into the beta feed."
+    },
 		{
 			"label": "Build packages (develop)",
 			"type": "shell",

@@ -13,7 +13,9 @@ set -euo pipefail
 #   Arg1:"all" (default): Builds all folders under under services & utils.
 #   Arg[n]: Or a list of folders under services or utils to build
 # Options:
-#   --develop-only             Build and index into develop folders only (stamps version with ~dYYMMDD.HHMM)
+#   --develop-only             Build with a UTC ~YYMMDD.HHMM version stamp
+#   --beta-only TYPE           Build a beta or rc into the beta feed
+#   --notes TEXT               Notes for a beta feed publication
 #   --release-only             Build newer package versions into release feeds, stage, and tag
 #   --clean-develop            Remove all contents from the develop feeds folder
 ####################################################################
@@ -33,6 +35,9 @@ declare pwd_old="$PWD"
 declare -A update_feeds=()
 declare -i develop_only=0
 declare -i release_only=0
+declare -i beta_only=0
+declare -i refresh_beta=0
+declare beta_type="" beta_notes="" build_stamp=""
 declare -i clean_develop_only=0
 declare -i all_mode=0
 
@@ -42,9 +47,11 @@ Usage: $(basename "$0") [options] [all|<package> ...]
 
 Options:
   --develop-only           Build and index packages in develop only.
-                           Version is stamped as MAJOR.MINOR.PATCH~dYYMMDD.HHMM
-                           Old develop packages for the same name are removed before placing the new one.
+                           Version is stamped as MAJOR.MINOR.PATCH~YYMMDD.HHMM (UTC).
   --release-only           Build newer versions, stage feeds/release, and create local tags.
+  --beta-only beta|rc      Build prerelease packages into feeds/beta.
+  --refresh-beta           Refresh the beta feed's stable baseline without building.
+  --notes TEXT             Required notes describing changes and known issues.
   --clean-develop          Remove all contents from the develop feeds folder
   -h, --help               Show this help
 EOF
@@ -57,6 +64,21 @@ while [[ $# -gt 0 ]]; do
       ;;
     --release-only)
       release_only=1
+      ;;
+    --beta-only)
+      (( $# >= 2 )) || { echo "ERROR: --beta-only requires beta or rc" >&2; exit 1; }
+      beta_only=1
+      beta_type="$2"
+      shift
+      ;;
+    --refresh-beta)
+      beta_only=1
+      refresh_beta=1
+      ;;
+    --notes)
+      (( $# >= 2 )) || { echo "ERROR: --notes requires text" >&2; exit 1; }
+      beta_notes="$2"
+      shift
       ;;
     --clean-develop)
       clean_develop_only=1
@@ -92,8 +114,8 @@ done
 
 cli_build_args=("${normalized_cli_build_args[@]}")
 
-(( develop_only == 0 || release_only == 0 )) || {
-  echo "ERROR: --develop-only and --release-only cannot be combined" >&2
+(( develop_only + release_only + beta_only <= 1 )) || {
+  echo "ERROR: build modes cannot be combined" >&2
   exit 1
 }
 
@@ -106,6 +128,27 @@ cli_build_args=("${normalized_cli_build_args[@]}")
   echo "ERROR: --clean-develop cannot be combined with --release-only" >&2
   exit 1
 }
+(( clean_develop_only == 0 || beta_only == 0 )) || {
+  echo "ERROR: --clean-develop cannot be combined with --beta-only" >&2
+  exit 1
+}
+if (( beta_only == 1 )); then
+  if (( refresh_beta == 1 )); then
+    [[ -z "$beta_type" && -z "$beta_notes" && ${#cli_build_args[@]} -eq 0 ]] || {
+      echo "ERROR: --refresh-beta cannot be combined with beta type, notes or packages" >&2; exit 1;
+    }
+  else
+    [[ "$beta_type" == beta || "$beta_type" == rc ]] || { echo "ERROR: expected beta or rc" >&2; exit 1; }
+    [[ "$beta_notes" =~ [^[:space:]] ]] || { echo "ERROR: beta builds require --notes" >&2; exit 1; }
+  fi
+  [[ -z "$(git -C "$this_path/.." status --porcelain --untracked-files=normal)" ]] || {
+    echo "ERROR: beta builds require a clean working tree" >&2; exit 1;
+  }
+  source_commit="$(git -C "$this_path/.." rev-parse --verify 'HEAD^{commit}')"
+elif [[ -n "$beta_notes" ]]; then
+  echo "ERROR: --notes requires --beta-only" >&2; exit 1
+fi
+build_stamp="$(date -u +'%y%m%d.%H%M')"
 
 cd "$this_path" || exit 1
 
@@ -113,6 +156,7 @@ this_path="."
 feeds_root="../feeds"
 develop_root="${feeds_root}/develop"
 release_root="${feeds_root}/release"
+beta_root="${feeds_root}/beta"
 test_feed_name="test-feed"
 test_feed_root="${feeds_root}/${test_feed_name}"
 examples_feed_name="examples"
@@ -135,6 +179,8 @@ feed_path_for_name() {
   local feed_name="$1"
   if [[ "$feed_name" == "$test_feed_name" ]]; then
     echo "$test_feed_root"
+  elif (( beta_only == 1 )); then
+    echo "${beta_root}/${feed_name}"
 	elif [[ "$feed_name" == "$examples_feed_name" ]]; then
 		echo "$examples_feed_root"
   elif (( release_only == 1 )); then
@@ -222,6 +268,26 @@ build_package_if_needed() {
       fi
       return "$status"
     fi
+  elif (( beta_only == 1 )); then
+    if [[ "$name" == test-* ]]; then
+      echo "skipping ${name}: test packages are not built for beta"
+      return 10
+    fi
+    feed_name="$(feed_name_for_package "$name")"
+    if python3 ./release-packages --is-newer "$pkg_root" "$baseline_root/$feed_name"; then
+      :
+    else
+      local status=$?
+      if (( status == 1 && all_mode == 1 )); then
+        echo "skipping ${name}: base version is not newer than stable"
+        return 10
+      fi
+      if (( status == 1 )); then
+        echo "ERROR: ${name} base version must be newer than the stable feed" >&2
+        return 1
+      fi
+      return "$status"
+    fi
   elif (( all_mode == 1 )); then
 
     feed_name="$(feed_name_for_package "$name")"
@@ -306,7 +372,7 @@ register_feed_targets() {
 
   for pkg in "${build_items[@]}"; do
     name="$(basename "$pkg")"
-    if (( release_only == 1 )) && [[ "$name" == test-* ]]; then
+    if (( release_only == 1 || beta_only == 1 )) && [[ "$name" == test-* ]]; then
       continue
     fi
     feed_name="$(feed_name_for_package "$name")"
@@ -369,17 +435,18 @@ develop_source_byref() {
   return 0
 }
 
-# Appends a develop build stamp (~dYYMMDD.HHMM) to the Version field in
+# Appends a UTC prerelease build stamp to the Version field in
 # the copied CONTROL/control file. Never touches the source control file.
-stamp_develop_version() {
+stamp_prerelease_version() {
   local develop_path="${1}"
   local control_file="${develop_path}/CONTROL/control"
-  local stamp
+  local stamp="~${build_stamp}"
 
   [[ -f "$control_file" ]] || { echo "ERROR: control file not found: $control_file" >&2; return 1; }
 
-  #stamp="~d$(date -u +'%y%m%d.%H%M')"
-	stamp="~d$(date +'%y%m%d.%H%M')"
+  if (( beta_only == 1 )); then
+    if [[ "$beta_type" == beta ]]; then stamp="~b${build_stamp}"; else stamp="~rc${build_stamp}"; fi
+  fi
 
 	sed -i "s/^\(Version:.*\)$/\1${stamp}/" "$control_file"
 }
@@ -422,8 +489,19 @@ build_package() {
         "${external_path}/build-external" 3>&1 1>/dev/null || return 1
 	fi
 
-  if (( develop_only == 1 )); then
-    stamp_develop_version "$develop_path" || return 1
+  if (( develop_only == 1 || beta_only == 1 )); then
+    stamp_prerelease_version "$develop_path" || return 1
+  fi
+
+  if (( beta_only == 1 )); then
+    python3 ./beta-packages --check "$develop_path/CONTROL/control" "$feed_path" || return 1
+  elif (( develop_only == 1 )); then
+    local version
+    version="$(awk '/^Version:/{print $2}' "$develop_path/CONTROL/control")"
+    if compgen -G "$feed_path/${name}_${version}_*.ipk" >/dev/null; then
+      echo "ERROR: ${name} ${version} already exists; wait for the next UTC minute" >&2
+      return 1
+    fi
   fi
 
   mkdir -p "${develop_path}/data/apps/available/${name}"
@@ -466,16 +544,16 @@ if (( clean_develop_only == 1 )); then
   exit 0
 fi
 
-if (( release_only == 1 )); then
+if (( release_only == 1 || beta_only == 1 )); then
   command -v opkg-compare-versions >/dev/null 2>&1 || {
     echo "ERROR: opkg-compare-versions not installed" >&2
     exit 1
   }
-  python3 ./release-packages --check-state
+  if (( release_only == 1 )); then python3 ./release-packages --check-state; fi
 fi
 
 acquire_feed_lock
-resolve_build_items
+if (( refresh_beta == 0 )); then resolve_build_items; fi
 
 if [[ ${#cli_build_args[@]} -gt 0 && "${cli_build_args[0]}" == "package" ]]; then
   cd "$pwd_old" || true
@@ -489,10 +567,14 @@ declare -i wait_status=0
 declare built_items_file
 built_items_file="$(mktemp)"
 release_workspace=""
+beta_workspace=""
 cleanup_build() {
   rm -f -- "$built_items_file"
   if [[ -n "$release_workspace" ]]; then
     rm -rf -- "$release_workspace"
+  fi
+  if [[ -n "$beta_workspace" ]]; then
+    rm -rf -- "$beta_workspace"
   fi
 }
 trap cleanup_build EXIT
@@ -505,6 +587,31 @@ if (( release_only == 1 )); then
     rsync -a "$release_root/" "$release_workspace/feed/"
   fi
   release_root="$release_workspace/feed"
+fi
+
+if (( beta_only == 1 )); then
+  mkdir -p ../.build
+  beta_workspace="$(mktemp -d ../.build/beta-feed.XXXXXX)"
+  mkdir -p "$beta_workspace/archive" "$beta_workspace/feed"
+  release_commit="$(git -C .. rev-parse --verify 'release^{commit}')"
+  git -C .. archive "$release_commit" feeds | tar -xf - -C "$beta_workspace/archive"
+  baseline_root="$beta_workspace/archive/feeds/release"
+  [[ -d "$baseline_root" ]] || { echo "ERROR: release branch has no stable feed" >&2; exit 1; }
+  if [[ -d "$beta_workspace/archive/feeds/beta" ]]; then
+    rsync -a --exclude='index.html' --exclude='vespera-latest.ipk' "$beta_workspace/archive/feeds/beta/" "$beta_workspace/feed/"
+  fi
+  if [[ -d "$beta_root" ]]; then
+    python3 ./beta-packages --check-notes "$beta_workspace/feed" "$beta_root"
+    rsync -a --exclude='index.html' --exclude='vespera-latest.ipk' "$beta_root/" "$beta_workspace/feed/"
+  fi
+  for feed in addons vespera examples; do
+    mkdir -p "$beta_workspace/feed/$feed"
+    if [[ -d "$baseline_root/$feed" ]]; then
+      rsync -a --exclude='Packages*' --exclude='index.html' --exclude='vespera-latest.ipk' "$baseline_root/$feed/" "$beta_workspace/feed/$feed/"
+    fi
+    build_feed_index "$beta_workspace/feed/$feed"
+  done
+  beta_root="$beta_workspace/feed"
 fi
 
 register_feed_targets
@@ -533,16 +640,36 @@ done
 mapfile -t build_items < "$built_items_file"
 
 if [[ ${#build_items[@]} -eq 0 ]]; then
+  if (( beta_only == 1 && refresh_beta == 1 )); then
+    mkdir -p "${feeds_root}/beta"
+    rsync -a --delete "$beta_root/" "${feeds_root}/beta/"
+    echo "Beta baseline refreshed from release ${release_commit}; publish feeds/beta."
+  fi
   echo "nothing to build"
   cd "$pwd_old" || true
   echo "Completed"
   exit 0
 fi
 
-update_feeds=()
-register_feed_targets
-
-build_feed_indexes
+if (( beta_only == 1 )); then
+  for feed in addons vespera examples; do
+    build_feed_index "$beta_root/$feed"
+  done
+  [[ -z "$(git -C .. status --porcelain --untracked-files=normal)" ]] || {
+    echo "ERROR: working tree changed during beta build; feed not updated" >&2; exit 1;
+  }
+  [[ "$(git -C .. rev-parse --verify 'HEAD^{commit}')" == "$source_commit" ]] || {
+    echo "ERROR: source commit changed during beta build; feed not updated" >&2; exit 1;
+  }
+  python3 ./beta-packages --notes "$beta_root" "$beta_type" "$build_stamp" "$beta_notes" "$source_commit" "$release_commit" "${build_items[@]}"
+  mkdir -p "${feeds_root}/beta"
+  rsync -a --delete "$beta_root/" "${feeds_root}/beta/"
+  echo "Beta feed ready at ${feeds_root}/beta; copy it to the release checkout for publication."
+else
+  update_feeds=()
+  register_feed_targets
+  build_feed_indexes
+fi
 
 if ((develop_only == 1)); then
 	if echo "${build_items[@]}" | grep -q "vespera"; then
