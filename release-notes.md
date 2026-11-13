@@ -1,5 +1,10 @@
 # Release Notes
 
+## Release-2026.11#13
+
+### dbus-inetbox/v0.1.6
+- Added optional operation status logging for observation, for future feature.
+
 ## Release-2026.11#12
 
 ### dbus-ne-shunt/v0.1.4
