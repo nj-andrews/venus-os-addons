@@ -153,9 +153,17 @@ class ne_shunt_services_controller:
 	############################################
 	def _try_toggle_serial_switch_value(self, name, service_path, newvalue):
 
-		service = self._services.get(name, None)
-		if (self._serialService == None or service is None or self._curData == None):
-			logging.debug('_try_toggle_serial_switch_value: serial service, switches service or curData is None')
+		service = self._services.get("switches", None)
+		if (self._serialService == None ):
+			logging.debug('_try_toggle_serial_switch_value: serial service=None')
+			return False
+
+		if (service is None or self._curData == None):
+			logging.debug('_try_toggle_serial_switch_value: service=None')
+			return False
+
+		if ( self._curData == None):
+			logging.debug('_try_toggle_serial_switch_value: serial data=None')
 			return False
 
 		if not (newvalue == 1 or newvalue == 0):
@@ -179,7 +187,7 @@ class ne_shunt_services_controller:
 	# FreshWater, GreyWaste1 and GreyWaste2
 	############################################
 	def _start_stop_tank_service(self, name, fluid_type, enabled = None):
-		logging.info(f"_start_stop_tank_service: {name}")
+		logging.debug(f"_start_stop_tank_service: {name}")
 		service = self._services.get(name, None)
 
 		# '/SwitchableOutput/FreshWaterTank/State'
@@ -220,30 +228,35 @@ class ne_shunt_services_controller:
 	def _start_stop_switch_service(self):
 		logging.debug("_start_stop_switch_service in")
 
-		name = 'Switches'
+		dbus_name = 'Switches'
 		service = self._services.get("switches", None)
 		if service:
 			logging.debug("_start_stop_switch_service: unregister")
 			service.unregister()
 			service = None
 			self._services.pop("switches")
+			return
 		else:
-			logging.debug("_start_stop_switch_service: Not running")
+			logging.debug("_start_stop_switch_service: starting")
 
-		switches = ["Internal Lights", "External Lights", "Water Pump", "Aux", "FreshWaterTank", "GreyWasteTank", "GreyWasteTank2", "LeisureBattery", "VehicleBattery"]
-		custome_name = str(self._settings[f"/{name}/CustomName"])
-		device_instance = self._get_vrm_class_instance(name)
+		switches = ["Internal Lights", "External Lights", "Water Pump", "Aux", "FreshWaterTank", "GreyWasteTank",
+			"GreyWasteTank2", "LeisureBattery", "VehicleBattery"]
+
+		custome_name = str(self._settings[f"/{dbus_name}/CustomName"])
+		device_instance = self._get_vrm_class_instance(dbus_name)
 		dbus_service_name = switch_service.serviceNameBuilder(
 				dbus_constants.SERVICE_TYPE_SWITCH, f"neshunt_{device_instance}_sid_{self._sid}")
 
-		self._services["switches"] = switch_service(self._settings, self._sid,
+		service = switch_service(self._settings, self._sid,
 										custome_name,
 										self._serial_port,
-										name,
+										dbus_name,
 										dbus_service_name,
 										device_instance,
 										switches,
 										onValueChangedCallback = self._dbus_switch_value_changed)
+
+		self._services["switches"] = service
 
 	############################################
 	# Starts the dbus vehicle battery service
@@ -309,7 +322,7 @@ class ne_shunt_services_controller:
 		if (name is None or name == 'LeisureBattery'):
 			self._start_stop_battery_service('LeisureBattery', newValue)
 
-		if (name is None or name == 'Switch'):
+		if (name is None or name == 'Switches'):
 			self._start_stop_switch_service()
 
 		# start stop the serial service as required.

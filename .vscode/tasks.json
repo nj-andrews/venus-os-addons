@@ -21,9 +21,15 @@
 			"default": "no"
 		},
 		{
+<<<<<<< HEAD
 			"id": "deviceIP",
 			"type": "promptString",
 			"description": "Device IP address",
+=======
+			"id": "rpiIp",
+			"type": "promptString",
+			"description": "Raspberry Pi IP address",
+>>>>>>> 597ce499edc24b8b742d7c1e2097c7d86ede00c0
 			"default": "192.168.10.24"
 		}
   ],
@@ -311,12 +317,20 @@
 			"detail": "SCP the active file to the RPi, stripping /data/dev/addons/vespera/src from the remote destination path."
 		},
 		{
+<<<<<<< HEAD
 			"label": "transfer active file to device (prompt for ip)",
+=======
+			"label": "transfer active file to rpi (prompt for ip)",
+>>>>>>> 597ce499edc24b8b742d7c1e2097c7d86ede00c0
 			"type": "shell",
 			"command": "bash",
 			"args": [
 				"-lc",
+<<<<<<< HEAD
 				"src=\"${file}\"; dest=\"${src#/data/dev/addons/*/src}\"; scp \"$src\" \"root@${input:deviceIP}:$dest\"; echo \"$src -> root@${input:deviceIP}:$dest\""
+=======
+				"src=\"${file}\"; dest=\"${src#/data/dev/addons/*/src}\"; scp \"$src\" \"root@${input:rpiIp}:$dest\"; echo \"$src -> root@${input:rpiIp}:$dest\""
+>>>>>>> 597ce499edc24b8b742d7c1e2097c7d86ede00c0
 			],
 			"presentation": {
 				"echo": true,

@@ -36,8 +36,6 @@ class switch_service(dbus_base_service):
 			paths[key + '/Settings/Type'] = {'initial': self.OUTPUT_TYPE_LATCHING, 'writable': False}
 			paths[key + '/Settings/ValidTypes'] = {'initial': validTypesLatching, 'writable': False}
 
-			# /SwitchableOutput/InternalLights/State
-			# /SwitchableOutput/InternalLights/State'
 			switch_state = settings[key + '/State']
 			paths[key + '/State'] = {'initial': switch_state, 'writable': True}
 			switch_states = 0x9 if switch_state == 1 else 0x0
