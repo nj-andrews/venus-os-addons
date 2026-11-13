@@ -15,7 +15,7 @@ def main():
 
 	#filename="/data/apps/dbus-ne-shunt.log",
 	logging.basicConfig(
-		format="%(asctime)s;%(levelname)-8s %(message)s",
+		format="%(levelname)-8s %(message)s",
 		level=(logging.DEBUG if args.debug else logging.INFO),
 	)
 
@@ -33,8 +33,6 @@ def main():
 
 	nuss = ne_shunt_services_controller(serial, args.sid, args.readonly)
 	nuss.initialize()
-
-	time.sleep(2)
 	GLib.timeout_add(1000, nuss._update)
 
 	log.info("Connected to dbus, and switching over to GLib.MainLoop() (= event based)")
