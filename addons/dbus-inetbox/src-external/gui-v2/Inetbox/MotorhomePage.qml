@@ -108,7 +108,9 @@ SwipeViewPage {
 		property VeQuickItem showAirconItem: VeQuickItem {uid: inetbox.bindSettingsPrefix("/ShowAircon")}
 		property VeQuickItem errorCodeItem: VeQuickItem {uid: inetbox.bindPrefix("/Error")}
  		property VeQuickItem errorDescriptionItem: VeQuickItem {uid: inetbox.bindPrefix("/ErrorDescription")}
-		property VeQuickItem schedulesStateItem: VeQuickItem {uid:  inetbox.bindSettingsPrefix("/Schedules/State") }
+		property VeQuickItem schedulesStateItem: VeQuickItem {uid: inetbox.bindSettingsPrefix("/Schedules/State") }
+		property VeQuickItem monitor_StatusItem: VeQuickItem {uid: inetbox.bindSettingsPrefix("/Monitor_Status") }
+		property VeQuickItem statusItem: VeQuickItem {uid: inetbox.bindPrefix("/Status") }
 
 	  property bool hasError: errorCodeItem.valid && errorCodeItem.value != 0
 

@@ -117,26 +117,26 @@
     <message id="inetbox_water">
         <location filename="../InetboxDevicePage.qml" line="39"/>
         <location filename="../InetboxSchedules.qml" line="28"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="156"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="145"/>
         <source>Water</source>
         <translation>水</translation>
     </message>
     <message id="inetbox_heating">
         <location filename="../InetboxSchedules.qml" line="22"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="177"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="166"/>
         <source>Heating</source>
         <translation>暖房</translation>
     </message>
     <message id="inetbox_aircon">
         <location filename="../InetboxSchedules.qml" line="34"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="192"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="181"/>
         <source>Aircon</source>
         <translation>エアコン</translation>
     </message>
     <message id="inetbox_fan_speed">
         <location filename="../InetboxDevicePage.qml" line="60"/>
         <location filename="../InetboxSchedules.qml" line="156"/>
-        <location filename="../components/MotorhomeInetbox.qml" line="226"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="215"/>
         <source>Fan speed</source>
         <translation>ファン速度</translation>
     </message>
@@ -192,7 +192,7 @@
         <translation>エラーコード: %1</translation>
     </message>
     <message id="inetbox_energy_mix">
-        <location filename="../components/MotorhomeInetbox.qml" line="238"/>
+        <location filename="../components/MotorhomeInetbox.qml" line="227"/>
         <source>Energy Mix</source>
         <translation>エネルギーミックス</translation>
     </message>

@@ -55,5 +55,18 @@ Page {
 				}
 			}
 		}
+	Label {
+		id: versionLabel
+		color: Theme.color_gray4
+		font.pixelSize: Theme.font_size_caption
+		Layout.fillWidth: true
+		text: root.inetboxModel.version
+	}
+	Label {
+		font.pixelSize: Theme.font_size_caption
+		visible: root.inetboxModel.monitor_StatusItem.value == 1
+		Layout.fillWidth: true
+		text: "ON(7)" //root.inetboxModel.statusItem.value
+	}
 	}
 }
