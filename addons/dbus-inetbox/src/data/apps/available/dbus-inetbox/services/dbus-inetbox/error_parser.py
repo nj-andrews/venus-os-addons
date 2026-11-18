@@ -20,9 +20,7 @@ def get_error_description(error_code, csv_file=None):
 	code = str(error_code).strip()
 	if not code:
 		return ""
-	if code == "900":
-		return "Inetbox service restarted"
-
+		
 	source = Path(csv_file) if csv_file else Path(__file__).with_name("truma-error-codes.csv")
 	causes = []
 	with open(source.resolve(), newline="", encoding="utf-8-sig") as fh:

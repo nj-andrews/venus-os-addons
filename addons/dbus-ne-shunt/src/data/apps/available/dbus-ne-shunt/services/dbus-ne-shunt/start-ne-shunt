@@ -12,8 +12,12 @@
 
 . /opt/victronenergy/serial-starter/run-service.sh
 
+
+app=$(dirname $0)/__main__.py
+
 sid=$(udevadm info --query=property --name="/dev/$tty" | sed -n "s/^SERIAL_DEVICE_ID=//p")
-if [[ -z "$sid" ]]; then
+
+if [[ -z "$sid" ]] || [[ ! -f "$app" ]]; then
 	# shutdown the service so it does not continue trying to run
 	# without the required sid
 	echo "$product.$tty missing sid; exiting service startup from $0"
@@ -23,6 +27,5 @@ if [[ -z "$sid" ]]; then
 	exit 1
 fi
 
-app=/data/apps/available/dbus-ne-shunt/services/dbus-ne-shunt/__main__.py
 
 start -s "/dev/$tty" -i "$sid"

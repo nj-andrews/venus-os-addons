@@ -2,4 +2,5 @@
 echo "*** starting inetbox ***"
 exec 2>&1
 . /etc/profile.d/profile.sh
-exec /data/apps/enabled/dbus-inetbox/services/dbus-inetbox/start-inetbox TTY
+# use available here, the check for enabled is in start-inetbox
+exec /data/apps/available/dbus-inetbox/services/dbus-inetbox/start-inetbox TTY

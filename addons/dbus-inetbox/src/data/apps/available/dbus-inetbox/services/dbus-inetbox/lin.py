@@ -234,7 +234,6 @@ class Lin:
 				self.log.warning("watchdog: alive still OFF - dumping state and resetting")
 				self.dump_state()
 				self.reset()
-				self.raise_restart_error()
 
 
 		def dump_state(self):
@@ -272,8 +271,8 @@ class Lin:
 
 		# error_code is stored raw and converted by cnv.error_code_to_string:
 		# (raw // 256) * 100 + raw % 256, so 900 == 9 * 256
-		def raise_restart_error(self):
-				self.app.status["error_code"] = [self.RESTART_ERROR_CODE // 100 * 256 + self.RESTART_ERROR_CODE % 100, True, False]
+		# def raise_restart_error(self):
+		# 		self.app.status["error_code"] = [self.RESTART_ERROR_CODE // 100 * 256 + self.RESTART_ERROR_CODE % 100, True, False]
 
 		# Equivalent to a service restart for the LIN layer. Runs synchronously on the
 		# event loop, so it cannot interleave with _lin_loop.

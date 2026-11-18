@@ -2,4 +2,5 @@
 echo "*** starting dbus-ne-shunt ***"
 exec 2>&1
 . /etc/profile.d/profile.sh
-exec /data/apps/enabled/dbus-ne-shunt/services/dbus-ne-shunt/start-ne-shunt TTY
+# use available here, the check for enabled is in ne-shunt
+exec /data/apps/available/dbus-ne-shunt/services/dbus-ne-shunt/start-ne-shunt TTY
