@@ -143,7 +143,7 @@ __install() {
 
 __firmware_changed() {
 	installer_lib_log_verbose2 && echo "In installer_lib_firmware_changed"
-	#__insatll_patch_files
+	__install_patch_files
 	__try_call "firmware_changed"
 }
 

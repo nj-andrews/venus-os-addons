@@ -12,7 +12,6 @@ This repository contains the documentation index for the supported Venus OS add-
 | Ne Shunt | Integration for Nordelec/Nordelettronica shunt devices. | [Overview](docs/user/ne-shunt/overview.md) | [Hardware](docs/user/ne-shunt/hardware.md) | [Setup](docs/user/ne-shunt/setup.md) | [Usage](docs/user/ne-shunt/usage.md) |
 | Network GPS | GPS forwarding over the network without a dedicated GPS dongle. | [Overview](docs/user/network-gps/overview.md) | - | [Setup](docs/user/network-gps/setup.md) | - |
 | Mount Shares | Mount and persist SMB/CIFS and NFS shares from Venus OS. | [Overview](docs/user/mount-shares/overview.md) | - | - | [Usage](docs/user/mount-shares/usage.md) |
-| Solar Divert Relay | Planned add-on for managing a relay from excess solar conditions. | [Overview](docs/user/solar-divert/overview.md) | - | - | - |
 
 ## Quick links
 

@@ -15,7 +15,6 @@ __log_verbose2() { [[ "${VESPERA_VERBOSITY}" -gt 1 ]]; }
 __vespera_overlay() { "${VESPERA_DATA_DIR}/info/vespera.overlay-lib" "$@"; }
 
 __refresh_udevadm() {
-
 	if [[ -d "$VESPERA_DATA_DIR/overlays/_etc_udev_rules.d/merged" ]]; then
 		# overlay for udev rules exists then reload udev rules
 		udevadm control --reload
@@ -80,7 +79,6 @@ __firmware_changed() {
 	: > "${VESPERA_WORKING_DIR}/${VESPERA_VENUS_FIRMWARE_CHANGED_FILE}"
 	echo "$VESPERA_VERBOSITY" > "${VESPERA_WORKING_DIR}/verbosity"
 
-
 	opkg_ensure_combined_conf_file
 
 	echo "Configuring packages"
@@ -96,17 +94,8 @@ __firmware_changed() {
 	done
 	echo "Configuring packages completed"
 
-	__refresh_udevadm
-
-	echo "Starting all services"
-	__start_all_services
-
 	__vespera_lib_cleanup
 
-	echo "Executing all rcS.local startup scripts for enabled apps"
-	"$__vespera_path/scripts/execute-startup-scripts" rcS.local
-
-	echo "done"
 }
 
 declare log_file="${VESPERA_ROOT:-}/var/log/vespera/rcS-local.log"
@@ -124,13 +113,27 @@ if [[ ! -f "$VESPERA_VENUS_VERSION_FILE" ]]; then
 	cp "${VESPERA_ROOT:-}/opt/victronenergy/version" "$VESPERA_VENUS_VERSION_FILE"
 fi
 
+serial_starter_up=false
+svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
+echo "Is serial-starter up: $serial_starter_up"
+
 if cmp -s "$VESPERA_VENUS_VERSION_FILE" "${VESPERA_ROOT:-}/opt/victronenergy/version"; then
 	echo "Firmware versions match; mounting"
 	__vespera_overlay overlay-mount
-	__refresh_udevadm
-	__start_all_services
-	"$__vespera_path/scripts/execute-startup-scripts" rcS.local
-	exit 0
+else
+	__firmware_changed
 fi
 
-__firmware_changed
+svstat "/service/serial-starter" | grep -q "^/service/serial-starter: up " && serial_starter_up=true
+[ $serial_starter_up == true ] && svc -t /service/serial-starter
+
+__refresh_udevadm
+
+echo "Starting all services"
+
+__start_all_services
+
+echo "Executing all rcS.local startup scripts for enabled apps"
+"$__vespera_path/scripts/execute-startup-scripts" rcS.local
+
+echo "done"
